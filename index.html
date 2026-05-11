@@ -971,12 +971,13 @@ svg.chart {
       </div>
     </div>
 
+    <!-- Foto-grid · 4 venue-foto's + 1 placeholder (De Keu — geen rechtenvrije foto beschikbaar) -->
     <div class="competitor-photos reveal" style="--i:4">
-      <div class="photo" data-img="poolbar"></div>
-      <div class="photo" data-img="doka"></div>
-      <div class="photo" data-img="dekeu"></div>
-      <div class="photo" data-img="planb"></div>
-      <div class="photo" data-img="loop51"></div>
+      <div class="photo" data-img="doka"></div>      <!-- ph-1 · groot links -->
+      <div class="photo" data-img="loop51"></div>    <!-- ph-2 · klein boven -->
+      <div class="photo" data-img="dekeu"></div>     <!-- ph-3 · klein boven (placeholder) -->
+      <div class="photo" data-img="mokum"></div>     <!-- ph-4 · brede onderkant -->
+      <div class="photo" data-img="planb"></div>     <!-- ph-5 · groot rechts -->
     </div>
   </div>
 </section>
@@ -1287,22 +1288,27 @@ const DATA = {
    ================================================================= */
 const IMAGES = {
   // sec 03 — concurrenten
-  poolbar: { url: null, credit: '',                 alt: 'The Pool Bar — Amsterdam',     label: 'The Pool Bar',    sub: 'Amsterdam Centrum' },
-  doka:    { url: null, credit: '',                 alt: 'Doka — Volkshotel Amsterdam',  label: 'Doka',            sub: 'Volkshotel · Oost' },
-  dekeu:   { url: null, credit: '',                 alt: 'Poolcafé de Keu — Amsterdam',  label: 'De Keu',          sub: 'Oud-West' },
-  planb:   { url: null, credit: '',                 alt: 'Plan B — Amsterdam',           label: 'Plan B',          sub: 'Oud-West' },
-  loop51:  { url: null, credit: '',                 alt: 'Loop 51 — Vinyl Brunch De Pijp', label: 'Loop 51',       sub: 'De Pijp' },
+  doka:    { url: 'https://www.volkshotel.nl/content/uploads/2019/10/R1-06657-006A.jpg',      credit: 'Foto · Volkshotel', alt: 'Doka — Volkshotel Amsterdam',    label: 'Doka',            sub: 'Volkshotel · Oost' },
+  dekeu:   { url: null,                                                                       credit: '',                  alt: 'Poolcafé de Keu — Amsterdam',    label: 'De Keu',          sub: 'Oud-West' },
+  planb:   { url: 'https://www.planbovertoom.nl/wp-content/uploads/2024/11/DSC01881-scaled.jpg', credit: 'Foto · Plan B',  alt: 'Plan B — Amsterdam',             label: 'Plan B',          sub: 'Oud-West' },
+  loop51:  { url: 'https://images.squarespace-cdn.com/content/v1/680155b8ea1a2d02a37bf2e3/54be601d-f51f-40ac-bc26-a734ad74f21b/P1025308.jpg', credit: 'Foto · Loop 51', alt: 'Loop 51 — Vinyl Brunch De Pijp', label: 'Loop 51', sub: 'De Pijp' },
+  mokum:   { url: 'https://poolen-amsterdam.nl/wp-content/uploads/Mokum-Pool-Darts-03-1-2048x1365.jpg', credit: 'Foto · Mokum Pool & Darts', alt: 'Mokum Pool & Darts — Amsterdam', label: 'Mokum Pool',  sub: 'Amstel' },
 
   // sec 06 — unique elementen (sfeerbeeld, geen specifieke venue)
-  parra:   { url: null, credit: '',                 alt: 'Designer-vilt referentie',     label: 'Iwan Simonis × Parra', sub: 'Sfeerbeeld', tone: 'cream' },
-  replay:  { url: null, credit: '',                 alt: 'Replay-camera systeem',        label: 'Overhead replay',      sub: 'PUSHIT-stijl',  tone: 'cream' },
-  killer:  { url: null, credit: '',                 alt: 'Killer Pool sociaal',          label: 'Killer Sunday',        sub: 'Sociaal anker', tone: 'cream' },
+  parra:   { url: null, credit: '', alt: 'Designer-vilt referentie',  label: 'Iwan Simonis × Parra', sub: 'Sfeerbeeld',    tone: 'cream' },
+  replay:  { url: null, credit: '', alt: 'Replay-camera systeem',     label: 'Overhead replay',      sub: 'PUSHIT-stijl',  tone: 'cream' },
+  killer:  { url: null, credit: '', alt: 'Killer Pool sociaal',       label: 'Killer Sunday',        sub: 'Sociaal anker', tone: 'cream' },
 
   // sec 07 — internationale referenties
-  nyc:     { url: null, credit: '',                 alt: 'Amsterdam Billiards Club NYC', label: 'Amsterdam Billiards Club', sub: 'NYC sinds 1989' },
-  statusq: { url: null, credit: '',                 alt: 'Status Q Brooklyn',            label: 'Status Q',                 sub: 'Brooklyn' },
-  lebrady: { url: null, credit: '',                 alt: 'Le Brady Paris',               label: 'Le Brady',                 sub: 'Paris 10e' },
-  tokyo:   { url: null, credit: '',                 alt: 'Tokyo high-rise pool',         label: 'Shibuya billiards',        sub: 'Tokio' },
+  nyc:     { url: 'https://amsterdambilliards.com/wp-content/uploads/2026/04/Amsterdam-Billiards-and-Bar.jpg', credit: 'Foto · Amsterdam Billiards Club', alt: 'Amsterdam Billiards Club NYC', label: 'Amsterdam Billiards Club', sub: 'NYC sinds 1989' },
+  statusq: { url: null, credit: '', alt: 'Status Q Brooklyn',     label: 'Status Q',            sub: 'Brooklyn' },
+  // ⚠ LET OP: "Le Brady" (39 bd de Strasbourg, Paris 10e) is een BIOSCOOP van Jean-Pierre Mocky,
+  // geen pool-bar. Het "naamloze gevel, 24/7, alleen ingewijden"-verhaal klopt voor de bioscoop,
+  // maar is verwarrend als pool-referentie. Mogelijke vervanging:
+  // Académie de Billard de Paris (Clichy-Montmartre) — historische biljartzaal in Parijs.
+  // Beslissing aan jou; tekst in sectie 7 staat ongewijzigd tot je hem aanpast.
+  lebrady: { url: null, credit: '', alt: 'Le Brady Paris',        label: 'Le Brady',            sub: 'Paris 10e' },
+  tokyo:   { url: null, credit: '', alt: 'Tokyo high-rise pool',  label: 'Shibuya billiards',   sub: 'Tokio' },
 };
 
 /* =================================================================
