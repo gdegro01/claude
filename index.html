@@ -488,18 +488,19 @@ section.scene {
   overflow: hidden;
   cursor: pointer;
   background: var(--ink-bg);
-  transition: flex-grow .55s cubic-bezier(.22,.61,.36,1);
+  transition: flex-grow .38s cubic-bezier(.4,0,.2,1);
+  will-change: flex-grow;
 }
-.bands:hover .band { flex-grow: .85; }
-.bands .band:hover { flex-grow: 2.4; }
+.bands:hover .band { flex-grow: .8; }
+.bands .band:hover { flex-grow: 2.6; }
 
 .band img {
   width: 100%; height: 100%;
   object-fit: cover; display: block;
-  transition: transform .8s cubic-bezier(.2,.6,.2,1), filter .4s ease;
+  transition: transform .6s cubic-bezier(.2,.6,.2,1), filter .3s ease;
   filter: brightness(.78) saturate(.95);
 }
-.band:hover img { filter: brightness(.95) saturate(1); transform: scale(1.04); }
+.band:hover img { filter: brightness(.95) saturate(1); transform: scale(1.03); }
 .band.no-img {
   background: linear-gradient(135deg, var(--teal-dark) 0%, var(--ink-bg) 100%);
 }
@@ -536,20 +537,18 @@ section.scene {
 /* hover detail panel — schuift in van onder */
 .band-detail {
   position: absolute; left: 0; right: 0; bottom: 0;
-  padding: 28px 26px 26px;
+  padding: 26px 24px 24px;
   z-index: 3;
   background: linear-gradient(to top, rgba(220,74,46,.97) 0%, rgba(220,74,46,.95) 85%, rgba(220,74,46,0) 100%);
   color: #fff;
   transform: translateY(100%);
   opacity: 0;
-  transition: transform .45s cubic-bezier(.22,.61,.36,1), opacity .35s ease;
+  transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .25s ease;
   pointer-events: none;
+  will-change: transform, opacity;
 }
-.band:hover .band-detail {
-  transform: translateY(0);
-  opacity: 1;
-}
-.band:hover .band-label { opacity: 0; transition: opacity .25s; }
+.band:hover .band-detail { transform: translateY(0); opacity: 1; }
+.band:hover .band-label  { opacity: 0; transition: opacity .2s; }
 .band-detail .det-num {
   font-family: var(--mono); font-weight: 800;
   font-size: 12px; letter-spacing: .2em; text-transform: uppercase;
@@ -812,8 +811,45 @@ svg.chart { display: block; width: 100%; height: auto; }
 .bouw-card li:last-child { border-bottom: none; }
 
 /* =================================================================
-   09 — INTERNATIONALE REFERENTIES  (kleinere cards)
+   09 — LOSSE TIPS  (10 cards uit Plan & Referenties)
    ================================================================= */
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 18px 16px;
+}
+.tip {
+  border-top: 2px solid var(--orange);
+  padding: 12px 14px 0 0;
+  display: flex; flex-direction: column;
+}
+.tip.t-teal   { border-top-color: var(--teal); }
+.tip.t-cream  { border-top-color: var(--cream-deep); }
+.tip.t-olive  { border-top-color: var(--olive); }
+.tip.t-plum   { border-top-color: var(--plum); }
+.tip .tnum {
+  font-family: var(--mono); font-weight: 800;
+  font-size: 22px; line-height: .85;
+  color: var(--orange); margin-bottom: 8px;
+}
+.tip.t-teal  .tnum { color: var(--teal); }
+.tip.t-cream .tnum { color: var(--muted); }
+.tip.t-olive .tnum { color: var(--olive); }
+.tip.t-plum  .tnum { color: var(--plum); }
+.tip .ttitle {
+  font-family: var(--mono); font-weight: 700;
+  font-size: 14px; line-height: 1.15;
+  margin-bottom: 8px;
+  letter-spacing: -.005em;
+  color: var(--ink);
+}
+.tip .tbody {
+  font-family: var(--sans); font-weight: 400;
+  font-size: 12px; line-height: 1.5;
+  color: var(--muted);
+}
+
+/* — refs-grid niet meer in gebruik (sec 9 vervangen door tips), CSS bewaard voor printcompat — */
 .refs-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -823,7 +859,7 @@ svg.chart { display: block; width: 100%; height: auto; }
   position: relative;
   overflow: hidden;
   background: var(--ink);
-  aspect-ratio: 3 / 2;       /* compacter */
+  aspect-ratio: 3 / 2;
   cursor: pointer;
 }
 .ref-card img {
@@ -1064,6 +1100,7 @@ svg.chart { display: block; width: 100%; height: auto; }
   .field-cols   { grid-template-columns: 1fr; gap: 24px; }
   .bouw-grid    { grid-template-columns: 1fr 1fr; }
   .refs-grid    { grid-template-columns: 1fr; }
+  .tips-grid    { grid-template-columns: repeat(2, 1fr); }
   .plan-grid    { grid-template-columns: 1fr; }
   .plan-col     { border-right: none; border-bottom: 1px solid rgba(247,239,220,.22); padding-bottom: 24px; }
   .scenarios    { grid-template-columns: 1.4fr 1fr 1fr 1fr; font-size: 12px; }
@@ -1106,7 +1143,7 @@ svg.chart { display: block; width: 100%; height: auto; }
   <button data-go="6"  aria-label="6 — Cijfers"></button>
   <button data-go="7"  aria-label="7 — Projectie"></button>
   <button data-go="8"  aria-label="8 — Bouwstenen"></button>
-  <button data-go="9"  aria-label="9 — Referenties"></button>
+  <button data-go="9"  aria-label="9 — Tips"></button>
   <button data-go="10" aria-label="10 — 30/60/90"></button>
   <button data-go="11" aria-label="11 — Slot"></button>
 </nav>
@@ -1419,68 +1456,76 @@ svg.chart { display: block; width: 100%; height: auto; }
   </div>
 </section>
 
-<!-- 09 — REFERENTIES -->
-<section class="scene bg" id="sec-9" data-num="9">
+<!-- 09 — LOSSE TIPS  (uit Plan & Referenties tab) -->
+<section class="scene bg-alt" id="sec-9" data-num="9">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
       <div class="num">09</div>
       <div class="title-wrap">
-        <div class="kicker">Internationale referenties</div>
-        <h2>Wat anderen<br/>laten zien.</h2>
+        <div class="kicker">Praktische principes</div>
+        <h2>Tien tips uit<br/>het veld.</h2>
       </div>
     </header>
 
-    <div class="refs-grid">
-      <article class="ref-card reveal" style="--i:1" data-img="ref-nyc">
-        <div class="ref-meta">
-          <div class="ref-place">Amsterdam Billiards Club</div>
-          <div class="ref-loc">New York · sinds 1989</div>
-        </div>
-        <div class="ref-overlay">
-          <div class="ov-tag">01 · New York</div>
-          <div class="ov-place">Amsterdam Billiards Club</div>
-          <p class="ov-essence">25 Brunswick-tafels, grootste co-ed pool league van de US.</p>
-          <p class="ov-lesson">Een league kan een belangrijk deel van de business worden — doordeweekse omzet die je niet uit walk-ins haalt.</p>
-        </div>
+    <div class="tips-grid">
+      <article class="tip reveal" style="--i:1">
+        <div class="tnum">01</div>
+        <h3 class="ttitle">Akoestiek &gt; apparatuur</h3>
+        <p class="tbody">Een goede speaker in een slechte ruimte klinkt slechter dan een gemiddelde speaker in een goede ruimte. Eerst tunen, dan opwaarderen.</p>
       </article>
 
-      <article class="ref-card reveal tone-teal" style="--i:2" data-img="ref-statusq">
-        <div class="ref-meta">
-          <div class="ref-place">Status Q</div>
-          <div class="ref-loc">Brooklyn · New York</div>
-        </div>
-        <div class="ref-overlay">
-          <div class="ov-tag">02 · Brooklyn</div>
-          <div class="ov-place">Status Q</div>
-          <p class="ov-essence">"Are we a bar with billiards or a billiards hall with a bar? We are both."</p>
-          <p class="ov-lesson">Beide identiteiten claimen, niet kiezen. Voorkomt verkeerde verwachting.</p>
-        </div>
+      <article class="tip t-teal reveal" style="--i:2">
+        <div class="tnum">02</div>
+        <h3 class="ttitle">Mensen absorberen geluid</h3>
+        <p class="tbody">Vijf mensen in de zaak klinkt totaal anders dan vijfenveertig. Tune bij volle bezetting, niet leeg.</p>
       </article>
 
-      <article class="ref-card reveal tone-plum" style="--i:3" data-img="ref-paris">
-        <div class="ref-meta">
-          <div class="ref-place">Académie de Billard</div>
-          <div class="ref-loc">Paris · Clichy-Montmartre · 1947</div>
-        </div>
-        <div class="ref-overlay">
-          <div class="ov-tag">03 · Paris</div>
-          <div class="ov-place">Académie de Billard</div>
-          <p class="ov-essence">Historische biljartzaal, 23 tafels, Art-Deco interieur, ongebroken traditie.</p>
-          <p class="ov-lesson">Een zaak die niet meegaat met trends, maar consequent één ding doet, bouwt een eigen publiek.</p>
-        </div>
+      <article class="tip t-cream reveal" style="--i:3">
+        <div class="tnum">03</div>
+        <h3 class="ttitle">Volume cap zelf opleggen</h3>
+        <p class="tbody">Bij listening bar is luidheid contraproductief. Gasten praten zachter, blijven langer, bestellen meer.</p>
       </article>
 
-      <article class="ref-card reveal tone-olive" style="--i:4" data-img="ref-tokyo">
-        <div class="ref-meta">
-          <div class="ref-place">Tokio high-rise pool</div>
-          <div class="ref-loc">Shibuya · Tokio</div>
-        </div>
-        <div class="ref-overlay">
-          <div class="ov-tag">04 · Tokio</div>
-          <div class="ov-place">Tokio high-rise pool</div>
-          <p class="ov-essence">Verstopt op de 4e en 6e verdieping van kantoorgebouwen — "hidden gems by looking up."</p>
-          <p class="ov-lesson">In de stad werkt verticaliteit. Een ongebruikelijke locatie wordt onderdeel van het verhaal.</p>
-        </div>
+      <article class="tip t-olive reveal" style="--i:4">
+        <div class="tnum">04</div>
+        <h3 class="ttitle">Geen panelen per se</h3>
+        <p class="tbody">Shibuya HiFi haalde acoustic panels weg — ruimte werd "dood". Meubilair, tapijten en gordijnen werken vaak beter.</p>
+      </article>
+
+      <article class="tip t-plum reveal" style="--i:5">
+        <div class="tnum">05</div>
+        <h3 class="ttitle">Reserveringen werken</h3>
+        <p class="tbody">Eavesdrop (38 zits): reserveringen verplicht. Voorkomt drukte-klachten die in pool-bars de #1 klacht zijn.</p>
+      </article>
+
+      <article class="tip reveal" style="--i:6">
+        <div class="tnum">06</div>
+        <h3 class="ttitle">Vinyl als visueel anker</h3>
+        <p class="tbody">Dante's HiFi heeft 8.000 platen aan de muur — visueel statement bouwt audiofiele credibility. Klein collection, ook prima — maak het zichtbaar.</p>
+      </article>
+
+      <article class="tip t-teal reveal" style="--i:7">
+        <div class="tnum">07</div>
+        <h3 class="ttitle">Maak het tactiel</h3>
+        <p class="tbody">Gasten mogen platen aanraken, soms zelf draaien op gast-decks. Tactiele betrokkenheid bouwt loyaliteit.</p>
+      </article>
+
+      <article class="tip t-cream reveal" style="--i:8">
+        <div class="tnum">08</div>
+        <h3 class="ttitle">Programmering als curatie</h3>
+        <p class="tbody">Geen achtergrondmuziek-modus. Elke avond een thema, een selector, een verhaal. Communiceer dit klein bij entree.</p>
+      </article>
+
+      <article class="tip t-olive reveal" style="--i:9">
+        <div class="tnum">09</div>
+        <h3 class="ttitle">Combineer met dag-concept</h3>
+        <p class="tbody">Loop 51 doet vinyl-brunch. Twee omzetstromen uit één huur. Bij lage huur extra interessant.</p>
+      </article>
+
+      <article class="tip t-plum reveal" style="--i:10">
+        <div class="tnum">10</div>
+        <h3 class="ttitle">Vilt-vervanging als ritueel</h3>
+        <p class="tbody">€150–300 per tafel. Plan een vaste cyclus: elk jaar 1–2 tafels. Onderhoud zichtbaar maken is een teken van trots.</p>
       </article>
     </div>
   </div>
@@ -1625,7 +1670,7 @@ const DATA = {
    ================================================================= */
 const IMAGES = {
   /* sec 04 — bands */
-  'band-thepoolbar':  { url: './photos/thepoolbar.jpg',  alt: 'The Pool Bar' },
+  'band-thepoolbar':  { url: './photos/poolbar.jpeg',   alt: 'The Pool Bar' },
   'band-planb':       { url: './photos/planb.jpg',       alt: 'Plan B Overtoom',     fallback: 'https://www.planbovertoom.nl/wp-content/uploads/2024/11/DSC01881-scaled.jpg' },
   'band-mokum':       { url: './photos/mokum.jpg',       alt: 'Mokum Pool & Darts',  fallback: 'https://poolen-amsterdam.nl/wp-content/uploads/Mokum-Pool-Darts-03-1-2048x1365.jpg' },
   'band-degracht':    { url: './photos/degracht.jpg',    alt: 'Poolbar De Gracht' },
