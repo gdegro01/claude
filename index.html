@@ -5,43 +5,62 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Side B — Concept-voorstel</title>
 
+<!-- Sans body via Google Fonts (Geist), om met Geist Mono te pairen -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Leaflet voor de kaart in sectie 03 -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
 /* =================================================================
    SIDE B — sollicitatie-presentatie bedrijfsleider
-   Eén bestand. Editorial layout, Modernline-template-inspiratie.
-   Aanpassen: zie CONFIG / DATA / IMAGES onderaan in <script>.
+   Eén bestand. Editorial Geist Mono + Disket Mono setup.
+   Aanpassen: zie CONFIG / DATA / IMAGES bovenin <script>.
    ================================================================= */
 
-:root {
-  --cream:        #EFE7D6;
-  --cream-deep:   #E2D7BD;
-  --cream-soft:   #F5EFE2;
-  --orange:       #E94B26;
-  --orange-dark:  #C73E1F;
-  --teal:         #1E4D52;
-  --teal-dark:    #143438;
-  --ink-bg:       #1A1815;
-  --ink:          #181715;
-  --ink-soft:     #2A2823;
-  --mute:         #6B6B6B;
-  --rule:         #C9BFA8;
+/* ----- self-hosted display fonts ----- */
+@font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 200; font-display: swap; src: url('./fonts/geist-mono-thin.woff2') format('woff2'); }
+@font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 300; font-display: swap; src: url('./fonts/geist-mono-extralight.woff2') format('woff2'); }
+@font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 600; font-display: swap; src: url('./fonts/geist-mono-semibold.woff2') format('woff2'); }
+@font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 700; font-display: swap; src: url('./fonts/geist-mono-bold.woff2') format('woff2'); }
+@font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 800; font-display: swap; src: url('./fonts/geist-mono-extrabold.woff2') format('woff2'); }
+@font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 900; font-display: swap; src: url('./fonts/geist-mono-black.woff2') format('woff2'); }
 
-  --serif-display: 'Anton', 'Archivo Black', sans-serif;
-  --serif-heavy:   'Archivo Black', 'Inter', sans-serif;
-  --sans:          'Inter', system-ui, -apple-system, sans-serif;
+@font-face { font-family: 'Disket Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url('./fonts/disket-mono-regular.woff2') format('woff2'); }
+@font-face { font-family: 'Disket Mono'; font-style: normal; font-weight: 700; font-display: swap; src: url('./fonts/disket-mono-bold.woff2') format('woff2'); }
+
+/* ----- variabelen ----- */
+:root {
+  /* palet — matcht de kaart die je stuurde */
+  --bg:           #F2E8D5;
+  --bg-alt:       #EBE0CB;
+  --line:         #C5B89E;
+  --line-soft:    #D9CDB1;
+  --orange:       #DC4A2E;
+  --orange-dark:  #B83A22;
+  --teal:         #1F5F5F;
+  --teal-dark:    #143F3F;
+  --ink-bg:       #1A1612;
+  --ink:          #1A1612;
+  --muted:        #6B5F50;
+  --cream-soft:   #F7EFDC;
+  --cream-deep:   #E2D7BD;
+
+  --mono:    'Geist Mono', ui-monospace, 'SF Mono', monospace;
+  --display: 'Disket Mono', 'Geist Mono', ui-monospace, monospace;
+  --sans:    'Geist', 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
 
   --gutter: clamp(20px, 4vw, 80px);
-  --max:    1400px;
+  --max:    1500px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
-  background: var(--cream);
+  background: var(--bg);
   color: var(--ink);
   font-family: var(--sans);
   font-size: 16px;
@@ -51,14 +70,13 @@ html, body {
   overflow-x: hidden;
 }
 
-::selection { background: var(--orange); color: var(--cream); }
+::selection { background: var(--orange); color: var(--bg); }
 
-/* ---------- shared layout ---------- */
+/* ---------- scenes ---------- */
 section.scene {
-  /* gebruik small viewport waar beschikbaar — geen overlap met browser UI */
   min-height: 100vh;
   min-height: 100svh;
-  padding: clamp(36px, 5.5vw, 90px) var(--gutter);
+  padding: clamp(32px, 4.5vw, 80px) var(--gutter);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -66,12 +84,11 @@ section.scene {
   break-after: page;
   page-break-after: always;
 }
-.scene.cream     { background: var(--cream); }
-.scene.cream-alt { background: var(--cream-soft); }
-.scene.orange    { background: var(--orange);  color: var(--cream); }
-.scene.teal      { background: var(--teal);    color: var(--cream); }
-.scene.ink       { background: var(--ink-bg);  color: var(--cream); }
-.scene.orange .mute, .scene.teal .mute, .scene.ink .mute { color: rgba(255,255,255,.7); }
+.scene.bg     { background: var(--bg); }
+.scene.bg-alt { background: var(--bg-alt); }
+.scene.orange { background: var(--orange); color: var(--bg); }
+.scene.teal   { background: var(--teal);   color: var(--bg); }
+.scene.ink    { background: var(--ink-bg); color: var(--bg); }
 
 .inner {
   max-width: var(--max);
@@ -79,117 +96,106 @@ section.scene {
   margin: 0 auto;
 }
 
-/* ---------- type ---------- */
-h1, h2, h3, h4 { font-family: var(--serif-display); font-weight: normal; letter-spacing: -.01em; line-height: .95; }
-.display-xl    { font-size: clamp(72px, 13vw, 220px); }
-.display-l     { font-size: clamp(48px, 8vw, 120px); }
-.display-m     { font-size: clamp(36px, 5.5vw, 80px); }
-.display-s     { font-size: clamp(26px, 3.2vw, 48px); }
-.heavy         { font-family: var(--serif-heavy); }
+/* ---------- typography ---------- */
+.tiny, .eyebrow {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+.eyebrow.orange { color: var(--orange); }
+.eyebrow.teal   { color: var(--teal); }
 
-p { max-width: 60ch; }
-p + p { margin-top: 1em; }
+.muted { color: var(--muted); }
+.scene.orange .muted, .scene.teal .muted, .scene.ink .muted { color: rgba(247,239,220,.7); }
 
-.mute  { color: var(--mute); font-size: .85em; letter-spacing: .04em; text-transform: uppercase; font-weight: 500; }
-.lead  { font-size: 1.25em; line-height: 1.45; max-width: 36ch; }
-.tiny  { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
-
-/* ---------- section header ---------- */
+/* ---------- section-header ---------- */
 .sec-head {
   display: flex;
   align-items: flex-end;
-  gap: 24px;
-  margin-bottom: clamp(24px, 4vw, 56px);
-  border-bottom: 1px solid var(--rule);
-  padding-bottom: 14px;
+  gap: 28px;
+  margin-bottom: clamp(28px, 4vw, 64px);
+  border-bottom: 2px solid currentColor;
+  padding-bottom: 18px;
 }
-.scene.orange .sec-head, .scene.teal .sec-head, .scene.ink .sec-head { border-color: rgba(255,255,255,.22); }
-.sec-num {
-  font-family: var(--serif-display);
-  font-size: clamp(52px, 8vw, 110px);
+.sec-head .num {
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: clamp(56px, 9vw, 130px);
   line-height: .8;
   color: var(--orange);
 }
-.scene.orange .sec-num { color: var(--teal); }
-.scene.teal   .sec-num { color: var(--orange); }
-.scene.ink    .sec-num { color: var(--orange); }
-.sec-title {
-  font-family: var(--serif-display);
-  font-size: clamp(26px, 3.2vw, 50px);
-  line-height: 1;
-  flex: 1;
-}
-.sec-kicker {
-  font-family: var(--sans);
-  font-size: 12px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: var(--mute);
-  margin-bottom: 6px;
-}
-.scene.orange .sec-kicker, .scene.teal .sec-kicker, .scene.ink .sec-kicker { color: rgba(255,255,255,.65); }
+.scene.orange .sec-head .num { color: var(--teal); }
+.scene.teal   .sec-head .num { color: var(--orange); }
+.scene.ink    .sec-head .num { color: var(--orange); }
 
-/* shared photo tile (placeholder + img) */
+.sec-head .title-wrap { flex: 1; }
+.sec-head .kicker {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.scene.orange .sec-head .kicker, .scene.teal .sec-head .kicker, .scene.ink .sec-head .kicker { color: rgba(247,239,220,.65); }
+
+.sec-head h2 {
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: clamp(40px, 6vw, 96px);
+  line-height: .92;
+  letter-spacing: -.02em;
+}
+
+/* shared photo tile */
 .photo {
   position: relative;
   overflow: hidden;
   background: var(--cream-deep);
 }
 .photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform .5s cubic-bezier(.2,.6,.2,1);
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  transition: transform .6s cubic-bezier(.2,.6,.2,1);
 }
-.photo:hover img { transform: scale(1.03); }
+.photo:hover img { transform: scale(1.04); }
 .photo .caption {
-  position: absolute;
-  inset: auto 0 0 0;
-  background: linear-gradient(to top, rgba(0,0,0,.7), transparent 70%);
+  position: absolute; inset: auto 0 0 0;
+  background: linear-gradient(to top, rgba(0,0,0,.78), transparent 75%);
   color: #fff;
-  font-family: var(--sans);
-  font-size: 10px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
+  font-family: var(--mono);
   font-weight: 600;
-  padding: 32px 12px 10px;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 36px 16px 14px;
 }
-.photo .credit {
-  font-weight: 400;
-  text-transform: none;
-  letter-spacing: 0;
-  font-size: 9.5px;
-  opacity: .7;
-  margin-top: 2px;
+.photo .caption .sub {
+  font-family: var(--sans);
+  font-weight: 400; font-size: 11px;
+  letter-spacing: 0; text-transform: none;
+  opacity: .75; margin-top: 3px;
 }
 .photo.no-img {
-  display: flex;
-  align-items: flex-end;
-  padding: 14px;
+  display: flex; align-items: flex-end; padding: 16px;
   background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
-  color: var(--cream);
+  color: var(--bg);
 }
 .photo.no-img:nth-child(even) {
   background: linear-gradient(135deg, var(--orange-dark) 0%, var(--orange) 100%);
 }
-.photo.no-img.tone-cream {
-  background: linear-gradient(135deg, var(--cream-deep) 0%, var(--cream) 100%);
-  color: var(--ink);
-}
 .photo.no-img .ph-label {
-  font-family: var(--serif-display);
-  font-size: clamp(15px, 1.6vw, 24px);
-  line-height: 1;
-  max-width: 14ch;
+  font-family: var(--mono); font-weight: 800;
+  font-size: clamp(18px, 1.8vw, 28px);
+  line-height: 1; max-width: 14ch;
 }
 .photo.no-img .ph-sub {
-  font-size: 9.5px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  opacity: .6;
-  margin-top: 4px;
+  font-family: var(--mono); font-weight: 600;
+  font-size: 10px; letter-spacing: .14em;
+  text-transform: uppercase; opacity: .65; margin-top: 5px;
 }
 
 /* =================================================================
@@ -197,54 +203,39 @@ p + p { margin-top: 1em; }
    ================================================================= */
 .cover {
   background: var(--orange);
-  color: var(--cream);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto 1fr auto;
-  gap: 24px;
-  padding: 36px var(--gutter);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
-.cover-meta-top    { grid-column: 1 / 2; }
-.cover-meta-topr   { grid-column: 2 / 3; text-align: right; }
-.cover-center      { grid-column: 1 / -1; align-self: center; }
-.cover-meta-bot    { grid-column: 1 / 2; align-self: end; }
-.cover-meta-botr   { grid-column: 2 / 3; align-self: end; text-align: right; }
+.cover .stage {
+  text-align: center;
+}
 .cover h1 {
-  font-family: var(--serif-display);
-  font-size: clamp(110px, 21vw, 380px);
-  letter-spacing: -.02em;
-  line-height: .85;
-  margin-left: -.04em;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(180px, 30vw, 600px);
+  line-height: .82;
+  letter-spacing: -.04em;
+  margin-bottom: clamp(20px, 2.5vw, 40px);
 }
-.cover h1 .b-flip {
+.cover h1 .b-out {
   display: inline-block;
   color: transparent;
-  -webkit-text-stroke: 5px var(--cream);
-  text-stroke: 5px var(--cream);
-  margin-left: -.07em;
+  -webkit-text-stroke: 6px var(--bg);
+  text-stroke: 6px var(--bg);
+  margin-left: -.06em;
 }
 .cover .tagline {
-  font-family: var(--serif-display);
-  font-size: clamp(18px, 1.7vw, 26px);
-  font-weight: 400;
-  margin-top: 28px;
-  max-width: 24ch;
-  line-height: 1.15;
-  letter-spacing: .005em;
-}
-.cover .scroll-hint {
-  font-size: 11px;
-  letter-spacing: .15em;
-  text-transform: uppercase;
+  font-family: var(--mono);
   font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.scroll-hint .arrow { display: inline-block; animation: bob 2s ease-in-out infinite; }
-@keyframes bob {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(4px); }
+  font-size: clamp(18px, 1.8vw, 28px);
+  line-height: 1.3;
+  letter-spacing: .01em;
+  max-width: 28ch;
+  margin: 0 auto;
+  opacity: .95;
 }
 
 /* =================================================================
@@ -253,519 +244,770 @@ p + p { margin-top: 1em; }
 .pitch-grid {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
-  gap: clamp(32px, 5vw, 72px);
+  gap: clamp(40px, 5vw, 80px);
   align-items: start;
 }
 .pitch-text {
-  font-size: clamp(18px, 1.6vw, 23px);
-  line-height: 1.45;
+  font-family: var(--sans);
   font-weight: 400;
+  font-size: clamp(20px, 1.9vw, 28px);
+  line-height: 1.45;
   max-width: 28ch;
 }
-.pitch-text .lead-emph { font-family: var(--serif-display); display: block; margin-bottom: 16px; font-size: 1.35em; line-height: 1; }
+.pitch-text .lead {
+  font-family: var(--mono);
+  font-weight: 800;
+  display: block;
+  margin-bottom: 22px;
+  font-size: 1.25em;
+  line-height: 1.05;
+  letter-spacing: -.01em;
+}
 .pitch-text strong { font-weight: 600; }
-.pitch-foot { margin-top: 22px; font-size: 13px; color: var(--mute); line-height: 1.5; }
 
-.pillars { display: flex; flex-direction: column; gap: 14px; }
+.pillars { display: flex; flex-direction: column; gap: 16px; }
 .pillar {
   background: var(--cream-deep);
-  padding: 22px 26px;
-  position: relative;
+  padding: 26px 28px;
 }
-.pillar-num {
-  font-family: var(--serif-display);
+.pillar .pnum {
+  font-family: var(--mono);
+  font-weight: 800;
   font-size: 44px;
-  line-height: .8;
+  line-height: .85;
   color: var(--orange);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
-.pillar-title {
-  font-family: var(--serif-heavy);
-  font-size: 20px;
+.pillar .ptitle {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 22px;
   line-height: 1.15;
-  letter-spacing: -.005em;
+  letter-spacing: -.01em;
 }
-.pillar-sub {
-  font-family: var(--sans);
+.pillar .psub {
+  font-family: var(--mono);
+  font-weight: 500;
   font-size: 12px;
-  color: var(--mute);
+  color: var(--muted);
   margin-top: 6px;
   letter-spacing: .04em;
   text-transform: uppercase;
 }
-.pillar.empty { background: transparent; border: 1.5px dashed var(--rule); }
-.pillar.empty .pillar-num   { color: var(--rule); }
-.pillar.empty .pillar-title { font-family: var(--serif-display); font-weight: normal; color: var(--mute); font-style: italic; font-size: 19px; }
-.pillar.empty .pillar-sub   { color: var(--rule); }
+.pillar.empty { background: transparent; border: 1.5px dashed var(--line); }
+.pillar.empty .pnum { color: var(--line); }
+.pillar.empty .ptitle { font-family: var(--mono); font-weight: 400; font-style: italic; color: var(--muted); font-size: 20px; }
+.pillar.empty .psub { color: var(--line); }
 
 /* =================================================================
-   03 — CONCURRENTIELANDSCHAP
+   03 — KAART
    ================================================================= */
-.insight-line {
-  font-family: var(--serif-display);
-  font-size: clamp(22px, 2.2vw, 34px);
-  line-height: 1.15;
-  max-width: 28ch;
-  margin-bottom: 40px;
-  color: var(--teal);
+.scene.map-scene {
+  padding: 0;
+  background: var(--bg);
 }
-.insight-line em { font-style: normal; color: var(--orange); }
-
-.tables-wrap {
+.map-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  margin-bottom: 44px;
+  grid-template-columns: 1fr 460px;
+  gap: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
 }
-.tbl-label {
-  font-family: var(--sans);
+.map-host {
+  background: var(--ink);
+  position: relative;
+  overflow: hidden;
+}
+#map { width: 100%; height: 100%; }
+
+.map-aside {
+  background: var(--bg);
+  padding: clamp(28px, 3.5vw, 56px) clamp(24px, 3vw, 44px);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  border-left: 2px solid var(--ink);
+}
+.map-aside .head-num {
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: clamp(48px, 7vw, 100px);
+  line-height: .8;
+  color: var(--orange);
+  margin-bottom: 6px;
+}
+.map-aside .head-kicker {
+  font-family: var(--mono);
   font-weight: 600;
   font-size: 11px;
-  letter-spacing: .15em;
+  letter-spacing: .22em;
   text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.map-aside h2 {
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: clamp(34px, 4vw, 56px);
+  line-height: .98;
+  letter-spacing: -.02em;
+  margin-bottom: 14px;
+}
+.map-aside h2 em {
+  font-style: normal;
   color: var(--orange);
-  margin-bottom: 10px;
-  padding-bottom: 8px;
-  border-bottom: 1.5px solid var(--orange);
 }
-table.editorial {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13.5px;
-}
-table.editorial th,
-table.editorial td {
-  text-align: left;
-  padding: 10px 8px 9px 0;
-  border-bottom: 1px solid var(--rule);
-  vertical-align: top;
-}
-table.editorial th {
+.map-aside .lead {
   font-family: var(--sans);
-  font-size: 10.5px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: var(--mute);
-  padding-top: 0;
-  padding-bottom: 8px;
+  font-weight: 400;
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.55;
+  margin-bottom: 22px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--ink);
 }
-table.editorial td.name {
-  font-family: var(--serif-heavy);
-  font-size: 14px;
-  letter-spacing: -.005em;
-  padding-right: 14px;
+.map-aside .lead strong.pool   { color: var(--orange); font-weight: 600; }
+.map-aside .lead strong.listen { color: var(--teal);   font-weight: 600; }
+
+.legend-col { margin-bottom: 22px; }
+.legend-col .col-h {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.legend-col.pool   .col-h { color: var(--orange); }
+.legend-col.listen .col-h { color: var(--teal); }
+.swatch {
+  width: 14px; height: 14px; flex-shrink: 0; border-radius: 50%;
+}
+.swatch.pool   { background: var(--orange); }
+.swatch.listen { background: var(--teal); }
+
+.legend-row {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 12.5px;
+  align-items: baseline;
+}
+.legend-row:last-child { border-bottom: none; }
+.legend-row .lnum {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 11px;
+}
+.legend-col.pool   .lnum { color: var(--orange); }
+.legend-col.listen .lnum { color: var(--teal); }
+.legend-row .lname {
+  font-family: var(--sans);
+  font-weight: 600;
+  line-height: 1.32;
+}
+.legend-row .lname small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 400;
+  margin-top: 2px;
+  line-height: 1.45;
+}
+.legend-row .lrate {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 11px;
+  text-align: right;
   white-space: nowrap;
 }
-table.editorial tr { transition: background .12s ease; }
-table.editorial tbody tr:hover { background: var(--cream-deep); }
-table.editorial td.pos { color: var(--ink-soft); }
-table.editorial td.note { color: var(--mute); font-size: 12.5px; }
+.legend-row .lrate small { color: var(--muted); font-weight: 400; }
 
-/* concurrenten foto-grid — 6 venues */
-.competitor-photos {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: 150px 150px;
-  gap: 14px;
+.map-foot {
+  margin-top: auto;
+  padding-top: 18px;
+  font-family: var(--sans);
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+  font-style: italic;
+  border-top: 1px solid var(--line-soft);
 }
-.competitor-photos .ph-1 { grid-column: 1 / 3; grid-row: 1 / 3; }   /* groot links */
-.competitor-photos .ph-2 { grid-column: 3 / 4; grid-row: 1 / 2; }
-.competitor-photos .ph-3 { grid-column: 4 / 5; grid-row: 1 / 2; }
-.competitor-photos .ph-4 { grid-column: 3 / 5; grid-row: 2 / 3; }
-.competitor-photos .ph-5 { grid-column: 5 / 7; grid-row: 1 / 2; }
-.competitor-photos .ph-6 { grid-column: 5 / 7; grid-row: 2 / 3; }
+
+/* Leaflet overrides */
+.leaflet-container {
+  font-family: var(--sans);
+  background: #ECE1CA;
+}
+.leaflet-tile { filter: saturate(1.05) contrast(1.08); }
+.leaflet-control-attribution {
+  background: rgba(242,232,213,.92) !important;
+  font-family: var(--mono) !important;
+  font-size: 10px !important;
+  color: var(--muted) !important;
+  padding: 3px 8px !important;
+}
+.leaflet-control-attribution a { color: var(--orange) !important; }
+.leaflet-control-zoom a {
+  background: var(--bg) !important;
+  color: var(--ink) !important;
+  border: 1.5px solid var(--ink) !important;
+  font-family: var(--mono) !important;
+  font-weight: 700 !important;
+}
+.leaflet-control-zoom a:hover { background: var(--orange) !important; color: #fff !important; }
+
+.marker-wrap {
+  position: relative;
+  width: 80px;
+  height: 56px;
+  pointer-events: none;
+}
+.marker-circle {
+  position: absolute;
+  left: 50%; top: 0;
+  transform: translateX(-50%);
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: white;
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: 14px;
+  border: 2.5px solid var(--bg);
+  box-shadow: 0 3px 10px rgba(26,22,18,.4), 0 0 0 1px rgba(26,22,18,.15);
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform .15s ease;
+}
+.marker-circle.pool   { background: var(--orange); }
+.marker-circle.listen { background: var(--teal); }
+.marker-circle:hover { transform: translateX(-50%) scale(1.12); }
+.marker-rating {
+  position: absolute;
+  top: 38px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 10px;
+  padding: 2px 6px;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(26,22,18,.25);
+}
+
+.leaflet-popup-content-wrapper {
+  background: var(--bg) !important;
+  border-radius: 2px !important;
+  border: 1.5px solid var(--ink) !important;
+}
+.leaflet-popup-content {
+  margin: 14px 18px !important;
+  font-family: var(--sans) !important;
+  font-size: 13px !important;
+  color: var(--ink) !important;
+  line-height: 1.45 !important;
+}
+.leaflet-popup-tip {
+  background: var(--bg) !important;
+  border: 1.5px solid var(--ink) !important;
+}
+.popup-tag {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: .2em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.popup-tag.pool   { color: var(--orange); }
+.popup-tag.listen { color: var(--teal); }
+.popup-name {
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: 18px;
+  margin-bottom: 6px;
+  letter-spacing: -.01em;
+}
+.popup-segment {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  line-height: 1.45;
+}
+.popup-rate {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 11px;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+  color: var(--ink);
+}
+.popup-rate span { color: var(--muted); font-weight: 400; margin-left: 4px; }
 
 /* =================================================================
-   04 — INZICHTEN UIT HET VELD
+   04 — CONCURRENTEN FOTO'S
+   ================================================================= */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-rows: clamp(180px, 22vw, 320px);
+  gap: 14px;
+}
+.photo-grid .pg-1 { grid-column: 1 / span 7; grid-row: 1 / span 2; }   /* big left */
+.photo-grid .pg-2 { grid-column: 8 / span 5; grid-row: 1 / span 2; }   /* big right top */
+.photo-grid .pg-3 { grid-column: 1 / span 4; grid-row: 3 / span 1; }
+.photo-grid .pg-4 { grid-column: 5 / span 4; grid-row: 3 / span 1; }
+.photo-grid .pg-5 { grid-column: 9 / span 4; grid-row: 3 / span 1; }
+.photo-grid .pg-6 { grid-column: 1 / span 12; grid-row: 4 / span 1; }  /* wide bottom */
+
+/* =================================================================
+   05 — INZICHTEN UIT HET VELD
    ================================================================= */
 .field-top {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 28px;
-  margin-bottom: clamp(36px, 5vw, 64px);
+  gap: 24px;
+  margin-bottom: clamp(28px, 4vw, 52px);
 }
 .field-obs {
   border-top: 2px solid var(--orange);
-  padding-top: 18px;
+  padding-top: 14px;
 }
-.field-obs .field-num {
-  font-family: var(--serif-display);
-  font-size: 32px;
+.field-obs .fnum {
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: 24px;
   line-height: .9;
   color: var(--orange);
   margin-bottom: 8px;
 }
-.field-obs .field-head {
-  font-family: var(--serif-display);
-  font-size: clamp(18px, 1.7vw, 24px);
+.field-obs .fhead {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: clamp(15px, 1.4vw, 20px);
   line-height: 1.1;
-  margin-bottom: 12px;
-  color: var(--cream);
+  margin-bottom: 10px;
 }
 .field-obs p {
-  font-size: 13.5px;
+  font-size: 12.5px;
   line-height: 1.5;
-  color: rgba(239,231,214,.75);
+  color: rgba(247,239,220,.75);
+  max-width: 32ch;
 }
 
 .field-cols {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 56px;
-  border-top: 1px solid rgba(255,255,255,.18);
-  padding-top: 32px;
+  gap: 48px;
+  border-top: 1px solid rgba(247,239,220,.18);
+  padding-top: 28px;
 }
-.field-col-head {
-  font-family: var(--serif-display);
-  font-size: clamp(22px, 2.2vw, 32px);
+.field-col h3 {
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: clamp(18px, 1.8vw, 28px);
   line-height: 1;
-  margin-bottom: 24px;
+  margin-bottom: 18px;
 }
-.field-col.praise .field-col-head { color: var(--cream); }
-.field-col.praise .field-col-head::before { content: "+ "; color: var(--orange); }
-.field-col.crit   .field-col-head { color: var(--cream); }
-.field-col.crit   .field-col-head::before { content: "− "; color: var(--orange); }
+.field-col.praise h3::before { content: "+ "; color: var(--orange); }
+.field-col.crit   h3::before { content: "− "; color: var(--orange); }
 
-.field-list { list-style: none; padding: 0; margin: 0; }
+.field-list { list-style: none; padding: 0; }
 .field-list li {
-  padding: 14px 0;
-  border-bottom: 1px solid rgba(255,255,255,.12);
-  font-size: 13.5px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(247,239,220,.12);
+  font-size: 12.5px;
   line-height: 1.5;
-  color: rgba(239,231,214,.85);
+  color: rgba(247,239,220,.82);
 }
 .field-list li strong {
   display: block;
-  font-family: var(--serif-heavy);
-  font-size: 14px;
-  color: var(--cream);
-  margin-bottom: 4px;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--bg);
+  margin-bottom: 3px;
   letter-spacing: -.005em;
 }
 
 /* =================================================================
-   05 — FINANCIËLE SCENARIOS
+   06 — CIJFERS
    ================================================================= */
 .scenarios {
   display: grid;
-  grid-template-columns: 1.1fr 1fr 1fr 1fr;
-  gap: 0;
-  border-top: 2px solid var(--cream);
-  border-bottom: 2px solid var(--cream);
+  grid-template-columns: 1.3fr 1fr 1fr 1fr;
+  border-top: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
 }
 .scenarios .row { display: contents; }
 .scenarios .lbl,
 .scenarios .v {
-  padding: 14px 18px;
-  border-bottom: 1px solid rgba(255,255,255,.15);
-  font-size: 14px;
+  padding: 16px 22px;
+  border-bottom: 1px solid rgba(247,239,220,.16);
   display: flex;
   align-items: center;
 }
 .scenarios .lbl {
-  color: var(--cream-soft);
+  font-family: var(--mono);
+  font-weight: 700;             /* duidelijker dan voorheen */
+  font-size: 14px;              /* groter en bolder */
+  color: var(--bg);
   text-transform: uppercase;
-  letter-spacing: .08em;
-  font-size: 11.5px;
-  font-weight: 600;
+  letter-spacing: .04em;
 }
 .scenarios .v {
-  font-family: var(--serif-heavy);
+  font-family: var(--mono);
+  font-weight: 800;
   font-size: 19px;
   letter-spacing: -.01em;
-  color: var(--cream);
+  color: var(--bg);
 }
-.scenarios .v.small { font-family: var(--sans); font-size: 13px; font-weight: 500; }
-.scenarios .col-b { background: rgba(30,77,82,.18); }
 .scenarios .col-head {
-  font-family: var(--serif-display);
-  font-size: clamp(20px, 2vw, 34px);
-  padding: 18px 18px 14px;
-  border-bottom: 2px solid var(--cream);
-  color: var(--cream);
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: clamp(22px, 2.4vw, 38px);
+  padding: 20px 22px 16px;
+  border-bottom: 2px solid var(--bg);
   line-height: 1;
 }
-.scenarios .col-head.col-b { background: var(--teal); color: var(--cream); }
-.scenarios .col-head .col-tag {
+.scenarios .col-head .tag {
   display: block;
-  font-family: var(--sans);
-  font-size: 10.5px;
+  font-family: var(--mono);
   font-weight: 600;
-  letter-spacing: .14em;
+  font-size: 11px;
+  letter-spacing: .16em;
   text-transform: uppercase;
   margin-top: 6px;
-  opacity: .8;
+  opacity: .75;
 }
-.scen-foot {
-  margin-top: 28px;
-  font-family: var(--serif-display);
-  font-size: clamp(18px, 2vw, 28px);
-  max-width: 38ch;
-  line-height: 1.2;
-}
-.scen-foot em { font-style: normal; color: var(--teal); background: var(--cream-soft); padding: 0 6px; }
 
 /* =================================================================
-   06 — 5-JAAR PROJECTIE
+   07 — PROJECTIE
    ================================================================= */
 .chart-wrap {
   display: grid;
   grid-template-columns: 2.2fr 1fr;
-  gap: 48px;
+  gap: clamp(28px, 4vw, 64px);
   align-items: center;
 }
 .chart-svg-wrap {
-  background: var(--cream-soft);
+  background: var(--bg-alt);
   padding: 28px;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--line);
 }
 svg.chart { display: block; width: 100%; height: auto; }
+
 .chart-legend {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  font-size: 13.5px;
-}
-.chart-legend .leg-item {
-  display: flex;
-  align-items: baseline;
   gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--rule);
+  font-size: 13px;
 }
-.chart-legend .leg-swatch {
-  display: inline-block;
-  width: 20px;
-  height: 2px;
-  flex: 0 0 20px;
+.leg-item {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
 }
-.chart-legend .leg-name {
-  font-family: var(--serif-heavy);
+/* legend swatches — solid line / thick orange / dotted */
+.leg-swatch { display: block; width: 100%; height: 14px; position: relative; }
+.leg-swatch .ln { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); }
+.leg-swatch.a  .ln { border-top: 2px solid var(--teal); }
+.leg-swatch.b  .ln { border-top: 4px solid var(--orange); }
+.leg-swatch.c  .ln { border-top: 3px dotted var(--muted); }
+.leg-name {
+  font-family: var(--mono);
+  font-weight: 700;
   font-size: 15px;
-  flex: 1;
 }
-.chart-legend .leg-val {
+.leg-val {
+  font-family: var(--mono);
+  font-weight: 500;
   font-size: 11.5px;
-  color: var(--mute);
+  color: var(--muted);
+  margin-top: 2px;
   letter-spacing: .04em;
 }
-.chart-legend .leg-item.is-b {
-  background: rgba(233,75,38,.06);
-  margin-left: -8px;
-  padding-left: 8px;
-  padding-right: 8px;
-}
 .chart-foot {
-  font-family: var(--serif-display);
-  font-size: clamp(17px, 1.7vw, 24px);
-  max-width: 52ch;
-  margin-top: 32px;
-  line-height: 1.25;
-  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 12px;             /* veel kleiner */
+  max-width: 80ch;
+  margin-top: 22px;
+  line-height: 1.5;
+  color: var(--muted);
+  font-style: italic;
 }
 
 /* =================================================================
-   07 — BOUWSTENEN
+   08 — BOUWSTENEN (cards-stijl, zoals refs)
    ================================================================= */
 .bouw-intro {
-  font-family: var(--serif-display);
-  font-size: clamp(20px, 2vw, 30px);
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: clamp(16px, 1.5vw, 22px);
   max-width: 44ch;
-  line-height: 1.2;
-  margin-bottom: clamp(28px, 4vw, 48px);
+  line-height: 1.35;
+  margin-bottom: clamp(24px, 3.5vw, 44px);
+  color: rgba(247,239,220,.82);
 }
 .bouw-intro em { font-style: normal; color: var(--orange); }
 
 .bouw-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 28px;
+  gap: 24px;
 }
 .bouw-card {
-  border-top: 2px solid var(--cream);
-  padding-top: 18px;
+  background: rgba(247,239,220,.06);
+  border: 1px solid rgba(247,239,220,.16);
+  padding: 24px 24px 20px;
 }
-.bouw-card .cat-num {
-  font-family: var(--serif-display);
-  font-size: 32px;
+.bouw-card .cnum {
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: 30px;
   line-height: .85;
   color: var(--orange);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
-.bouw-card .cat-title {
-  font-family: var(--serif-display);
-  font-size: clamp(18px, 1.7vw, 24px);
-  line-height: 1.05;
+.bouw-card .ctitle {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: clamp(17px, 1.7vw, 22px);
+  line-height: 1.1;
   margin-bottom: 16px;
-}
-.bouw-list { list-style: none; padding: 0; margin: 0; }
-.bouw-list li {
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255,255,255,.14);
-  font-size: 12.5px;
-  line-height: 1.4;
-  color: rgba(239,231,214,.82);
-}
-.bouw-list li strong {
-  display: block;
-  font-family: var(--serif-heavy);
-  font-size: 13px;
-  color: var(--cream);
-  margin-bottom: 3px;
   letter-spacing: -.005em;
 }
-.bouw-list li:last-child { border-bottom: none; }
+.bouw-card ul {
+  list-style: none;
+  padding: 0;
+}
+.bouw-card li {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 12.5px;
+  line-height: 1.4;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(247,239,220,.1);
+  color: rgba(247,239,220,.82);
+}
+.bouw-card li:last-child { border-bottom: none; }
 
 /* =================================================================
-   08 — INTERNATIONALE REFERENTIES
+   09 — INTERNATIONALE REFERENTIES (grote foto's + hover info)
    ================================================================= */
-.refs {
+.refs-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 36px 40px;
+  gap: 18px;
 }
-.ref {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 20px;
-  border-top: 1.5px solid var(--ink);
-  padding-top: 18px;
+.ref-card {
+  position: relative;
+  overflow: hidden;
+  background: var(--ink);
+  aspect-ratio: 16 / 11;
+  cursor: pointer;
 }
-.ref .ref-photo { height: 120px; }
-.ref .ref-text { display: flex; flex-direction: column; }
+.ref-card img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  transition: transform 1s cubic-bezier(.2,.6,.2,1), filter .4s ease;
+}
+.ref-card .ref-fallback {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--orange-dark) 0%, var(--orange) 100%);
+  font-family: var(--mono); font-weight: 800;
+  font-size: clamp(28px, 3vw, 56px);
+  color: var(--bg);
+  letter-spacing: -.02em;
+}
+.ref-card.tone-teal .ref-fallback {
+  background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 100%);
+}
+.ref-meta {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 22px 26px 20px;
+  color: #fff;
+  background: linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,.6) 40%, transparent);
+  transition: padding-bottom .4s ease;
+}
 .ref-place {
-  font-family: var(--serif-display);
-  font-size: clamp(20px, 1.9vw, 28px);
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: clamp(22px, 2.2vw, 34px);
   line-height: 1;
   margin-bottom: 4px;
+  letter-spacing: -.01em;
 }
 .ref-loc {
-  font-size: 11px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--mute);
+  font-family: var(--mono);
   font-weight: 600;
-  margin-bottom: 12px;
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  opacity: .8;
 }
-.ref-essence {
-  font-style: italic;
-  font-size: 13px;
-  color: var(--ink-soft);
-  margin-bottom: 10px;
-  line-height: 1.45;
+.ref-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(220,74,46,.94) 0%, rgba(220,74,46,.94) 100%);
+  color: #fff;
+  padding: 28px 26px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity .35s ease;
 }
-.ref-lesson {
-  font-size: 12px;
-  color: var(--ink);
-  line-height: 1.45;
-  border-left: 2px solid var(--orange);
-  padding-left: 12px;
-  margin-top: auto;
-}
-.ref-lesson::before {
-  content: "WAT WE ERVAN LEREN";
-  display: block;
-  font-size: 9.5px;
-  letter-spacing: .18em;
+.ref-card:hover .ref-overlay { opacity: 1; }
+.ref-card:hover img { transform: scale(1.06); }
+.ref-overlay .ov-tag {
+  font-family: var(--mono);
   font-weight: 700;
-  color: var(--orange);
-  margin-bottom: 4px;
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  opacity: .8;
+}
+.ref-overlay .ov-place {
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: clamp(22px, 2.2vw, 32px);
+  line-height: 1;
+  letter-spacing: -.01em;
+  margin-bottom: 8px;
+}
+.ref-overlay .ov-essence {
+  font-family: var(--sans);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.45;
+  margin-bottom: 14px;
+  max-width: 44ch;
+}
+.ref-overlay .ov-lesson {
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 13.5px;
+  line-height: 1.45;
+  max-width: 44ch;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,.4);
+}
+.ref-overlay .ov-lesson::before {
+  content: "Wat we ervan leren";
+  display: block;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  opacity: .85;
 }
 
 /* =================================================================
-   09 — 30/60/90
+   10 — 30/60/90  (groter, brutaler)
    ================================================================= */
-.plan {
+.plan-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 0;
-  border-top: 2px solid var(--cream);
+  border-top: 2px solid var(--bg);
 }
 .plan-col {
-  padding: 28px 24px 28px 0;
-  border-right: 1px solid rgba(255,255,255,.18);
+  padding: 32px 28px 24px 0;
+  border-right: 1px solid rgba(247,239,220,.22);
 }
-.plan-col:last-child { border-right: none; }
-.plan-col:not(:first-child) { padding-left: 24px; }
+.plan-col:last-child  { border-right: none; }
+.plan-col:not(:first-child) { padding-left: 28px; }
 .plan-phase {
-  font-family: var(--serif-display);
-  font-size: clamp(44px, 5.5vw, 84px);
-  line-height: .85;
-  color: var(--teal);
+  font-family: var(--mono);
+  font-weight: 900;
+  font-size: clamp(110px, 14vw, 220px);    /* enorm */
+  line-height: .82;
+  letter-spacing: -.04em;
+  color: var(--bg);
   margin-bottom: 4px;
 }
 .plan-when {
-  font-size: 10.5px;
-  letter-spacing: .15em;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .18em;
   text-transform: uppercase;
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: var(--cream-soft);
+  margin-bottom: 16px;
+  color: var(--bg);
+  opacity: .8;
 }
 .plan-title {
-  font-family: var(--serif-display);
-  font-size: clamp(18px, 1.8vw, 26px);
-  line-height: 1.05;
-  margin-bottom: 20px;
-  color: var(--cream);
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: clamp(22px, 2.4vw, 36px);
+  line-height: 1;
+  margin-bottom: 22px;
+  letter-spacing: -.01em;
+  color: var(--bg);
 }
-.plan-list { list-style: none; padding: 0; margin: 0; }
+.plan-list { list-style: none; padding: 0; }
 .plan-list li {
-  font-size: 13.5px;
-  color: var(--cream-soft);
-  line-height: 1.45;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255,255,255,.15);
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(247,239,220,.22);
   position: relative;
-  padding-left: 16px;
+  padding-left: 20px;
+  color: rgba(247,239,220,.92);
 }
 .plan-list li:before {
   content: "—";
-  position: absolute;
-  left: 0;
-  color: var(--teal);
+  position: absolute; left: 0;
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--bg);
 }
 .plan-list li:last-child { border-bottom: none; }
 
 /* =================================================================
-   10 — SLOT
+   11 — SLOT
    ================================================================= */
-.slot {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: left;
+.scene.slot {
   background: var(--teal);
-  color: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .slot-quote {
-  font-family: var(--serif-display);
-  font-size: clamp(36px, 5vw, 88px);
-  line-height: 1;
-  letter-spacing: -.01em;
-  max-width: 22ch;
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: clamp(40px, 6vw, 100px);
+  line-height: 1.02;
+  letter-spacing: -.02em;
+  max-width: 24ch;
   margin: 0 auto;
+  text-align: left;
+  color: var(--bg);
 }
-.slot-quote .open,
-.slot-quote .close {
-  color: var(--orange);
-  font-style: normal;
-}
-.slot-meta {
-  margin-top: clamp(40px, 5vw, 80px);
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  border-top: 1px solid rgba(255,255,255,.3);
-  padding-top: 22px;
-  font-size: 11.5px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  font-weight: 600;
-}
-.slot-meta .contact-name { font-family: var(--serif-display); font-size: clamp(18px, 1.7vw, 26px); letter-spacing: 0; text-transform: none; font-weight: normal; }
-.slot-meta .contact-detail { opacity: .85; }
+.slot-quote .punc { color: var(--orange); font-style: normal; }
 
 /* =================================================================
    NAVIGATIE
@@ -782,26 +1024,24 @@ svg.chart { display: block; width: 100%; height: auto; }
   mix-blend-mode: difference;
 }
 .nav-dots button {
-  width: 9px;
-  height: 9px;
+  width: 9px; height: 9px;
   border-radius: 50%;
   border: 1px solid rgba(255,255,255,.75);
   background: transparent;
-  padding: 0;
-  cursor: pointer;
+  padding: 0; cursor: pointer;
   transition: background .2s, transform .2s;
 }
-.nav-dots button:hover { transform: scale(1.4); }
+.nav-dots button:hover  { transform: scale(1.4); }
 .nav-dots button.active { background: rgba(255,255,255,.95); transform: scale(1.3); }
 
 .kbd-hint {
   position: fixed;
-  bottom: 18px;
-  left: var(--gutter);
-  font-size: 10.5px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
+  bottom: 18px; left: var(--gutter);
+  font-family: var(--mono);
   font-weight: 600;
+  font-size: 10.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
   color: rgba(0,0,0,.55);
   mix-blend-mode: difference;
   z-index: 50;
@@ -810,10 +1050,10 @@ svg.chart { display: block; width: 100%; height: auto; }
   display: inline-block;
   padding: 2px 5px;
   border: 1px solid currentColor;
-  border-radius: 2px;
   margin: 0 2px;
-  font-family: var(--sans);
-  font-size: 9.5px;
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 10px;
 }
 
 /* =================================================================
@@ -822,36 +1062,40 @@ svg.chart { display: block; width: 100%; height: auto; }
 .reveal {
   opacity: 0;
   transform: translateY(16px);
-  transition: opacity .65s cubic-bezier(.2,.6,.2,1), transform .65s cubic-bezier(.2,.6,.2,1);
+  transition: opacity .7s cubic-bezier(.2,.6,.2,1), transform .7s cubic-bezier(.2,.6,.2,1);
   transition-delay: calc(var(--i, 0) * 55ms);
 }
 .reveal.in-view { opacity: 1; transform: translateY(0); }
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
-  .scroll-hint .arrow { animation: none; }
 }
 
 /* =================================================================
    RESPONSIVE
    ================================================================= */
-@media (max-width: 1024px) {
+@media (max-width: 1100px) {
+  .map-layout { grid-template-columns: 1fr; height: auto; }
+  .map-host   { min-height: 500px; }
+  .map-aside  { border-left: none; border-top: 2px solid var(--ink); }
   .pitch-grid, .chart-wrap { grid-template-columns: 1fr; }
-  .tables-wrap { grid-template-columns: 1fr; }
-  .competitor-photos { grid-template-columns: 1fr 1fr; grid-template-rows: 160px 160px 160px; }
-  .competitor-photos .ph-1 { grid-column: 1 / 3; grid-row: 1 / 2; }
-  .competitor-photos .ph-2 { grid-column: 1 / 2; grid-row: 2 / 3; }
-  .competitor-photos .ph-3 { grid-column: 2 / 3; grid-row: 2 / 3; }
-  .competitor-photos .ph-4 { grid-column: 1 / 2; grid-row: 3 / 4; }
-  .competitor-photos .ph-5 { grid-column: 2 / 3; grid-row: 3 / 4; }
-  .competitor-photos .ph-6 { display: none; }
-  .field-top   { grid-template-columns: 1fr; }
-  .field-cols  { grid-template-columns: 1fr; gap: 32px; }
-  .bouw-grid   { grid-template-columns: 1fr 1fr; }
-  .refs, .plan { grid-template-columns: 1fr; }
-  .scenarios   { grid-template-columns: 1.4fr 1fr 1fr 1fr; font-size: 12px; }
-  .cover       { grid-template-columns: 1fr; }
-  .cover-meta-topr, .cover-meta-botr { text-align: left; }
-  .nav-dots    { display: none; }
+  .photo-grid {
+    grid-template-columns: repeat(6, 1fr);
+    grid-auto-rows: clamp(180px, 28vw, 280px);
+  }
+  .photo-grid .pg-1 { grid-column: 1 / span 6; grid-row: 1; }
+  .photo-grid .pg-2 { grid-column: 1 / span 6; grid-row: 2; }
+  .photo-grid .pg-3 { grid-column: 1 / span 3; grid-row: 3; }
+  .photo-grid .pg-4 { grid-column: 4 / span 3; grid-row: 3; }
+  .photo-grid .pg-5 { grid-column: 1 / span 3; grid-row: 4; }
+  .photo-grid .pg-6 { grid-column: 4 / span 3; grid-row: 4; }
+  .field-top    { grid-template-columns: 1fr; }
+  .field-cols   { grid-template-columns: 1fr; gap: 32px; }
+  .bouw-grid    { grid-template-columns: 1fr 1fr; }
+  .refs-grid    { grid-template-columns: 1fr; }
+  .plan-grid    { grid-template-columns: 1fr; }
+  .plan-col     { border-right: none; border-bottom: 1px solid rgba(247,239,220,.22); padding-bottom: 28px; }
+  .scenarios    { grid-template-columns: 1.4fr 1fr 1fr 1fr; font-size: 12px; }
+  .nav-dots     { display: none; }
 }
 @media (max-width: 640px) {
   .bouw-grid { grid-template-columns: 1fr; }
@@ -861,112 +1105,95 @@ svg.chart { display: block; width: 100%; height: auto; }
    PRINT
    ================================================================= */
 @media print {
-  :root { --gutter: 28px; }
+  :root { --gutter: 24px; }
   html, body { background: #fff; color: #000; }
   .nav-dots, .kbd-hint { display: none; }
   section.scene {
     min-height: auto;
     page-break-after: always;
-    break-after: page;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .scene.orange, .scene.teal, .scene.ink, .cover, .slot { color: #fff; }
   .reveal { opacity: 1 !important; transform: none !important; }
-  .scroll-hint, .arrow { display: none; }
+  /* leaflet zoom controls verbergen bij print */
+  .leaflet-control-zoom { display: none; }
+  .map-layout { height: auto; grid-template-columns: 1fr; }
+  .map-host { min-height: 480px; }
 }
 </style>
 </head>
 <body>
 
 <!-- =================================================================
-     NAVIGATIE
+     NAV
      ================================================================= -->
 <nav class="nav-dots" aria-label="Sectie-navigatie">
   <button data-go="1"  aria-label="1 — Cover"></button>
   <button data-go="2"  aria-label="2 — Concept"></button>
-  <button data-go="3"  aria-label="3 — Concurrentie"></button>
-  <button data-go="4"  aria-label="4 — Inzichten"></button>
-  <button data-go="5"  aria-label="5 — Cijfers"></button>
-  <button data-go="6"  aria-label="6 — Projectie"></button>
-  <button data-go="7"  aria-label="7 — Bouwstenen"></button>
-  <button data-go="8"  aria-label="8 — Referenties"></button>
-  <button data-go="9"  aria-label="9 — 30/60/90"></button>
-  <button data-go="10" aria-label="10 — Slot"></button>
+  <button data-go="3"  aria-label="3 — Het veld"></button>
+  <button data-go="4"  aria-label="4 — Beelden"></button>
+  <button data-go="5"  aria-label="5 — Inzichten"></button>
+  <button data-go="6"  aria-label="6 — Cijfers"></button>
+  <button data-go="7"  aria-label="7 — Projectie"></button>
+  <button data-go="8"  aria-label="8 — Bouwstenen"></button>
+  <button data-go="9"  aria-label="9 — Referenties"></button>
+  <button data-go="10" aria-label="10 — 30/60/90"></button>
+  <button data-go="11" aria-label="11 — Slot"></button>
 </nav>
 
 <div class="kbd-hint">
-  <kbd>↑</kbd><kbd>↓</kbd> sectie · <kbd>1</kbd>–<kbd>9</kbd>·<kbd>0</kbd> direct
+  <kbd>←</kbd><kbd>→</kbd>·<kbd>↑</kbd><kbd>↓</kbd> sectie · <kbd>1</kbd>–<kbd>9</kbd>·<kbd>0</kbd>·<kbd>End</kbd>
 </div>
 
 <!-- =================================================================
      01 — COVER
      ================================================================= -->
 <section class="scene cover" id="sec-1" data-num="1">
-  <div class="cover-meta-top reveal" style="--i:0">
-    <div class="tiny">Concept-voorstel · Amsterdam</div>
-  </div>
-  <div class="cover-meta-topr reveal" style="--i:1">
-    <div class="tiny" data-cfg="datestr"></div>
-  </div>
-
-  <div class="cover-center reveal" style="--i:2">
-    <h1>Side<span class="b-flip">B</span></h1>
-    <p class="tagline">Voor mensen die muziek serieus nemen<br/>maar zichzelf niet.</p>
-  </div>
-
-  <div class="cover-meta-bot reveal" style="--i:3">
-    <div class="tiny">Sollicitatie bedrijfsleider</div>
-    <div class="tiny" style="opacity:.75;margin-top:6px" data-cfg="brandName"></div>
-  </div>
-  <div class="cover-meta-botr reveal" style="--i:4">
-    <span class="scroll-hint">Doorlopen <span class="arrow">↓</span></span>
+  <div class="stage">
+    <h1 class="reveal" style="--i:0">Side<span class="b-out">B</span></h1>
+    <p class="tagline reveal" style="--i:1">Voor mensen die muziek serieus nemen<br/>maar zichzelf niet.</p>
   </div>
 </section>
 
 <!-- =================================================================
      02 — CONCEPT
      ================================================================= -->
-<section class="scene cream" id="sec-2" data-num="2">
+<section class="scene bg" id="sec-2" data-num="2">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
-      <div class="sec-num">02</div>
-      <div style="flex:1">
-        <div class="sec-kicker">Het concept</div>
-        <h2 class="sec-title">Listening bar met<br/>pooltafels.</h2>
+      <div class="num">02</div>
+      <div class="title-wrap">
+        <div class="kicker">Het concept</div>
+        <h2>Listening bar<br/>met pooltafels.</h2>
       </div>
     </header>
 
     <div class="pitch-grid">
       <div class="pitch-text reveal" style="--i:1">
-        <span class="lead-emph">Side B is een pool-café en listening bar in één.</span>
-        Hoogwaardige hifi en een aantal tafels in één ruimte. Doelgroep:
-        <strong>25–40 jaar</strong>, een casual sociaal publiek dat
-        muziek serieus neemt maar zichzelf niet.
-        <span class="pitch-foot">Initiatief van de eigenaren van Sisi's, Lokaal Lokaal, The Other Side en Borodin. In Amsterdam zien we deze combinatie nergens — of dat een gat is of een reden, hoort bij wat we samen uit te vinden hebben.</span>
+        <span class="lead">Een pool-café en listening bar in één.</span>
+        Hoogwaardige hifi en een aantal tafels in dezelfde ruimte.
+        Doelgroep: <strong>25–40 jaar</strong>, een casual sociaal publiek
+        dat muziek serieus neemt maar zichzelf niet. In Amsterdam zien
+        we deze combinatie nergens — of dat een gat is of een reden,
+        hoort bij wat samen uit te vinden valt.
       </div>
 
       <div class="pillars">
         <div class="pillar reveal" style="--i:2">
-          <div class="pillar-num">01</div>
-          <div class="pillar-title">Pool als sociaal spel</div>
-          <div class="pillar-sub">— niet als sport</div>
+          <div class="pnum">01</div>
+          <div class="ptitle">Pool als sociaal spel</div>
+          <div class="psub">— niet als sport</div>
         </div>
         <div class="pillar reveal" style="--i:3">
-          <div class="pillar-num">02</div>
-          <div class="pillar-title">Muziek als ritueel</div>
-          <div class="pillar-sub">— niet als achtergrond</div>
+          <div class="pnum">02</div>
+          <div class="ptitle">Muziek als ritueel</div>
+          <div class="psub">— niet als achtergrond</div>
         </div>
-        <!-- Derde pijler — bewust open gehouden. Vul in als je hem hebt.
-             Mogelijke richtingen vanuit het concept:
-               · "Curatie als signatuur — niet als hindernis"
-               · "Plek als ritueel — niet als bestemming"
-               · "Casual als kompas — niet als compromis"
-        -->
+        <!-- Derde pijler — bewust open. Vul in als je hem hebt. -->
         <div class="pillar empty reveal" style="--i:4">
-          <div class="pillar-num">03</div>
-          <div class="pillar-title">[ derde pijler ]</div>
-          <div class="pillar-sub">— nog in te vullen</div>
+          <div class="pnum">03</div>
+          <div class="ptitle">[ derde pijler ]</div>
+          <div class="psub">— nog in te vullen</div>
         </div>
       </div>
     </div>
@@ -974,108 +1201,116 @@ svg.chart { display: block; width: 100%; height: auto; }
 </section>
 
 <!-- =================================================================
-     03 — CONCURRENTIELANDSCHAP
+     03 — KAART (Leaflet)
      ================================================================= -->
-<section class="scene cream-alt" id="sec-3" data-num="3">
-  <div class="inner">
-    <header class="sec-head reveal" style="--i:0">
-      <div class="sec-num">03</div>
-      <div style="flex:1">
-        <div class="sec-kicker">Het veld</div>
-        <h2 class="sec-title">Veertien zaken,<br/>geen combinatie.</h2>
-      </div>
-    </header>
+<section class="scene map-scene" id="sec-3" data-num="3">
+  <div class="map-layout">
 
-    <p class="insight-line reveal" style="--i:1">
-      In Amsterdam: <em>10 pool-bars</em> en <em>4 listening bars</em>.
-      <br/>De combinatie staat open.
-    </p>
-
-    <div class="tables-wrap">
-      <div class="reveal" style="--i:2">
-        <div class="tbl-label">Pool-bars · directe overlap</div>
-        <table class="editorial">
-          <thead><tr><th>Naam</th><th>Positionering</th><th>Sterk</th><th>Zwak</th></tr></thead>
-          <tbody id="tbl-pool"></tbody>
-        </table>
-        <p class="mute" style="margin-top:12px;font-size:11.5px;text-transform:none;letter-spacing:0">Plus 4 secundaire zaken (Final Touch, Cafe the Palace, Billiards Hermes, Pool Center Noord).</p>
-      </div>
-
-      <div class="reveal" style="--i:3">
-        <div class="tbl-label">Listening bars · referentie-segment</div>
-        <table class="editorial">
-          <thead><tr><th>Naam</th><th>Positionering</th><th>Sterk</th><th>Zwak</th></tr></thead>
-          <tbody id="tbl-listen"></tbody>
-        </table>
-        <p class="mute" style="margin-top:12px;font-size:11.5px;text-transform:none;letter-spacing:0">Doka geeft 3.6★ — klachten gaan over deurbeleid, niet over het concept.</p>
-      </div>
+    <div class="map-host">
+      <div id="map"></div>
     </div>
 
-    <!-- 6 venue-foto's: Doka, CUE, Murmur, Loop 51, Plan B, Mokum -->
-    <div class="competitor-photos reveal" style="--i:4">
-      <div class="photo ph-1" data-img="doka"></div>
-      <div class="photo ph-2" data-img="cue"></div>
-      <div class="photo ph-3" data-img="murmur"></div>
-      <div class="photo ph-4" data-img="loop51"></div>
-      <div class="photo ph-5" data-img="planb"></div>
-      <div class="photo ph-6" data-img="mokum"></div>
-    </div>
+    <aside class="map-aside">
+      <div class="head-num">03</div>
+      <div class="head-kicker">Concurrentielandschap · Amsterdam</div>
+      <h2>Het Amsterdamse <em>veld.</em></h2>
+      <p class="lead">
+        Elf <strong class="pool">pool-bars</strong> en vier <strong class="listen">listening bars</strong> op de kaart,
+        geclusterd rond centrum en grachtengordel. Ratings via Google Maps,
+        peildatum mei 2026.
+      </p>
+
+      <div class="legend-col pool">
+        <h3 class="col-h"><span class="swatch pool"></span>Pool-bars</h3>
+        <div id="legend-pool"></div>
+      </div>
+
+      <div class="legend-col listen">
+        <h3 class="col-h"><span class="swatch listen"></span>Listening bars</h3>
+        <div id="legend-listen"></div>
+      </div>
+
+      <p class="map-foot">Kaartdata via OpenStreetMap, tile-style CARTO Voyager. Klik op een marker voor segment en rating.</p>
+    </aside>
+
   </div>
 </section>
 
 <!-- =================================================================
-     04 — INZICHTEN UIT HET VELD  (NEW)
+     04 — CONCURRENTEN FOTO'S
      ================================================================= -->
 <section class="scene ink" id="sec-4" data-num="4">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
-      <div class="sec-num">04</div>
-      <div style="flex:1">
-        <div class="sec-kicker">Inzichten uit reviews</div>
-        <h2 class="sec-title">Wat het veld<br/>vertelt.</h2>
+      <div class="num">04</div>
+      <div class="title-wrap">
+        <div class="kicker">In beeld</div>
+        <h2>Hoe het er bij<br/>de buren uitziet.</h2>
+      </div>
+    </header>
+
+    <div class="photo-grid reveal" style="--i:1">
+      <div class="photo pg-1" data-img="doka"></div>
+      <div class="photo pg-2" data-img="cue"></div>
+      <div class="photo pg-3" data-img="murmur"></div>
+      <div class="photo pg-4" data-img="loop51"></div>
+      <div class="photo pg-5" data-img="planb"></div>
+      <div class="photo pg-6" data-img="mokum"></div>
+    </div>
+  </div>
+</section>
+
+<!-- =================================================================
+     05 — INZICHTEN
+     ================================================================= -->
+<section class="scene orange" id="sec-5" data-num="5">
+  <div class="inner">
+    <header class="sec-head reveal" style="--i:0">
+      <div class="num">05</div>
+      <div class="title-wrap">
+        <div class="kicker">Inzichten uit reviews</div>
+        <h2>Wat het<br/>veld vertelt.</h2>
       </div>
     </header>
 
     <div class="field-top">
       <article class="field-obs reveal" style="--i:1">
-        <div class="field-num">01</div>
-        <div class="field-head">Volwassen markt,<br/>niet verzadigd.</div>
-        <p>Geen enkele zaak onder 4,3★. Slechte poolbars blijven niet open. Het is een markt waar publiek weet wat het wil.</p>
+        <div class="fnum">01</div>
+        <div class="fhead">Volwassen markt,<br/>niet verzadigd.</div>
+        <p>Geen zaak onder 4,3★. Slechte poolbars blijven niet open — publiek weet wat het wil.</p>
       </article>
 
       <article class="field-obs reveal" style="--i:2">
-        <div class="field-num">02</div>
-        <div class="field-head">The Pool Bar<br/>als anker.</div>
-        <p>1.700 reviews tegen 850 voor de nummer twee. Dat is meer "place to be" dan buurtzaak — een onevenredig aandeel van de aandacht.</p>
+        <div class="fnum">02</div>
+        <div class="fhead">The Pool Bar<br/>als anker.</div>
+        <p>1.700 reviews tegen 850 voor nummer twee. Meer "place to be" dan buurtzaak.</p>
       </article>
 
       <article class="field-obs reveal" style="--i:3">
-        <div class="field-num">03</div>
-        <div class="field-head">Mokum als<br/>recente speler.</div>
-        <p>4,9★ met 88 reviews betekent recent geopend, directe tractie. Eigenaars zijn ex-EU kampioenen — een duidelijke USP via expertise.</p>
+        <div class="fnum">03</div>
+        <div class="fhead">Mokum als<br/>nieuwe speler.</div>
+        <p>4,9★ met 88 reviews. Recent geopend, directe tractie — ex-EU kampioenen als USP.</p>
       </article>
     </div>
 
     <div class="field-cols">
       <div class="field-col praise reveal" style="--i:4">
-        <h3 class="field-col-head">Wat reviews prijzen</h3>
+        <h3>Wat reviews prijzen</h3>
         <ul class="field-list">
-          <li><strong>Sfeer en muziek</strong>"Great music," "amazing vibe." Vrijwel elke positieve review noemt het. Bij De Keu is het ankerpunt, bij The Pool Bar nadrukkelijk genoemd. Zelden expliciet als programmering gebouwd.</li>
-          <li><strong>Tafelkwaliteit</strong>Poolbar De Gracht (recent opnieuw bekleed), Plan B ("top notch tables"), Final Touch ("regulation size"). Slechte tafels = slechte reviews, ongeacht de rest.</li>
-          <li><strong>Persoonlijk personeel</strong>Reviews noemen mensen bij naam: "Paco was absolutely fantastic", "Rikki and Hans". Persoonlijke service is in dit segment onderscheidend.</li>
-          <li><strong>Combinatie van games</strong>Pool naast darts, shuffleboard, board games. Gasten zien het als plus, niet als afgeleid.</li>
-          <li><strong>Pricing transparency</strong>Plan B's €18,50/uur is bekend, mensen accepteren het bij kwaliteit. Onduidelijke prijzen geven irritatie.</li>
+          <li><strong>Sfeer en muziek</strong>"Great music", "amazing vibe" — vrijwel elke positieve review. Zelden expliciet gebouwd als programmering.</li>
+          <li><strong>Tafelkwaliteit</strong>Plan B: "top notch tables." De Gracht: recent opnieuw bekleed. Hygiënefactor.</li>
+          <li><strong>Persoonlijk personeel</strong>Reviews noemen mensen bij naam: "Paco was absolutely fantastic." Differentiërend.</li>
+          <li><strong>Pricing transparency</strong>Plan B's €18,50/uur is bekend, geaccepteerd bij kwaliteit. Onduidelijke prijzen geven irritatie.</li>
         </ul>
       </div>
 
       <div class="field-col crit reveal" style="--i:5">
-        <h3 class="field-col-head">Wat reviews bekritiseren</h3>
+        <h3>Wat reviews bekritiseren</h3>
         <ul class="field-list">
-          <li><strong>Wachtrijen in het weekend</strong>De #1 klacht bij populaire zaken. "Plan to be there at least an hour earlier" (The Pool Bar). "Don't bother turning up without booking" (Plan B).</li>
-          <li><strong>Reserveringen die niet werken</strong>Plan B: "I tried to book one day prior and got DENIED." Checkpoint Charlie: bevestigde reservering voor 17 personen afgezegd. Eén precedent zet de zaak op TripAdvisor.</li>
-          <li><strong>Versleten tafels</strong>De Keu krijgt expliciet "tables are clearly overused and need to be refurbished." Onderhoud is een hygiënefactor.</li>
-          <li><strong>Personeel-incidenten</strong>Vooral bij grote groepen of conflicten over rekeningen. Eén manager-fout = jarenlange schade.</li>
-          <li><strong>Onduidelijkheid over capaciteit</strong>Wel of niet reserveren? Hoe lang wachten? Tafel beschikbaar? Onzekerheid is een grotere ergernis dan wachten zelf.</li>
+          <li><strong>Wachtrijen in het weekend</strong>De #1 klacht. "Plan to be there an hour earlier." "Don't bother without booking."</li>
+          <li><strong>Reserveringen die falen</strong>Plan B: "I tried to book a day prior and got DENIED." Eén precedent = jarenlange TripAdvisor-schade.</li>
+          <li><strong>Versleten tafels</strong>De Keu: "tables are clearly overused and need to be refurbished." Onderhoud is hygiëne.</li>
+          <li><strong>Onduidelijkheid over capaciteit</strong>Wel of niet reserveren, hoe lang wachten — onzekerheid is een grotere ergernis dan wachten.</li>
         </ul>
       </div>
     </div>
@@ -1083,36 +1318,32 @@ svg.chart { display: block; width: 100%; height: auto; }
 </section>
 
 <!-- =================================================================
-     05 — FINANCIËLE SCENARIOS
+     06 — CIJFERS
      ================================================================= -->
-<section class="scene orange" id="sec-5" data-num="5">
+<section class="scene teal" id="sec-6" data-num="6">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
-      <div class="sec-num">05</div>
-      <div style="flex:1">
-        <div class="sec-kicker">Drie scenarios</div>
-        <h2 class="sec-title">Drie maten<br/>om in te denken.</h2>
+      <div class="num">06</div>
+      <div class="title-wrap">
+        <div class="kicker">Drie scenarios</div>
+        <h2>Drie maten<br/>om in te denken.</h2>
       </div>
     </header>
 
     <div class="scenarios reveal" style="--i:1" id="scenarios"></div>
-
-    <p class="scen-foot reveal" style="--i:2">
-      Drie scenario's, geen aanbeveling. <em>Welke past, hangt af van locatie, vergunningen en wat de eigenaren willen bouwen.</em>
-    </p>
   </div>
 </section>
 
 <!-- =================================================================
-     06 — 5-JAAR PROJECTIE
+     07 — PROJECTIE
      ================================================================= -->
-<section class="scene cream" id="sec-6" data-num="6">
+<section class="scene bg" id="sec-7" data-num="7">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
-      <div class="sec-num">06</div>
-      <div style="flex:1">
-        <div class="sec-kicker">Vijf jaar in beeld</div>
-        <h2 class="sec-title">Opstart, opbouw,<br/>afbouw.</h2>
+      <div class="num">07</div>
+      <div class="title-wrap">
+        <div class="kicker">Vijf jaar in beeld</div>
+        <h2>Opstart, opbouw,<br/>afbouw.</h2>
       </div>
     </header>
 
@@ -1122,23 +1353,21 @@ svg.chart { display: block; width: 100%; height: auto; }
     </div>
 
     <p class="chart-foot reveal" style="--i:3">
-      De curve is een aanname op basis van vergelijkbare horeca-cases:
-      opbouw in jaar 1, plateau jaar 3–4, geleidelijke afbouw. Werkelijkheid
-      hangt af van seizoen, programmering en marketing — geen voorspelling, een raamwerk.
+      Aannames: opbouw jaar 1, plateau jaar 3–4, geleidelijke afbouw. Werkelijkheid hangt af van seizoen, programmering en marketing. Geen voorspelling — een raamwerk.
     </p>
   </div>
 </section>
 
 <!-- =================================================================
-     07 — BOUWSTENEN
+     08 — BOUWSTENEN (cards)
      ================================================================= -->
-<section class="scene teal" id="sec-7" data-num="7">
+<section class="scene ink" id="sec-8" data-num="8">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
-      <div class="sec-num">07</div>
-      <div style="flex:1">
-        <div class="sec-kicker">Open lijst van opties</div>
-        <h2 class="sec-title">Bouwstenen<br/>om uit te kiezen.</h2>
+      <div class="num">08</div>
+      <div class="title-wrap">
+        <div class="kicker">Open lijst van opties</div>
+        <h2>Bouwstenen<br/>om uit te kiezen.</h2>
       </div>
     </header>
 
@@ -1149,80 +1378,74 @@ svg.chart { display: block; width: 100%; height: auto; }
     <div class="bouw-grid">
 
       <article class="bouw-card reveal" style="--i:2">
-        <div class="cat-num">A</div>
-        <h3 class="cat-title">Pool als sociaal spel</h3>
-        <ul class="bouw-list">
-          <li><strong>Killer Pool</strong>Eliminatiespel voor 3–12 spelers tegelijk. Lage drempel.</li>
-          <li><strong>Cutthroat</strong>3-spelers variant, korter dan 8-ball, meer interactie.</li>
-          <li><strong>Album Side Game</strong>Wint je terwijl een plaat-kant draait? Bij stilte: gelijk.</li>
-          <li><strong>Pool 101</strong>Gratis instap-les op zondagmiddag. Drempel voor nieuwe gasten weg.</li>
-          <li><strong>"Find the King"</strong>Eén tafel altijd vrij beschikbaar buiten piekuren.</li>
-          <li><strong>Hot Seat</strong>Winnaar blijft, verliezer achteraan. Natuurlijke roulatie.</li>
+        <div class="cnum">A</div>
+        <h3 class="ctitle">Pool als sociaal spel</h3>
+        <ul>
+          <li>Killer Pool — eliminatie, 3–12 spelers</li>
+          <li>Cutthroat — 3-spelers, korter dan 8-ball</li>
+          <li>Album Side Game — speel terwijl een plaat-kant draait</li>
+          <li>Pool 101 — gratis instap-les zondagmiddag</li>
+          <li>"Find the King" — één tafel altijd vrij</li>
         </ul>
       </article>
 
       <article class="bouw-card reveal" style="--i:3">
-        <div class="cat-num">B</div>
-        <h3 class="cat-title">Weekprogrammering</h3>
-        <ul class="bouw-list">
-          <li><strong>Maandag — Quiet Monday</strong>Ambient, vroeg open. Voor freelancers.</li>
-          <li><strong>Dinsdag — Selector Series</strong>Gast-selectors, rotatie per kwartaal.</li>
-          <li><strong>Woensdag — Album Night</strong>Eén klassieker, begin tot eind.</li>
-          <li><strong>Donderdag — Lokaal &amp; Vers</strong>Amsterdamse producers en labels.</li>
-          <li><strong>Vrijdag — B-Side Fridays</strong>Deep cuts en B-kanten.</li>
-          <li><strong>Zondag — Sunday Spinning</strong>Vinyl-brunch met natural wine.</li>
+        <div class="cnum">B</div>
+        <h3 class="ctitle">Weekprogrammering</h3>
+        <ul>
+          <li>Maandag — Quiet Monday, ambient + freelancers</li>
+          <li>Dinsdag — Selector Series, rotatie per kwartaal</li>
+          <li>Woensdag — Album Night, begin tot eind</li>
+          <li>Vrijdag — B-Side Fridays, deep cuts</li>
+          <li>Zondag — Sunday Spinning, vinyl-brunch</li>
         </ul>
       </article>
 
       <article class="bouw-card reveal" style="--i:4">
-        <div class="cat-num">C</div>
-        <h3 class="cat-title">Aesthetiek &amp; materiaal</h3>
-        <ul class="bouw-list">
-          <li><strong>Vintage Brunswick-tafels</strong>Verhaal te vertellen, houden waarde.</li>
-          <li><strong>Vilt-kleur</strong>Niet groen — diep rood of zwart als signatuur.</li>
-          <li><strong>Industriële hanglampen</strong>Boven elke tafel een eigen "eiland" van licht.</li>
-          <li><strong>Messing krijthouders</strong>€15/stuk, groot verschil in detail.</li>
-          <li><strong>Cue-rack als muurinstallatie</strong>Visueel anker, niet plastic standaard.</li>
-          <li><strong>Houten scoring-borden</strong>Analoog, past bij de rest.</li>
+        <div class="cnum">C</div>
+        <h3 class="ctitle">Aesthetiek &amp; materiaal</h3>
+        <ul>
+          <li>Vintage Brunswick-tafels — verhaal, waarde</li>
+          <li>Vilt-kleur — niet groen, diep rood of zwart</li>
+          <li>Industriële hanglampen boven elke tafel</li>
+          <li>Messing krijthouders aan tafel-rand</li>
+          <li>Cue-rack als muurinstallatie</li>
         </ul>
       </article>
 
       <article class="bouw-card reveal" style="--i:5">
-        <div class="cat-num">D</div>
-        <h3 class="cat-title">Bar &amp; food (geen kok)</h3>
-        <ul class="bouw-list">
-          <li><strong>Japanese highball</strong>Kissa-klassieker. Hoge marge, lage complexiteit.</li>
-          <li><strong>Natural wine op tap</strong>Lagere prijs, hogere marge.</li>
-          <li><strong>Lower-ABV menu</strong>Vermouth, spritzes, alcoholvrije cocktails.</li>
-          <li><strong>Katsu sandwich (€11)</strong>Vooraf gepaneerd, 3 min airfryer.</li>
-          <li><strong>Hot dogs uit airfryer</strong>Premium worst op brioche.</li>
-          <li><strong>Late night ramen (vr/za na 23u)</strong>Eén item, 8 min, €14.</li>
+        <div class="cnum">D</div>
+        <h3 class="ctitle">Bar &amp; food (geen kok)</h3>
+        <ul>
+          <li>Japanese highball als signature</li>
+          <li>Natural wine op tap</li>
+          <li>Lower-ABV menu (vermouth, spritz, alcoholvrij)</li>
+          <li>Katsu sandwich €11, 3 min airfryer</li>
+          <li>Late night ramen vr/za na 23u</li>
         </ul>
       </article>
 
       <article class="bouw-card reveal" style="--i:6">
-        <div class="cat-num">E</div>
-        <h3 class="cat-title">Slimme toevoegingen</h3>
-        <ul class="bouw-list">
-          <li><strong>Listening menu</strong>Kaartje "wat draait vanavond" naast de drankkaart.</li>
-          <li><strong>Vinyl wall</strong>Visueel statement achter de DJ-booth.</li>
-          <li><strong>Audiophile lidmaatschap</strong>€100/jaar — vroege toegang, naamplaatje.</li>
-          <li><strong>Koptelefoon-bar</strong>Drie krukken met high-end koptelefoons.</li>
-          <li><strong>Polaroid Hall of Fame</strong>Mooie shots krijgen een foto op de muur.</li>
-          <li><strong>Boekenkast</strong>Audio-magazines, fanzines. Maakt het derde plek.</li>
+        <div class="cnum">E</div>
+        <h3 class="ctitle">Slimme toevoegingen</h3>
+        <ul>
+          <li>Listening menu — "wat draait vanavond"</li>
+          <li>Vinyl wall achter de DJ-booth</li>
+          <li>Audiophile lidmaatschap €100/jaar</li>
+          <li>Koptelefoon-bar — drie high-end krukken</li>
+          <li>Polaroid Hall of Fame</li>
         </ul>
       </article>
 
       <article class="bouw-card reveal" style="--i:7">
-        <div class="cat-num">F</div>
-        <h3 class="cat-title">Marketing &amp; opening</h3>
-        <ul class="bouw-list">
-          <li><strong>Pre-opening Instagram</strong>6 maanden bouw-content: speakers, tuning, vinyl.</li>
-          <li><strong>Vijf besloten previews</strong>Per avond ander publiek — iedereen voelt insider.</li>
-          <li><strong>Soft opening 2 weken</strong>50% capaciteit, bewust onderbemand om operatie te schreeuwen.</li>
-          <li><strong>Industry Night maandag</strong>Voor horeca-werkers — netwerk + rustige dag.</li>
-          <li><strong>Pers-hooks per kwartaal</strong>Nieuwe selector, vinyl-aankoop, samenwerking.</li>
-          <li><strong>Drempelverlagende communicatie</strong>"Nieuw bij pool? Welkom" — tegenovergestelde van Mokum/Plan B.</li>
+        <div class="cnum">F</div>
+        <h3 class="ctitle">Marketing &amp; opening</h3>
+        <ul>
+          <li>Pre-opening Instagram, 6 maanden</li>
+          <li>Vijf besloten previews — per avond ander publiek</li>
+          <li>Soft opening 2 weken op 50% capaciteit</li>
+          <li>Industry Night maandag voor horeca</li>
+          <li>Drempelverlagende communicatie</li>
         </ul>
       </article>
 
@@ -1231,89 +1454,102 @@ svg.chart { display: block; width: 100%; height: auto; }
 </section>
 
 <!-- =================================================================
-     08 — INTERNATIONALE REFERENTIES
+     09 — INTERNATIONALE REFERENTIES (hover info)
      ================================================================= -->
-<section class="scene cream" id="sec-8" data-num="8">
+<section class="scene bg" id="sec-9" data-num="9">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
-      <div class="sec-num">08</div>
-      <div style="flex:1">
-        <div class="sec-kicker">Internationale referenties</div>
-        <h2 class="sec-title">Wat anderen<br/>laten zien.</h2>
+      <div class="num">09</div>
+      <div class="title-wrap">
+        <div class="kicker">Internationale referenties</div>
+        <h2>Wat anderen<br/>laten zien.</h2>
       </div>
     </header>
 
-    <div class="refs">
-      <article class="ref reveal" style="--i:1">
-        <div class="photo ref-photo" data-img="nyc"></div>
-        <div class="ref-text">
+    <div class="refs-grid">
+
+      <article class="ref-card reveal" style="--i:1" data-img="ref-nyc">
+        <div class="ref-meta">
           <div class="ref-place">Amsterdam Billiards Club</div>
           <div class="ref-loc">New York · sinds 1989</div>
-          <p class="ref-essence">25 Brunswick-tafels, grootste co-ed pool league van de US.</p>
-          <p class="ref-lesson">Een pool league kan een belangrijk onderdeel van de business worden. Doordeweekse omzet die je niet uit walk-ins haalt.</p>
+        </div>
+        <div class="ref-overlay">
+          <div class="ov-tag">01 · New York</div>
+          <div class="ov-place">Amsterdam Billiards Club</div>
+          <p class="ov-essence">25 Brunswick-tafels, grootste co-ed pool league van de US.</p>
+          <p class="ov-lesson">Een pool league kan een belangrijk onderdeel van de business worden — doordeweekse omzet die je niet uit walk-ins haalt.</p>
         </div>
       </article>
 
-      <article class="ref reveal" style="--i:2">
-        <div class="photo ref-photo" data-img="statusq"></div>
-        <div class="ref-text">
+      <article class="ref-card reveal tone-teal" style="--i:2" data-img="ref-statusq">
+        <div class="ref-meta">
           <div class="ref-place">Status Q</div>
           <div class="ref-loc">Brooklyn · New York</div>
-          <p class="ref-essence">"Are we a bar with billiards or a billiards hall with a bar? We are both."</p>
-          <p class="ref-lesson">Twee identiteiten expliciet claimen, niet kiezen. Voorkomt dat gasten met verkeerde verwachting komen.</p>
+        </div>
+        <div class="ref-overlay">
+          <div class="ov-tag">02 · Brooklyn</div>
+          <div class="ov-place">Status Q</div>
+          <p class="ov-essence">"Are we a bar with billiards or a billiards hall with a bar? We are both."</p>
+          <p class="ov-lesson">Twee identiteiten expliciet claimen, niet kiezen. Voorkomt dat gasten met de verkeerde verwachting binnenkomen.</p>
         </div>
       </article>
 
-      <!-- Eerst stond hier "Le Brady (Paris)" maar dat blijkt een bioscoop
-           van Jean-Pierre Mocky, geen pool-bar. Vervangen door de echte
-           Parijse pool-referentie: Académie de Billard de Paris (Clichy
-           Montmartre), historische biljartzaal sinds 1947. -->
-      <article class="ref reveal" style="--i:3">
-        <div class="photo ref-photo" data-img="paris"></div>
-        <div class="ref-text">
+      <!-- Eerste versie had "Le Brady (Paris)" maar dat blijkt een bioscoop
+           van Jean-Pierre Mocky. Vervangen door de echte Parijse pool-
+           referentie: Académie de Billard de Paris (Clichy Montmartre, 1947). -->
+      <article class="ref-card reveal" style="--i:3" data-img="ref-paris">
+        <div class="ref-meta">
           <div class="ref-place">Académie de Billard</div>
           <div class="ref-loc">Paris · Clichy-Montmartre · 1947</div>
-          <p class="ref-essence">Historische biljartzaal, 23 tafels, Art-Deco interieur, ongebroken traditie.</p>
-          <p class="ref-lesson">Een zaak die niet probeert mee te gaan met trends, maar consequent één ding doet, bouwt een eigen publiek.</p>
+        </div>
+        <div class="ref-overlay">
+          <div class="ov-tag">03 · Paris</div>
+          <div class="ov-place">Académie de Billard</div>
+          <p class="ov-essence">Historische biljartzaal, 23 tafels, Art-Deco interieur, ongebroken traditie.</p>
+          <p class="ov-lesson">Een zaak die niet probeert mee te gaan met trends, maar consequent één ding doet, bouwt een eigen publiek.</p>
         </div>
       </article>
 
-      <article class="ref reveal" style="--i:4">
-        <div class="photo ref-photo" data-img="tokyo"></div>
-        <div class="ref-text">
+      <article class="ref-card reveal tone-teal" style="--i:4" data-img="ref-tokyo">
+        <div class="ref-meta">
           <div class="ref-place">Tokio high-rise pool</div>
           <div class="ref-loc">Shibuya · Tokio</div>
-          <p class="ref-essence">Verstopt op de 4e en 6e verdieping van kantoorgebouwen — "hidden gems by looking up."</p>
-          <p class="ref-lesson">In de stad werkt verticaliteit. Een ongebruikelijke locatie wordt onderdeel van het verhaal in plaats van een obstakel.</p>
+        </div>
+        <div class="ref-overlay">
+          <div class="ov-tag">04 · Tokio</div>
+          <div class="ov-place">Tokio high-rise pool</div>
+          <p class="ov-essence">Verstopt op de 4e en 6e verdieping van kantoorgebouwen — "hidden gems by looking up."</p>
+          <p class="ov-lesson">In de stad werkt verticaliteit. Een ongebruikelijke locatie wordt onderdeel van het verhaal, niet een obstakel.</p>
         </div>
       </article>
+
     </div>
   </div>
 </section>
 
 <!-- =================================================================
-     09 — 30/60/90
+     10 — 30/60/90
      ================================================================= -->
-<section class="scene orange" id="sec-9" data-num="9">
+<section class="scene orange" id="sec-10" data-num="10">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
-      <div class="sec-num">09</div>
-      <div style="flex:1">
-        <div class="sec-kicker">Eerste negentig dagen</div>
-        <h2 class="sec-title">Eerst luisteren,<br/>dan bouwen.</h2>
+      <div class="num">10</div>
+      <div class="title-wrap">
+        <div class="kicker">Eerste negentig dagen</div>
+        <h2>Eerst luisteren,<br/>dan bouwen.</h2>
       </div>
     </header>
 
-    <div class="plan">
+    <div class="plan-grid">
       <div class="plan-col reveal" style="--i:1">
         <div class="plan-phase">30</div>
         <div class="plan-when">Dag 1 — 30</div>
         <h3 class="plan-title">Luisteren en meten</h3>
         <ul class="plan-list">
-          <li>Persoonlijke kennismaking met team, gasten en buurt</li>
-          <li>Operationele audit: tafels, geluidsinstallatie, programmering</li>
-          <li>Basis-metingen: bezetting per avond, gemiddelde besteding</li>
-          <li>Bezoeken aan Doka en twee tot drie andere referenties</li>
+          <li>Kennismaking met team, gasten en buurt</li>
+          <li>Operationele audit: tafels, geluid, programmering</li>
+          <li>Basis-metingen: bezetting per avond, gem. besteding</li>
+          <li>Bezoeken aan Doka en enkele andere referenties</li>
         </ul>
       </div>
 
@@ -1323,9 +1559,9 @@ svg.chart { display: block; width: 100%; height: auto; }
         <h3 class="plan-title">Quick wins</h3>
         <ul class="plan-list">
           <li>Reserveringssysteem werkend en transparant</li>
-          <li>Eerste laagdrempelige programmering op een rustige dag</li>
-          <li>Samenwerking met enkele vinyl-selectors uit de scene</li>
-          <li>Eén signature-investering uitgewerkt (vilt, krijthouders of bar)</li>
+          <li>Eerste laagdrempelige programmering op rustige dag</li>
+          <li>Samenwerking met enkele vinyl-selectors</li>
+          <li>Eén signature-investering uitgewerkt</li>
         </ul>
       </div>
 
@@ -1336,8 +1572,8 @@ svg.chart { display: block; width: 100%; height: auto; }
         <ul class="plan-list">
           <li>Jaarplan met thema-maanden en programmering</li>
           <li>Eerste Pool 101-sessies live</li>
-          <li>Marketing-kalender met pers-momenten ingepland</li>
-          <li>Evaluatie-cyclus met eigenaars maandelijks vastgelegd</li>
+          <li>Marketing-kalender met pers-momenten</li>
+          <li>Evaluatie-cyclus maandelijks met eigenaars</li>
         </ul>
       </div>
     </div>
@@ -1345,68 +1581,34 @@ svg.chart { display: block; width: 100%; height: auto; }
 </section>
 
 <!-- =================================================================
-     10 — SLOT
+     11 — SLOT
      ================================================================= -->
-<section class="scene slot" id="sec-10" data-num="10">
-  <div class="inner" style="display:flex;flex-direction:column;justify-content:center;flex:1;width:100%">
-
-    <p class="slot-quote reveal" style="--i:0">
-      <span class="open">"</span>Amsterdams eerste pool + listening bar.<br/>
-      Voor mensen die muziek serieus nemen<br/>maar zichzelf niet.<span class="close">"</span>
-    </p>
-
-    <div class="slot-meta reveal" style="--i:1">
-      <div>
-        <div class="tiny" style="opacity:.7;margin-bottom:6px">Bedankt voor het gesprek</div>
-        <div class="contact-name" data-cfg="contactName"></div>
-      </div>
-      <div style="text-align:right">
-        <div class="contact-detail" data-cfg="contactEmail"></div>
-        <div class="contact-detail" data-cfg="contactPhone" style="margin-top:4px"></div>
-      </div>
-    </div>
-
-  </div>
+<section class="scene slot" id="sec-11" data-num="11">
+  <p class="slot-quote reveal" style="--i:0">
+    <span class="punc">"</span>Amsterdams eerste pool + listening bar.<br/>
+    Voor mensen die muziek serieus nemen<br/>maar zichzelf niet.<span class="punc">"</span>
+  </p>
 </section>
 
 <!-- =================================================================
-     SCRIPT — config, data, render, nav
+     SCRIPT
      ================================================================= -->
 <script>
 /* =================================================================
-   CONFIG — merk-naam, datum, contact
+   CONFIG
    ================================================================= */
 const CONFIG = {
-  brandName:    'Side B',
-  tagline:      'Voor mensen die muziek serieus nemen maar zichzelf niet.',
-  datestr:      'Mei 2026',
-  contactName:  '[jouw naam]',
-  contactEmail: '[email]',
-  contactPhone: '[telefoon]',
+  brandName: 'Side B',
 };
 
 /* =================================================================
-   DATA — Bron: Scenarios_listening_bar.xlsx (definitief)
+   DATA — Bron: Scenarios_listening_bar.xlsx + kaartdata
    ================================================================= */
 const DATA = {
-  pool: [
-    { naam: 'The Pool Bar',       pos: 'Marktleider casual',         sterk: '1.700 reviews',          zwak: 'Geen muziek-USP' },
-    { naam: 'Poolcafé de Keu',    pos: 'Casual + "great music"',     sterk: 'Dichtste positionering', zwak: 'Versleten tafels' },
-    { naam: 'Poolbar De Gracht',  pos: 'Buurt casual Oost',          sterk: 'Recent vernieuwd',       zwak: 'Geen muziek-USP' },
-    { naam: 'Plan B',             pos: 'Pro-segment',                sterk: 'Tournament-kwaliteit',   zwak: 'Reserveringsfrustratie' },
-    { naam: 'Mokum Pool',         pos: 'Premium pro',                sterk: 'Ex-EU kampioen',         zwak: 'Pro-only' },
-  ],
-  listen: [
-    { naam: 'Doka',     pos: '5jr Volkshotel · 98dB',     sterk: 'Programmering',           zwak: 'Deurbeleid 3.6★' },
-    { naam: 'Loop 51',  pos: 'Vinyl-brunch De Pijp',      sterk: 'Daytime listening',       zwak: 'Alleen overdag' },
-    { naam: 'CUE',      pos: 'Onder Michelin-resto',      sterk: 'Premium positionering',   zwak: 'Alleen avond' },
-    { naam: 'Murmur',   pos: 'Alleen vr/za in Noord',     sterk: 'Exclusiviteit',           zwak: 'Beperkt verdienmodel' },
-  ],
-
   scenarios: {
     rows: [
       { lbl: 'Pooltafels',               a: '5',           b: '8',           c: '12' },
-      { lbl: 'Capaciteit personen',      a: '80',          b: '120',         c: '180' },
+      { lbl: 'Capaciteit',               a: '80',          b: '120',         c: '180' },
       { lbl: 'Omzet per jaar',           a: '€496k',       b: '€839k',       c: '€1,46M' },
       { lbl: 'EBITDA',                   a: '€139k · 28%', b: '€233k · 28%', c: '€433k · 30%' },
       { lbl: 'Investering',              a: '€90k',        b: '€160k',       c: '€250k' },
@@ -1414,36 +1616,55 @@ const DATA = {
       { lbl: 'Cumulatief EBIT · 5 jaar', a: '€478k',       b: '€792k',       c: '€1,55M' },
     ],
   },
-
   projection: {
-    years: ['Jaar 1', 'Jaar 2', 'Jaar 3', 'Jaar 4', 'Jaar 5'],
-    a:    [12, 103, 139, 139, 85],
-    b:    [18, 171, 232, 232, 140],
-    c:    [68, 331, 436, 436, 278],
+    years: ['Jaar 1','Jaar 2','Jaar 3','Jaar 4','Jaar 5'],
+    a: [12,103,139,139,85],
+    b: [18,171,232,232,140],
+    c: [68,331,436,436,278],
   },
+
+  poolBars: [
+    { num: 1,  name: "The Pool Bar",        seg: "Centrum · marktleider casual, vooral toeristen en groepen.",                                 lat: 52.3685701, lng: 4.8906426, rating: 4.5, reviews: 1700, short: "Centrum, marktleider qua bekendheid" },
+    { num: 2,  name: "Plan B",              seg: "Overtoom · pro-segment, tournament-kwaliteit, €18.50/u tafels.",                              lat: 52.3611816, lng: 4.8700553, rating: 4.5, reviews: 853,  short: "Overtoom, pro-segment" },
+    { num: 3,  name: "Poolbar De Gracht",   seg: "Oost · recent vernieuwd, casual buurt-vibe, 11 tafels.",                                       lat: 52.3626717, lng: 4.9097059, rating: 4.3, reviews: 748,  short: "Oost, recent vernieuwd" },
+    { num: 4,  name: "Final Touch",         seg: "Centrum · twee verdiepingen, snooker-zwaar, klassiek billiards.",                              lat: 52.3644252, lng: 4.8860000, rating: 4.7, reviews: 605,  short: "Centrum, twee verdiepingen" },
+    { num: 5,  name: "Cafe the Palace",     seg: "Centrum · Doors-thema, betaalbaar, gedateerd interieur.",                                      lat: 52.3763180, lng: 4.8925019, rating: 4.5, reviews: 489,  short: "Centrum, Doors-thema" },
+    { num: 6,  name: "Poolcafé de Keu",     seg: "Oud-West · casual + 'great music selection' — dichtste vergelijking met ons concept.",         lat: 52.3641033, lng: 4.8779636, rating: 4.5, reviews: 410,  short: "Oud-West, casual + 'great music'" },
+    { num: 7,  name: "Billiards Cafe Hermes",seg: "De Pijp · klein en niche, eigenzinnige sfeer, loyale stamgasten.",                            lat: 52.3527000, lng: 4.8892000, rating: 4.7, reviews: 353,  short: "De Pijp, klein en niche" },
+    { num: 8,  name: "Pool Center Boven 't IJ", seg: "Noord · in winkelcentrum, 9ft tafels, lokaal buurtconcept.",                               lat: 52.3991313, lng: 4.9376219, rating: 4.7, reviews: 285,  short: "Noord, in winkelcentrum" },
+    { num: 9,  name: "Mokum Pool & Darts",  seg: "Watergraafsmeer · premium pro, eigenaar ex-Europees kampioen.",                                lat: 52.3504428, lng: 4.9232788, rating: 4.9, reviews: 88,   short: "Watergraafsmeer, premium pro" },
+    { num: 10, name: "The All Out",         seg: "Zuid · multi-games (karaoke, darts, shuffle), event-focus.",                                   lat: 52.3403930, lng: 4.8929720, rating: 4.7, reviews: 361,  short: "Zuid, multi-games venue" },
+    { num: 11, name: "Bij 8 Eraf",          seg: "Slotervaart, Nieuw-West · buurt-sportsbar met pool + darts.",                                  lat: 52.3425102, lng: 4.7951646, rating: 4.5, reviews: 115,  short: "Slotervaart, buurt-sportsbar" },
+  ],
+  listeningBars: [
+    { letter: "A", name: "Doka",               seg: "Volkshotel kelder · 5 jaar bestaand, 98dB max. Deurbeleid drukt rating.",         lat: 52.3537886, lng: 4.9116250, rating: 3.6, reviews: 174, short: "Volkshotel kelder · 5 jaar bestaand" },
+    { letter: "B", name: "Loop 51",            seg: "De Pijp · vinyl-brunch concept. Bewijst dat daytime listening werkt.",            lat: 52.3513202, lng: 4.8895518, rating: 4.7, reviews: 511, short: "De Pijp, vinyl-brunch concept" },
+    { letter: "C", name: "CUE Bar Restaurant", seg: "Centrum · listening bar onder Michelin-restaurant, premium positionering.",       lat: 52.3644265, lng: 4.8979664, rating: 4.7, reviews: 284, short: "Centrum, onder Michelin-restaurant" },
+    { letter: "D", name: "murmur",             seg: "Noord · alleen vrijdag/zaterdag open, Libanees food + DJ-sets.",                  lat: 52.3855435, lng: 4.9280073, rating: 4.7, reviews: 171, short: "Noord, alleen vrijdag/zaterdag" },
+  ],
 };
 
 /* =================================================================
-   IMAGES — venue-foto's. URL=null → styled placeholder.
+   IMAGES — venue-foto's
    ================================================================= */
 const IMAGES = {
-  // sec 03 — concurrenten (6 foto's)
-  doka:    { url: 'https://www.volkshotel.nl/content/uploads/2019/10/R1-06657-006A.jpg', credit: 'Foto · Volkshotel', alt: 'Doka — Volkshotel Amsterdam', label: 'Doka', sub: 'Volkshotel · Oost' },
-  cue:     { url: 'https://cdn.prod.website-files.com/6841a4beb5cabb956f197ea1/68542c40140606bd001a5069_CUE_1November_by_ZsofiaBodnar-4.avif', credit: 'Foto · Zsofia Bodnar / CUE', alt: 'CUE Amsterdam listening bar', label: 'CUE', sub: 'Utrechtsestraat' },
-  murmur:  { url: 'https://www.tracksandtales.co/cdn/shop/articles/Copy_of_Phill_Argent_-_10.9.1.HG_1_c1105ae3-90ec-4e23-bf96-5d2280eb1aca.png?v=1761310720&width=1100', credit: 'Foto · Phill Argent / Tracks &amp; Tales', alt: 'Murmur Amsterdam Noord', label: 'Murmur', sub: 'Amsterdam Noord' },
-  loop51:  { url: 'https://images.squarespace-cdn.com/content/v1/680155b8ea1a2d02a37bf2e3/54be601d-f51f-40ac-bc26-a734ad74f21b/P1025308.jpg', credit: 'Foto · Loop 51', alt: 'Loop 51 — Vinyl Brunch De Pijp', label: 'Loop 51', sub: 'De Pijp' },
-  planb:   { url: 'https://www.planbovertoom.nl/wp-content/uploads/2024/11/DSC01881-scaled.jpg', credit: 'Foto · Plan B', alt: 'Plan B — Amsterdam', label: 'Plan B', sub: 'Oud-West' },
-  mokum:   { url: 'https://poolen-amsterdam.nl/wp-content/uploads/Mokum-Pool-Darts-03-1-2048x1365.jpg', credit: 'Foto · Mokum Pool &amp; Darts', alt: 'Mokum Pool & Darts — Amsterdam', label: 'Mokum Pool', sub: 'Amstel' },
+  // sec 04 — concurrenten foto's (groot)
+  doka:    { url: 'https://www.volkshotel.nl/content/uploads/2019/10/R1-06657-006A.jpg',                                                                       credit: 'Foto · Volkshotel',                  alt: 'Doka — Volkshotel Amsterdam',    label: 'Doka',         sub: 'Volkshotel · Oost' },
+  cue:     { url: 'https://cdn.prod.website-files.com/6841a4beb5cabb956f197ea1/68542c40140606bd001a5069_CUE_1November_by_ZsofiaBodnar-4.avif',                  credit: 'Foto · Zsofia Bodnar / CUE',         alt: 'CUE Amsterdam listening bar',    label: 'CUE',          sub: 'Utrechtsestraat' },
+  murmur:  { url: 'https://www.tracksandtales.co/cdn/shop/articles/Copy_of_Phill_Argent_-_10.9.1.HG_1_c1105ae3-90ec-4e23-bf96-5d2280eb1aca.png?v=1761310720&width=1100', credit: 'Foto · Phill Argent / Tracks & Tales', alt: 'murmur Amsterdam Noord',       label: 'murmur',       sub: 'Amsterdam Noord' },
+  loop51:  { url: 'https://images.squarespace-cdn.com/content/v1/680155b8ea1a2d02a37bf2e3/54be601d-f51f-40ac-bc26-a734ad74f21b/P1025308.jpg',                    credit: 'Foto · Loop 51',                     alt: 'Loop 51 — Vinyl Brunch De Pijp', label: 'Loop 51',      sub: 'De Pijp' },
+  planb:   { url: 'https://www.planbovertoom.nl/wp-content/uploads/2024/11/DSC01881-scaled.jpg',                                                                credit: 'Foto · Plan B',                      alt: 'Plan B — Amsterdam',             label: 'Plan B',       sub: 'Overtoom' },
+  mokum:   { url: 'https://poolen-amsterdam.nl/wp-content/uploads/Mokum-Pool-Darts-03-1-2048x1365.jpg',                                                         credit: 'Foto · Mokum Pool & Darts',          alt: 'Mokum Pool & Darts',             label: 'Mokum Pool',   sub: 'Watergraafsmeer' },
 
-  // sec 08 — internationale referenties (4 foto's)
-  nyc:     { url: 'https://amsterdambilliards.com/wp-content/uploads/2026/04/Amsterdam-Billiards-and-Bar.jpg', credit: 'Foto · Amsterdam Billiards', alt: 'Amsterdam Billiards Club NYC', label: 'Amsterdam Billiards Club', sub: 'NYC · sinds 1989' },
-  statusq: { url: null, credit: '', alt: 'Status Q Brooklyn',       label: 'Status Q',            sub: 'Brooklyn' },
-  paris:   { url: null, credit: '', alt: 'Académie de Billard',     label: 'Académie de Billard', sub: 'Paris · 1947' },
-  tokyo:   { url: null, credit: '', alt: 'Tokyo high-rise pool',    label: 'Shibuya billiards',   sub: 'Tokio' },
+  // sec 09 — internationale referenties
+  'ref-nyc':     { url: 'https://amsterdambilliards.com/wp-content/uploads/2026/04/Amsterdam-Billiards-and-Bar.jpg', credit: 'Foto · Amsterdam Billiards Club', alt: 'Amsterdam Billiards Club NYC', label: 'NYC' },
+  'ref-statusq': { url: null, credit: '', alt: 'Status Q Brooklyn',     label: 'Status Q' },
+  'ref-paris':   { url: null, credit: '', alt: 'Académie de Billard',   label: 'Paris' },
+  'ref-tokyo':   { url: null, credit: '', alt: 'Tokyo high-rise pool',  label: 'Tokio' },
 };
 
 /* =================================================================
-   RENDER
+   RENDER — config, kaart, foto's, scenarios, chart
    ================================================================= */
 (function renderConfig() {
   document.querySelectorAll('[data-cfg]').forEach(el => {
@@ -1453,14 +1674,6 @@ const IMAGES = {
   document.title = `${CONFIG.brandName} — Concept-voorstel`;
 })();
 
-(function renderTables() {
-  const fmt = items => items.map(r =>
-    `<tr><td class="name">${r.naam}</td><td class="pos">${r.pos}</td><td class="note">${r.sterk}</td><td class="note">${r.zwak}</td></tr>`
-  ).join('');
-  document.getElementById('tbl-pool').innerHTML   = fmt(DATA.pool);
-  document.getElementById('tbl-listen').innerHTML = fmt(DATA.listen);
-})();
-
 (function renderScenarios() {
   const mount = document.getElementById('scenarios');
   const cols = [
@@ -1468,99 +1681,102 @@ const IMAGES = {
     { tag: 'B', sub: 'Medium'     },
     { tag: 'C', sub: 'Volwaardig' },
   ];
-  let html = '<div class="lbl col-head" style="border-bottom:2px solid var(--cream)"></div>';
-  cols.forEach((c, i) => {
-    html += `<div class="col-head ${i===1?'col-b':''}">${c.tag}<span class="col-tag">${c.sub}</span></div>`;
+  let html = '<div class="lbl col-head"></div>';
+  cols.forEach(c => {
+    html += `<div class="col-head">${c.tag}<span class="tag">${c.sub}</span></div>`;
   });
-  DATA.scenarios.rows.forEach((r) => {
-    html += `<div class="row">`;
+  DATA.scenarios.rows.forEach(r => {
+    html += '<div class="row">';
     html += `<div class="lbl">${r.lbl}</div>`;
     html += `<div class="v">${r.a}</div>`;
-    html += `<div class="v col-b">${r.b}</div>`;
+    html += `<div class="v">${r.b}</div>`;
     html += `<div class="v">${r.c}</div>`;
-    html += `</div>`;
+    html += '</div>';
   });
   mount.innerHTML = html;
 })();
 
 (function renderChart() {
-  const W = 720, H = 400, PAD = { t: 30, r: 30, b: 50, l: 60 };
+  const W = 740, H = 380, PAD = { t: 24, r: 24, b: 46, l: 60 };
   const p = DATA.projection;
-  const allVals = [...p.a, ...p.b, ...p.c];
-  const maxY = Math.ceil(Math.max(...allVals) / 50) * 50;
-  const minY = 0;
+  const maxY = Math.ceil(Math.max(...p.a, ...p.b, ...p.c) / 50) * 50;
+  const x = i => PAD.l + (i * (W - PAD.l - PAD.r)) / (p.years.length - 1);
+  const y = v => PAD.t + ((maxY - v) * (H - PAD.t - PAD.b)) / maxY;
+  const path = a => a.map((v,i) => (i?'L':'M') + x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ');
 
-  const xs = p.years.length;
-  const x = i => PAD.l + (i * (W - PAD.l - PAD.r)) / (xs - 1);
-  const y = v => PAD.t + ((maxY - v) * (H - PAD.t - PAD.b)) / (maxY - minY);
+  /* duidelijk verschil A/C:
+     A = teal, dunne ononderbroken lijn
+     B = oranje, dik ononderbroken
+     C = grijs, gestippeld (dots, niet dashes) */
+  const colA = '#1F5F5F', colB = '#DC4A2E', colC = '#6B5F50';
 
-  const path = arr => arr.map((v, i) => `${i===0?'M':'L'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
-
-  // Op een orange-section is de chart-wrap cream — kleuren werken in beide tinten
-  const colors = { a: '#1E4D52', b: '#E94B26', c: '#6B6B6B' };
-
-  const gridLines = [];
-  const yTicks = 5;
-  for (let i = 0; i <= yTicks; i++) {
-    const yv = minY + (maxY - minY) * i / yTicks;
+  const grid = [];
+  for (let i = 0; i <= 5; i++) {
+    const yv = (maxY * i) / 5;
     const yp = y(yv);
-    gridLines.push(
-      `<line x1="${PAD.l}" x2="${W - PAD.r}" y1="${yp}" y2="${yp}" stroke="#C9BFA8" stroke-width="0.5"/>`,
-      `<text x="${PAD.l - 10}" y="${yp + 4}" text-anchor="end" font-family="Inter" font-size="11" fill="#6B6B6B">€${Math.round(yv)}k</text>`
+    grid.push(
+      `<line x1="${PAD.l}" x2="${W-PAD.r}" y1="${yp}" y2="${yp}" stroke="#C5B89E" stroke-width=".5"/>`,
+      `<text x="${PAD.l-10}" y="${yp+4}" text-anchor="end" font-family="Geist Mono,monospace" font-size="11" font-weight="500" fill="#6B5F50">€${Math.round(yv)}k</text>`
     );
   }
-
-  const xLabels = p.years.map((yr, i) =>
-    `<text x="${x(i)}" y="${H - PAD.b + 22}" text-anchor="middle" font-family="Inter" font-size="11" fill="#6B6B6B">${yr}</text>`
+  const xLab = p.years.map((yr,i) =>
+    `<text x="${x(i)}" y="${H-PAD.b+22}" text-anchor="middle" font-family="Geist Mono,monospace" font-size="11" font-weight="500" fill="#6B5F50">${yr}</text>`
   ).join('');
 
-  const dotsFor = (arr, color) => arr.map((v, i) =>
-    `<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="#F5EFE2" stroke="${color}" stroke-width="2">
-       <title>${p.years[i]} — €${v}k</title>
-     </circle>`
+  const dots = (arr, col) => arr.map((v,i) =>
+    `<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="#EBE0CB" stroke="${col}" stroke-width="2"><title>${p.years[i]} — €${v}k</title></circle>`
   ).join('');
 
   const svg = `
     <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="5-jaar EBIT projectie per scenario">
-      ${gridLines.join('')}
-      <path d="${path(p.a)}" fill="none" stroke="${colors.a}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>
-      <path d="${path(p.b)}" fill="none" stroke="${colors.b}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="${path(p.c)}" fill="none" stroke="${colors.c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 4" opacity=".70"/>
-      ${dotsFor(p.a, colors.a)}
-      ${dotsFor(p.b, colors.b)}
-      ${dotsFor(p.c, colors.c)}
-      ${xLabels}
-      <text x="${PAD.l - 50}" y="${PAD.t - 8}" font-family="Inter" font-size="10" font-weight="600" fill="#6B6B6B" letter-spacing="1.5">EBIT</text>
+      ${grid.join('')}
+      <path d="${path(p.a)}" fill="none" stroke="${colA}" stroke-width="2"   stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="${path(p.b)}" fill="none" stroke="${colB}" stroke-width="4"   stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="${path(p.c)}" fill="none" stroke="${colC}" stroke-width="3"   stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.5 6"/>
+      ${dots(p.a, colA)}
+      ${dots(p.b, colB)}
+      ${dots(p.c, colC)}
+      ${xLab}
+      <text x="${PAD.l-50}" y="${PAD.t-4}" font-family="Geist Mono,monospace" font-size="10" font-weight="700" fill="#6B5F50" letter-spacing="2">EBIT</text>
     </svg>
   `;
   document.getElementById('chart-mount').innerHTML = svg;
 
-  const totA = p.a.reduce((s, v) => s + v, 0);
-  const totB = p.b.reduce((s, v) => s + v, 0);
-  const totC = p.c.reduce((s, v) => s + v, 0);
+  const totA = p.a.reduce((s,v)=>s+v,0), totB = p.b.reduce((s,v)=>s+v,0), totC = p.c.reduce((s,v)=>s+v,0);
   document.getElementById('chart-legend').innerHTML = `
     <div class="leg-item">
-      <span class="leg-swatch" style="background:${colors.a}"></span>
-      <div style="flex:1">
+      <span class="leg-swatch a"><span class="ln"></span></span>
+      <div>
         <div class="leg-name">A · Compact</div>
         <div class="leg-val">5 tafels · cumulatief €${totA}k</div>
       </div>
     </div>
-    <div class="leg-item is-b">
-      <span class="leg-swatch" style="background:${colors.b};height:3px"></span>
-      <div style="flex:1">
+    <div class="leg-item">
+      <span class="leg-swatch b"><span class="ln"></span></span>
+      <div>
         <div class="leg-name">B · Medium</div>
         <div class="leg-val">8 tafels · cumulatief €${totB}k</div>
       </div>
     </div>
     <div class="leg-item">
-      <span class="leg-swatch" style="background:${colors.c};border-top:2px dashed ${colors.c};height:0"></span>
-      <div style="flex:1">
+      <span class="leg-swatch c"><span class="ln"></span></span>
+      <div>
         <div class="leg-name">C · Volwaardig</div>
         <div class="leg-val">12 tafels · cumulatief €${totC}k</div>
       </div>
     </div>
   `;
+})();
+
+(function renderLegendList() {
+  const fmtRow = (n, b, klass) => `
+    <div class="legend-row">
+      <span class="lnum">${n}</span>
+      <span class="lname">${b.name}<small>${b.short}</small></span>
+      <span class="lrate">★ ${b.rating} <small>· ${b.reviews.toLocaleString('nl-NL')}</small></span>
+    </div>`;
+  document.getElementById('legend-pool').innerHTML   = DATA.poolBars.map(b => fmtRow(b.num, b, 'pool')).join('');
+  document.getElementById('legend-listen').innerHTML = DATA.listeningBars.map(b => fmtRow(b.letter, b, 'listen')).join('');
 })();
 
 (function renderPhotos() {
@@ -1569,55 +1785,113 @@ const IMAGES = {
     const meta = IMAGES[key];
     if (!meta) return;
     if (meta.url) {
-      const img = document.createElement('img');
-      img.src = meta.url;
-      img.alt = meta.alt || '';
-      img.loading = 'lazy';
-      img.referrerPolicy = 'no-referrer';
-      img.onerror = () => { el.innerHTML = ''; renderPlaceholder(el, meta); };
-      el.appendChild(img);
-      if (meta.credit) {
-        const cap = document.createElement('div');
-        cap.className = 'caption';
-        cap.innerHTML = `${meta.label || ''}<div class="credit">${meta.credit}</div>`;
-        el.appendChild(cap);
+      if (el.classList.contains('ref-card')) {
+        const img = document.createElement('img');
+        img.src = meta.url;
+        img.alt = meta.alt || '';
+        img.loading = 'lazy';
+        img.referrerPolicy = 'no-referrer';
+        img.onerror = () => { img.remove(); makeRefFallback(el, meta); };
+        el.insertBefore(img, el.firstChild);
+      } else {
+        const img = document.createElement('img');
+        img.src = meta.url;
+        img.alt = meta.alt || '';
+        img.loading = 'lazy';
+        img.referrerPolicy = 'no-referrer';
+        img.onerror = () => { el.innerHTML = ''; renderPhotoPlaceholder(el, meta); };
+        el.appendChild(img);
+        if (meta.credit || meta.label) {
+          const cap = document.createElement('div');
+          cap.className = 'caption';
+          cap.innerHTML = `${meta.label || ''}<div class="sub">${meta.sub || ''} · ${meta.credit || ''}</div>`;
+          el.appendChild(cap);
+        }
       }
     } else {
-      renderPlaceholder(el, meta);
+      if (el.classList.contains('ref-card')) {
+        makeRefFallback(el, meta);
+      } else {
+        renderPhotoPlaceholder(el, meta);
+      }
     }
   });
 })();
-
-function renderPlaceholder(el, meta) {
+function renderPhotoPlaceholder(el, meta) {
   el.classList.add('no-img');
-  if (meta.tone === 'cream') el.classList.add('tone-cream');
   el.innerHTML = `
     <div>
       <div class="ph-label">${meta.label || ''}</div>
       <div class="ph-sub">${meta.sub || ''}</div>
-    </div>
-  `;
+    </div>`;
+}
+function makeRefFallback(el, meta) {
+  const fb = document.createElement('div');
+  fb.className = 'ref-fallback';
+  fb.textContent = meta.label || '';
+  el.insertBefore(fb, el.firstChild);
 }
 
 /* =================================================================
-   NAVIGATIE
+   LEAFLET MAP
+   ================================================================= */
+(function initMap() {
+  if (typeof L === 'undefined') return;
+  const map = L.map('map', {
+    center: [52.370, 4.900],
+    zoom: 13,
+    zoomControl: true,
+    scrollWheelZoom: false,
+  });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(map);
+
+  const mkMarker = (b, klass, label) => {
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="marker-wrap"><div class="marker-circle ${klass}">${label}</div><div class="marker-rating">★ ${b.rating}</div></div>`,
+      iconSize: [80, 56],
+      iconAnchor: [40, 17],
+    });
+    const m = L.marker([b.lat, b.lng], { icon }).addTo(map);
+    m.bindPopup(`
+      <div class="popup-tag ${klass}">${klass === 'pool' ? 'POOL · #'+label : 'LISTENING · '+label}</div>
+      <div class="popup-name">${b.name}</div>
+      <div class="popup-segment">${b.seg}</div>
+      <div class="popup-rate">★ ${b.rating} <span>· ${b.reviews.toLocaleString('nl-NL')} reviews</span></div>
+    `);
+  };
+
+  DATA.poolBars.forEach(b => mkMarker(b, 'pool', b.num));
+  DATA.listeningBars.forEach(b => mkMarker(b, 'listen', b.letter));
+
+  const allPoints = [
+    ...DATA.poolBars.map(b => [b.lat, b.lng]),
+    ...DATA.listeningBars.map(b => [b.lat, b.lng]),
+  ];
+  map.fitBounds(allPoints, { padding: [40, 40] });
+
+  // herzichting bij section in/out (Leaflet vraagt invalidateSize bij grootteveranderingen)
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(en => { if (en.isIntersecting) setTimeout(() => map.invalidateSize(), 100); });
+  }, { threshold: 0.2 });
+  obs.observe(document.getElementById('sec-3'));
+})();
+
+/* =================================================================
+   NAVIGATIE — toetsenbord (←→↑↓) + dots + observer
    ================================================================= */
 const sections = Array.from(document.querySelectorAll('.scene'));
 const dots = Array.from(document.querySelectorAll('.nav-dots button'));
+let cur = 0;
 
 function goTo(n) {
-  const idx = Math.max(0, Math.min(sections.length - 1, n - 1));
-  sections[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function currentIndex() {
-  const mid = window.scrollY + window.innerHeight / 2;
-  for (let i = 0; i < sections.length; i++) {
-    const r = sections[i].getBoundingClientRect();
-    const top = r.top + window.scrollY;
-    if (mid >= top && mid < top + r.height) return i;
-  }
-  return 0;
+  cur = Math.max(0, Math.min(sections.length - 1, n));
+  sections[cur].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  dots.forEach((d, i) => d.classList.toggle('active', i === cur));
 }
 
 document.addEventListener('keydown', (e) => {
@@ -1626,39 +1900,43 @@ document.addEventListener('keydown', (e) => {
   if (tag === 'input' || tag === 'textarea') return;
 
   const k = e.key;
-  if (k === 'ArrowDown' || k === 'PageDown' || k === ' ') {
+  if (k === 'ArrowDown' || k === 'ArrowRight' || k === 'PageDown' || k === ' ') {
     e.preventDefault();
-    goTo(currentIndex() + 2);
-  } else if (k === 'ArrowUp' || k === 'PageUp') {
+    goTo(cur + 1);
+  } else if (k === 'ArrowUp' || k === 'ArrowLeft' || k === 'PageUp') {
     e.preventDefault();
-    goTo(currentIndex());
+    goTo(cur - 1);
   } else if (k === 'Home') {
     e.preventDefault();
-    goTo(1);
+    goTo(0);
   } else if (k === 'End') {
     e.preventDefault();
-    goTo(sections.length);
+    goTo(sections.length - 1);
   } else if (/^[1-9]$/.test(k)) {
     e.preventDefault();
-    goTo(parseInt(k, 10));
+    goTo(parseInt(k, 10) - 1);
   } else if (k === '0') {
     e.preventDefault();
-    goTo(10);
+    goTo(9); // sectie 10
   }
 });
+dots.forEach((btn, i) => btn.addEventListener('click', () => goTo(i)));
 
-dots.forEach(btn => btn.addEventListener('click', () => goTo(parseInt(btn.dataset.go, 10))));
-
+/* observer: zorgt dat scrollen met muiswiel ook `cur` bijhoudt + dots actualiseert */
 const dotObserver = new IntersectionObserver((entries) => {
   entries.forEach(en => {
-    if (en.isIntersecting && en.intersectionRatio > 0.5) {
-      const n = parseInt(en.target.dataset.num, 10);
-      dots.forEach(d => d.classList.toggle('active', parseInt(d.dataset.go, 10) === n));
+    if (en.isIntersecting && en.intersectionRatio > 0.55) {
+      const idx = sections.indexOf(en.target);
+      if (idx >= 0) {
+        cur = idx;
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      }
     }
   });
-}, { threshold: [0.5] });
+}, { threshold: [0.55] });
 sections.forEach(s => dotObserver.observe(s));
 
+/* reveal on scroll */
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(en => {
     if (en.isIntersecting) {
