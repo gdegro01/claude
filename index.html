@@ -5,44 +5,45 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Side B — Concept-voorstel</title>
 
-<!-- Sans body via Google Fonts (Geist), om met Geist Mono te pairen -->
+<!-- Sans body via Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- Leaflet voor de kaart in sectie 03 -->
+<!-- Leaflet voor de kaart -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
 /* =================================================================
    SIDE B — sollicitatie-presentatie bedrijfsleider
-   Eén bestand. Editorial Geist Mono + Disket Mono setup.
-   Aanpassen: zie CONFIG / DATA / IMAGES bovenin <script>.
+   Aanpassen: CONFIG / DATA / IMAGES bovenin <script>.
+   Eigen foto's:  drop ./photos/{naam}.jpg en update IMAGES.
    ================================================================= */
 
-/* ----- self-hosted display fonts ----- */
+/* fonts */
 @font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 200; font-display: swap; src: url('./fonts/geist-mono-thin.woff2') format('woff2'); }
 @font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 300; font-display: swap; src: url('./fonts/geist-mono-extralight.woff2') format('woff2'); }
 @font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 600; font-display: swap; src: url('./fonts/geist-mono-semibold.woff2') format('woff2'); }
 @font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 700; font-display: swap; src: url('./fonts/geist-mono-bold.woff2') format('woff2'); }
 @font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 800; font-display: swap; src: url('./fonts/geist-mono-extrabold.woff2') format('woff2'); }
 @font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 900; font-display: swap; src: url('./fonts/geist-mono-black.woff2') format('woff2'); }
+@font-face { font-family: 'Disket Mono';font-style: normal; font-weight: 400; font-display: swap; src: url('./fonts/disket-mono-regular.woff2') format('woff2'); }
+@font-face { font-family: 'Disket Mono';font-style: normal; font-weight: 700; font-display: swap; src: url('./fonts/disket-mono-bold.woff2') format('woff2'); }
 
-@font-face { font-family: 'Disket Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url('./fonts/disket-mono-regular.woff2') format('woff2'); }
-@font-face { font-family: 'Disket Mono'; font-style: normal; font-weight: 700; font-display: swap; src: url('./fonts/disket-mono-bold.woff2') format('woff2'); }
-
-/* ----- variabelen ----- */
 :root {
-  /* palet — matcht de kaart die je stuurde */
   --bg:           #F2E8D5;
   --bg-alt:       #EBE0CB;
   --line:         #C5B89E;
   --line-soft:    #D9CDB1;
   --orange:       #DC4A2E;
   --orange-dark:  #B83A22;
+  --orange-soft:  #F0A38F;
   --teal:         #1F5F5F;
   --teal-dark:    #143F3F;
+  --teal-soft:    #5E9A9A;
+  --plum:         #6E3242;
+  --olive:        #6B6332;
   --ink-bg:       #1A1612;
   --ink:          #1A1612;
   --muted:        #6B5F50;
@@ -76,11 +77,14 @@ html, body {
 section.scene {
   min-height: 100vh;
   min-height: 100svh;
-  padding: clamp(32px, 4.5vw, 80px) var(--gutter);
+  height: 100vh;
+  height: 100svh;
+  padding: clamp(28px, 4vw, 72px) var(--gutter);
   display: flex;
   flex-direction: column;
   justify-content: center;
   position: relative;
+  overflow: hidden;
   break-after: page;
   page-break-after: always;
 }
@@ -89,12 +93,20 @@ section.scene {
 .scene.orange { background: var(--orange); color: var(--bg); }
 .scene.teal   { background: var(--teal);   color: var(--bg); }
 .scene.ink    { background: var(--ink-bg); color: var(--bg); }
+.scene.orange .muted, .scene.teal .muted, .scene.ink .muted { color: rgba(247,239,220,.7); }
 
+/* secties met content die kan overlopen: laat scrollbar verdwijnen via inner */
 .inner {
   max-width: var(--max);
   width: 100%;
   margin: 0 auto;
 }
+.inner.scrollable {
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.inner.scrollable::-webkit-scrollbar { width: 4px; }
+.inner.scrollable::-webkit-scrollbar-thumb { background: rgba(0,0,0,.18); }
 
 /* ---------- typography ---------- */
 .tiny, .eyebrow {
@@ -104,32 +116,26 @@ section.scene {
   letter-spacing: .22em;
   text-transform: uppercase;
 }
-.eyebrow.orange { color: var(--orange); }
-.eyebrow.teal   { color: var(--teal); }
-
-.muted { color: var(--muted); }
-.scene.orange .muted, .scene.teal .muted, .scene.ink .muted { color: rgba(247,239,220,.7); }
 
 /* ---------- section-header ---------- */
 .sec-head {
   display: flex;
   align-items: flex-end;
-  gap: 28px;
-  margin-bottom: clamp(28px, 4vw, 64px);
+  gap: 24px;
+  margin-bottom: clamp(20px, 3vw, 48px);
   border-bottom: 2px solid currentColor;
-  padding-bottom: 18px;
+  padding-bottom: 14px;
 }
 .sec-head .num {
   font-family: var(--mono);
   font-weight: 800;
-  font-size: clamp(56px, 9vw, 130px);
+  font-size: clamp(48px, 7vw, 110px);
   line-height: .8;
   color: var(--orange);
 }
 .scene.orange .sec-head .num { color: var(--teal); }
 .scene.teal   .sec-head .num { color: var(--orange); }
 .scene.ink    .sec-head .num { color: var(--orange); }
-
 .sec-head .title-wrap { flex: 1; }
 .sec-head .kicker {
   font-family: var(--mono);
@@ -138,65 +144,33 @@ section.scene {
   letter-spacing: .2em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 .scene.orange .sec-head .kicker, .scene.teal .sec-head .kicker, .scene.ink .sec-head .kicker { color: rgba(247,239,220,.65); }
-
 .sec-head h2 {
   font-family: var(--mono);
   font-weight: 800;
-  font-size: clamp(40px, 6vw, 96px);
-  line-height: .92;
+  font-size: clamp(34px, 5vw, 80px);
+  line-height: .94;
   letter-spacing: -.02em;
 }
 
-/* shared photo tile */
-.photo {
-  position: relative;
-  overflow: hidden;
-  background: var(--cream-deep);
-}
+/* shared photo */
+.photo { position: relative; overflow: hidden; background: var(--cream-deep); }
 .photo img {
   width: 100%; height: 100%;
   object-fit: cover; display: block;
   transition: transform .6s cubic-bezier(.2,.6,.2,1);
 }
 .photo:hover img { transform: scale(1.04); }
-.photo .caption {
-  position: absolute; inset: auto 0 0 0;
-  background: linear-gradient(to top, rgba(0,0,0,.78), transparent 75%);
-  color: #fff;
-  font-family: var(--mono);
-  font-weight: 600;
-  font-size: 11px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  padding: 36px 16px 14px;
-}
-.photo .caption .sub {
-  font-family: var(--sans);
-  font-weight: 400; font-size: 11px;
-  letter-spacing: 0; text-transform: none;
-  opacity: .75; margin-top: 3px;
-}
 .photo.no-img {
   display: flex; align-items: flex-end; padding: 16px;
   background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
   color: var(--bg);
 }
-.photo.no-img:nth-child(even) {
-  background: linear-gradient(135deg, var(--orange-dark) 0%, var(--orange) 100%);
-}
-.photo.no-img .ph-label {
-  font-family: var(--mono); font-weight: 800;
-  font-size: clamp(18px, 1.8vw, 28px);
-  line-height: 1; max-width: 14ch;
-}
-.photo.no-img .ph-sub {
-  font-family: var(--mono); font-weight: 600;
-  font-size: 10px; letter-spacing: .14em;
-  text-transform: uppercase; opacity: .65; margin-top: 5px;
-}
+.photo.no-img:nth-child(even) { background: linear-gradient(135deg, var(--orange-dark) 0%, var(--orange) 100%); }
+.photo.no-img .ph-label { font-family: var(--mono); font-weight: 800; font-size: clamp(16px, 1.5vw, 24px); line-height: 1; max-width: 14ch; }
+.photo.no-img .ph-sub   { font-family: var(--mono); font-weight: 600; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; opacity: .65; margin-top: 5px; }
 
 /* =================================================================
    01 — COVER
@@ -204,14 +178,10 @@ section.scene {
 .cover {
   background: var(--orange);
   color: var(--bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   padding: 0;
 }
-.cover .stage {
-  text-align: center;
-}
+.cover .stage { text-align: center; }
 .cover h1 {
   font-family: var(--display);
   font-weight: 700;
@@ -244,13 +214,13 @@ section.scene {
 .pitch-grid {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
-  gap: clamp(40px, 5vw, 80px);
+  gap: clamp(36px, 5vw, 80px);
   align-items: start;
 }
 .pitch-text {
   font-family: var(--sans);
   font-weight: 400;
-  font-size: clamp(20px, 1.9vw, 28px);
+  font-size: clamp(19px, 1.7vw, 26px);
   line-height: 1.45;
   max-width: 28ch;
 }
@@ -258,168 +228,144 @@ section.scene {
   font-family: var(--mono);
   font-weight: 800;
   display: block;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
   font-size: 1.25em;
   line-height: 1.05;
   letter-spacing: -.01em;
 }
 .pitch-text strong { font-weight: 600; }
 
-.pillars { display: flex; flex-direction: column; gap: 16px; }
-.pillar {
-  background: var(--cream-deep);
-  padding: 26px 28px;
-}
-.pillar .pnum {
-  font-family: var(--mono);
-  font-weight: 800;
-  font-size: 44px;
-  line-height: .85;
-  color: var(--orange);
-  margin-bottom: 8px;
-}
-.pillar .ptitle {
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 22px;
-  line-height: 1.15;
-  letter-spacing: -.01em;
-}
-.pillar .psub {
-  font-family: var(--mono);
-  font-weight: 500;
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 6px;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-}
-.pillar.empty { background: transparent; border: 1.5px dashed var(--line); }
-.pillar.empty .pnum { color: var(--line); }
-.pillar.empty .ptitle { font-family: var(--mono); font-weight: 400; font-style: italic; color: var(--muted); font-size: 20px; }
-.pillar.empty .psub { color: var(--line); }
+.pillars { display: flex; flex-direction: column; gap: 14px; }
+.pillar { background: var(--cream-deep); padding: 22px 26px; }
+.pillar .pnum   { font-family: var(--mono); font-weight: 800; font-size: 40px; line-height: .85; color: var(--orange); margin-bottom: 6px; }
+.pillar .ptitle { font-family: var(--mono); font-weight: 700; font-size: 20px; line-height: 1.15; letter-spacing: -.01em; }
+.pillar .psub   { font-family: var(--mono); font-weight: 500; font-size: 11px; color: var(--muted); margin-top: 6px; letter-spacing: .04em; text-transform: uppercase; }
+.pillar.empty   { background: transparent; border: 1.5px dashed var(--line); }
+.pillar.empty .pnum   { color: var(--line); }
+.pillar.empty .ptitle { font-family: var(--mono); font-weight: 400; font-style: italic; color: var(--muted); font-size: 19px; }
+.pillar.empty .psub   { color: var(--line); }
 
 /* =================================================================
-   03 — KAART
+   03 — KAART  (smaller map, bigger names, fits viewport)
    ================================================================= */
 .scene.map-scene {
   padding: 0;
   background: var(--bg);
+  overflow: hidden;
 }
 .map-layout {
   display: grid;
-  grid-template-columns: 1fr 460px;
-  gap: 0;
+  grid-template-columns: 1fr 600px;       /* aside iets breder, kaart iets kleiner */
   width: 100%;
   height: 100vh;
   height: 100svh;
 }
-.map-host {
-  background: var(--ink);
-  position: relative;
-  overflow: hidden;
-}
+.map-host { background: var(--ink); position: relative; overflow: hidden; }
 #map { width: 100%; height: 100%; }
 
 .map-aside {
   background: var(--bg);
-  padding: clamp(28px, 3.5vw, 56px) clamp(24px, 3vw, 44px);
+  padding: clamp(22px, 2.8vw, 44px) clamp(22px, 2.4vw, 40px);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   border-left: 2px solid var(--ink);
+  scrollbar-width: thin;
 }
+.map-aside::-webkit-scrollbar { width: 4px; }
+.map-aside::-webkit-scrollbar-thumb { background: rgba(0,0,0,.18); }
+
 .map-aside .head-num {
   font-family: var(--mono);
   font-weight: 800;
-  font-size: clamp(48px, 7vw, 100px);
+  font-size: clamp(36px, 4.6vw, 68px);
   line-height: .8;
   color: var(--orange);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 .map-aside .head-kicker {
   font-family: var(--mono);
   font-weight: 600;
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: .22em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 .map-aside h2 {
   font-family: var(--mono);
   font-weight: 800;
-  font-size: clamp(34px, 4vw, 56px);
-  line-height: .98;
+  font-size: clamp(26px, 2.8vw, 40px);
+  line-height: .96;
   letter-spacing: -.02em;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
-.map-aside h2 em {
-  font-style: normal;
-  color: var(--orange);
-}
+.map-aside h2 em { font-style: normal; color: var(--orange); }
 .map-aside .lead {
   font-family: var(--sans);
   font-weight: 400;
-  font-size: 13.5px;
+  font-size: 12px;
   color: var(--muted);
-  line-height: 1.55;
-  margin-bottom: 22px;
-  padding-bottom: 20px;
+  line-height: 1.45;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
   border-bottom: 2px solid var(--ink);
 }
 .map-aside .lead strong.pool   { color: var(--orange); font-weight: 600; }
 .map-aside .lead strong.listen { color: var(--teal);   font-weight: 600; }
 
-.legend-col { margin-bottom: 22px; }
+/* 2-col legend layout zodat alles in 1 viewport past */
+.legend-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
 .legend-col .col-h {
   font-family: var(--mono);
   font-weight: 700;
-  font-size: 12px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: .18em;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  margin-bottom: 6px;
+  display: flex; align-items: center; gap: 8px;
 }
 .legend-col.pool   .col-h { color: var(--orange); }
 .legend-col.listen .col-h { color: var(--teal); }
-.swatch {
-  width: 14px; height: 14px; flex-shrink: 0; border-radius: 50%;
-}
+.swatch { width: 10px; height: 10px; flex-shrink: 0; border-radius: 50%; }
 .swatch.pool   { background: var(--orange); }
 .swatch.listen { background: var(--teal); }
 
 .legend-row {
   display: grid;
-  grid-template-columns: 22px 1fr auto;
-  gap: 10px;
-  padding: 9px 0;
+  grid-template-columns: 18px 1fr auto;
+  gap: 8px;
+  padding: 5px 0;
   border-bottom: 1px solid var(--line-soft);
-  font-size: 12.5px;
   align-items: baseline;
 }
 .legend-row:last-child { border-bottom: none; }
 .legend-row .lnum {
   font-family: var(--mono);
-  font-weight: 700;
-  font-size: 11px;
+  font-weight: 800;
+  font-size: 12px;
 }
 .legend-col.pool   .lnum { color: var(--orange); }
 .legend-col.listen .lnum { color: var(--teal); }
 .legend-row .lname {
   font-family: var(--sans);
   font-weight: 600;
-  line-height: 1.32;
+  font-size: 14.5px;        /* groter dan voorheen, fit 2-col */
+  line-height: 1.18;
+  letter-spacing: -.005em;
+  color: var(--ink);
 }
 .legend-row .lname small {
   display: block;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 400;
   margin-top: 2px;
-  line-height: 1.45;
+  line-height: 1.35;
 }
 .legend-row .lrate {
   font-family: var(--mono);
@@ -432,9 +378,9 @@ section.scene {
 
 .map-foot {
   margin-top: auto;
-  padding-top: 18px;
+  padding-top: 14px;
   font-family: var(--sans);
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--muted);
   line-height: 1.5;
   font-style: italic;
@@ -442,10 +388,7 @@ section.scene {
 }
 
 /* Leaflet overrides */
-.leaflet-container {
-  font-family: var(--sans);
-  background: #ECE1CA;
-}
+.leaflet-container { font-family: var(--sans); background: #ECE1CA; }
 .leaflet-tile { filter: saturate(1.05) contrast(1.08); }
 .leaflet-control-attribution {
   background: rgba(242,232,213,.92) !important;
@@ -464,15 +407,9 @@ section.scene {
 }
 .leaflet-control-zoom a:hover { background: var(--orange) !important; color: #fff !important; }
 
-.marker-wrap {
-  position: relative;
-  width: 80px;
-  height: 56px;
-  pointer-events: none;
-}
+.marker-wrap { position: relative; width: 80px; height: 56px; pointer-events: none; }
 .marker-circle {
-  position: absolute;
-  left: 50%; top: 0;
+  position: absolute; left: 50%; top: 0;
   transform: translateX(-50%);
   width: 34px; height: 34px;
   border-radius: 50%;
@@ -483,161 +420,239 @@ section.scene {
   font-size: 14px;
   border: 2.5px solid var(--bg);
   box-shadow: 0 3px 10px rgba(26,22,18,.4), 0 0 0 1px rgba(26,22,18,.15);
-  pointer-events: auto;
-  cursor: pointer;
+  pointer-events: auto; cursor: pointer;
   transition: transform .15s ease;
 }
 .marker-circle.pool   { background: var(--orange); }
 .marker-circle.listen { background: var(--teal); }
-.marker-circle:hover { transform: translateX(-50%) scale(1.12); }
+.marker-circle:hover  { transform: translateX(-50%) scale(1.12); }
 .marker-rating {
-  position: absolute;
-  top: 38px;
-  left: 50%;
+  position: absolute; top: 38px; left: 50%;
   transform: translateX(-50%);
-  background: var(--ink);
-  color: var(--bg);
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 10px;
-  padding: 2px 6px;
+  background: var(--ink); color: var(--bg);
+  font-family: var(--mono); font-weight: 700;
+  font-size: 10px; padding: 2px 6px;
   white-space: nowrap;
-  box-shadow: 0 2px 6px rgba(26,22,18,.25);
 }
-
-.leaflet-popup-content-wrapper {
-  background: var(--bg) !important;
-  border-radius: 2px !important;
-  border: 1.5px solid var(--ink) !important;
-}
-.leaflet-popup-content {
-  margin: 14px 18px !important;
-  font-family: var(--sans) !important;
-  font-size: 13px !important;
-  color: var(--ink) !important;
-  line-height: 1.45 !important;
-}
-.leaflet-popup-tip {
-  background: var(--bg) !important;
-  border: 1.5px solid var(--ink) !important;
-}
-.popup-tag {
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 10px;
-  letter-spacing: .2em;
-  margin-bottom: 6px;
-  text-transform: uppercase;
-}
+.leaflet-popup-content-wrapper { background: var(--bg) !important; border-radius: 2px !important; border: 1.5px solid var(--ink) !important; }
+.leaflet-popup-content         { margin: 14px 18px !important; font-family: var(--sans) !important; font-size: 13px !important; color: var(--ink) !important; line-height: 1.45 !important; }
+.leaflet-popup-tip             { background: var(--bg) !important; border: 1.5px solid var(--ink) !important; }
+.popup-tag      { font-family: var(--mono); font-weight: 700; font-size: 10px; letter-spacing: .2em; margin-bottom: 6px; text-transform: uppercase; }
 .popup-tag.pool   { color: var(--orange); }
 .popup-tag.listen { color: var(--teal); }
-.popup-name {
-  font-family: var(--mono);
-  font-weight: 800;
-  font-size: 18px;
-  margin-bottom: 6px;
-  letter-spacing: -.01em;
-}
-.popup-segment {
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 10px;
-  line-height: 1.45;
-}
-.popup-rate {
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 11px;
-  border-top: 1px solid var(--line);
-  padding-top: 8px;
-  color: var(--ink);
-}
+.popup-name     { font-family: var(--mono); font-weight: 800; font-size: 18px; margin-bottom: 6px; letter-spacing: -.01em; }
+.popup-segment  { font-size: 12px; color: var(--muted); margin-bottom: 10px; line-height: 1.45; }
+.popup-rate     { font-family: var(--mono); font-weight: 700; font-size: 11px; border-top: 1px solid var(--line); padding-top: 8px; }
 .popup-rate span { color: var(--muted); font-weight: 400; margin-left: 4px; }
 
 /* =================================================================
-   04 — CONCURRENTEN FOTO'S
+   04 — DE GROOTSTE CONCURRENTEN  (vertical bands, hover-expand)
    ================================================================= */
-.photo-grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  grid-auto-rows: clamp(180px, 22vw, 320px);
-  gap: 14px;
+.scene.bands-scene { padding: 0; background: var(--ink-bg); color: var(--bg); }
+.bands-wrap {
+  display: flex; flex-direction: column;
+  width: 100%; height: 100vh; height: 100svh;
 }
-.photo-grid .pg-1 { grid-column: 1 / span 7; grid-row: 1 / span 2; }   /* big left */
-.photo-grid .pg-2 { grid-column: 8 / span 5; grid-row: 1 / span 2; }   /* big right top */
-.photo-grid .pg-3 { grid-column: 1 / span 4; grid-row: 3 / span 1; }
-.photo-grid .pg-4 { grid-column: 5 / span 4; grid-row: 3 / span 1; }
-.photo-grid .pg-5 { grid-column: 9 / span 4; grid-row: 3 / span 1; }
-.photo-grid .pg-6 { grid-column: 1 / span 12; grid-row: 4 / span 1; }  /* wide bottom */
+.bands-head {
+  display: flex; align-items: center; gap: 22px;
+  padding: 22px clamp(20px, 3vw, 56px);
+  flex: 0 0 auto;
+  border-bottom: 2px solid rgba(247,239,220,.2);
+}
+.bands-head .num {
+  font-family: var(--mono); font-weight: 800;
+  font-size: clamp(34px, 4vw, 56px); line-height: .9; color: var(--orange);
+}
+.bands-head .title {
+  font-family: var(--mono); font-weight: 700;
+  font-size: clamp(18px, 1.8vw, 26px);
+  letter-spacing: -.01em;
+}
+.bands-head .kick {
+  font-family: var(--mono); font-weight: 600;
+  font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase;
+  color: rgba(247,239,220,.65); margin-bottom: 4px;
+}
+
+.bands {
+  display: flex;
+  flex: 1 1 auto;
+  width: 100%; min-height: 0;
+  gap: 3px;
+  background: rgba(247,239,220,.06);
+}
+.band {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--ink-bg);
+  transition: flex-grow .55s cubic-bezier(.22,.61,.36,1);
+}
+.bands:hover .band { flex-grow: .85; }
+.bands .band:hover { flex-grow: 2.4; }
+
+.band img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  transition: transform .8s cubic-bezier(.2,.6,.2,1), filter .4s ease;
+  filter: brightness(.78) saturate(.95);
+}
+.band:hover img { filter: brightness(.95) saturate(1); transform: scale(1.04); }
+.band.no-img {
+  background: linear-gradient(135deg, var(--teal-dark) 0%, var(--ink-bg) 100%);
+}
+.band.no-img:nth-child(odd) { background: linear-gradient(135deg, var(--orange-dark) 0%, var(--ink-bg) 100%); }
+.band.no-img:nth-child(3n)  { background: linear-gradient(135deg, var(--plum) 0%, var(--ink-bg) 100%); }
+
+/* always-visible label aan onderkant */
+.band-label {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 22px 22px 22px 22px;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(to top, rgba(0,0,0,.92), rgba(0,0,0,.55) 40%, transparent);
+}
+.band-num {
+  font-family: var(--mono); font-weight: 800;
+  font-size: 14px; letter-spacing: .12em;
+  color: var(--orange);
+  margin-bottom: 6px;
+}
+.band-name {
+  font-family: var(--mono); font-weight: 800;
+  font-size: clamp(18px, 1.8vw, 28px);
+  line-height: 1.05;
+  letter-spacing: -.01em;
+  color: var(--bg);
+}
+.band-stat {
+  font-family: var(--mono); font-weight: 600;
+  font-size: 11px; letter-spacing: .08em;
+  color: rgba(247,239,220,.7);
+  margin-top: 6px;
+}
+/* hover detail panel — schuift in van onder */
+.band-detail {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 28px 26px 26px;
+  z-index: 3;
+  background: linear-gradient(to top, rgba(220,74,46,.97) 0%, rgba(220,74,46,.95) 85%, rgba(220,74,46,0) 100%);
+  color: #fff;
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform .45s cubic-bezier(.22,.61,.36,1), opacity .35s ease;
+  pointer-events: none;
+}
+.band:hover .band-detail {
+  transform: translateY(0);
+  opacity: 1;
+}
+.band:hover .band-label { opacity: 0; transition: opacity .25s; }
+.band-detail .det-num {
+  font-family: var(--mono); font-weight: 800;
+  font-size: 12px; letter-spacing: .2em; text-transform: uppercase;
+  margin-bottom: 10px;
+  opacity: .85;
+}
+.band-detail .det-name {
+  font-family: var(--mono); font-weight: 800;
+  font-size: clamp(20px, 2vw, 30px);
+  line-height: 1.02;
+  margin-bottom: 8px;
+  letter-spacing: -.01em;
+}
+.band-detail .det-stat {
+  font-family: var(--mono); font-weight: 600;
+  font-size: 11px; letter-spacing: .1em;
+  margin-bottom: 14px;
+  opacity: .9;
+}
+.band-detail .det-body {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 40ch;
+}
 
 /* =================================================================
-   05 — INZICHTEN UIT HET VELD
+   05 — INZICHTEN  (cards, grotere tekst)
    ================================================================= */
 .field-top {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  margin-bottom: clamp(28px, 4vw, 52px);
+  gap: 18px;
+  margin-bottom: clamp(20px, 2.5vw, 32px);
 }
 .field-obs {
-  border-top: 2px solid var(--orange);
-  padding-top: 14px;
+  border-top: 2px solid var(--bg);
+  padding-top: 12px;
 }
 .field-obs .fnum {
-  font-family: var(--mono);
-  font-weight: 800;
-  font-size: 24px;
-  line-height: .9;
-  color: var(--orange);
-  margin-bottom: 8px;
+  font-family: var(--mono); font-weight: 800;
+  font-size: 22px; line-height: .9;
+  color: var(--bg); margin-bottom: 6px;
 }
 .field-obs .fhead {
-  font-family: var(--mono);
-  font-weight: 700;
+  font-family: var(--mono); font-weight: 800;
   font-size: clamp(15px, 1.4vw, 20px);
-  line-height: 1.1;
-  margin-bottom: 10px;
+  line-height: 1.08;
+  margin-bottom: 8px;
 }
 .field-obs p {
   font-size: 12.5px;
   line-height: 1.5;
-  color: rgba(247,239,220,.75);
-  max-width: 32ch;
+  color: rgba(247,239,220,.8);
+  max-width: 34ch;
 }
 
 .field-cols {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  border-top: 1px solid rgba(247,239,220,.18);
-  padding-top: 28px;
+  gap: 28px;
 }
-.field-col h3 {
-  font-family: var(--mono);
-  font-weight: 800;
-  font-size: clamp(18px, 1.8vw, 28px);
+.field-col-head {
+  font-family: var(--mono); font-weight: 800;
+  font-size: clamp(18px, 1.8vw, 26px);
   line-height: 1;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
-.field-col.praise h3::before { content: "+ "; color: var(--orange); }
-.field-col.crit   h3::before { content: "− "; color: var(--orange); }
+.field-col.praise .field-col-head::before { content: "+ "; opacity: .8; }
+.field-col.crit   .field-col-head::before { content: "− "; opacity: .8; }
 
-.field-list { list-style: none; padding: 0; }
-.field-list li {
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(247,239,220,.12);
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: rgba(247,239,220,.82);
+.field-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
 }
-.field-list li strong {
-  display: block;
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--bg);
-  margin-bottom: 3px;
+.field-card {
+  background: rgba(247,239,220,.07);
+  border: 1px solid rgba(247,239,220,.18);
+  padding: 14px 16px;
+}
+.field-card .ftag {
+  font-family: var(--mono); font-weight: 700;
+  font-size: 9.5px; letter-spacing: .2em;
+  text-transform: uppercase;
+  color: rgba(247,239,220,.55);
+  margin-bottom: 6px;
+}
+.field-card h4 {
+  font-family: var(--mono); font-weight: 800;
+  font-size: 15.5px;            /* groter dan eerder */
+  line-height: 1.15;
+  margin-bottom: 6px;
   letter-spacing: -.005em;
+  color: var(--bg);
+}
+.field-card p {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 13.5px;            /* veel groter dan eerder */
+  line-height: 1.5;
+  color: rgba(247,239,220,.88);
 }
 
 /* =================================================================
@@ -652,15 +667,14 @@ section.scene {
 .scenarios .row { display: contents; }
 .scenarios .lbl,
 .scenarios .v {
-  padding: 16px 22px;
+  padding: 14px 20px;
   border-bottom: 1px solid rgba(247,239,220,.16);
-  display: flex;
-  align-items: center;
+  display: flex; align-items: center;
 }
 .scenarios .lbl {
   font-family: var(--mono);
-  font-weight: 700;             /* duidelijker dan voorheen */
-  font-size: 14px;              /* groter en bolder */
+  font-weight: 700;
+  font-size: 13.5px;
   color: var(--bg);
   text-transform: uppercase;
   letter-spacing: .04em;
@@ -668,15 +682,15 @@ section.scene {
 .scenarios .v {
   font-family: var(--mono);
   font-weight: 800;
-  font-size: 19px;
+  font-size: 18px;
   letter-spacing: -.01em;
   color: var(--bg);
 }
 .scenarios .col-head {
   font-family: var(--mono);
   font-weight: 800;
-  font-size: clamp(22px, 2.4vw, 38px);
-  padding: 20px 22px 16px;
+  font-size: clamp(22px, 2.4vw, 36px);
+  padding: 18px 20px 14px;
   border-bottom: 2px solid var(--bg);
   line-height: 1;
 }
@@ -687,7 +701,7 @@ section.scene {
   font-size: 11px;
   letter-spacing: .16em;
   text-transform: uppercase;
-  margin-top: 6px;
+  margin-top: 5px;
   opacity: .75;
 }
 
@@ -697,128 +711,119 @@ section.scene {
 .chart-wrap {
   display: grid;
   grid-template-columns: 2.2fr 1fr;
-  gap: clamp(28px, 4vw, 64px);
+  gap: clamp(24px, 4vw, 56px);
   align-items: center;
 }
-.chart-svg-wrap {
-  background: var(--bg-alt);
-  padding: 28px;
-  border: 1px solid var(--line);
-}
+.chart-svg-wrap { background: var(--bg-alt); padding: 26px; border: 1px solid var(--line); }
 svg.chart { display: block; width: 100%; height: auto; }
 
-.chart-legend {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  font-size: 13px;
-}
+.chart-legend { display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
 .leg-item {
   display: grid;
   grid-template-columns: 36px 1fr;
   align-items: center;
   gap: 14px;
-  padding: 14px 0;
+  padding: 12px 0;
   border-bottom: 1px solid var(--line);
 }
-/* legend swatches — solid line / thick orange / dotted */
 .leg-swatch { display: block; width: 100%; height: 14px; position: relative; }
 .leg-swatch .ln { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); }
-.leg-swatch.a  .ln { border-top: 2px solid var(--teal); }
-.leg-swatch.b  .ln { border-top: 4px solid var(--orange); }
-.leg-swatch.c  .ln { border-top: 3px dotted var(--muted); }
-.leg-name {
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 15px;
-}
-.leg-val {
-  font-family: var(--mono);
-  font-weight: 500;
-  font-size: 11.5px;
-  color: var(--muted);
-  margin-top: 2px;
-  letter-spacing: .04em;
-}
+.leg-swatch.a .ln { border-top: 2px solid var(--teal); }
+.leg-swatch.b .ln { border-top: 4px solid var(--orange); }
+.leg-swatch.c .ln { border-top: 3px dotted var(--muted); }
+.leg-name { font-family: var(--mono); font-weight: 700; font-size: 15px; }
+.leg-val  { font-family: var(--mono); font-weight: 500; font-size: 11.5px; color: var(--muted); margin-top: 2px; letter-spacing: .04em; }
 .chart-foot {
   font-family: var(--sans);
   font-weight: 400;
-  font-size: 12px;             /* veel kleiner */
+  font-size: 12px;
   max-width: 80ch;
-  margin-top: 22px;
+  margin-top: 20px;
   line-height: 1.5;
   color: var(--muted);
   font-style: italic;
 }
 
 /* =================================================================
-   08 — BOUWSTENEN (cards-stijl, zoals refs)
+   08 — BOUWSTENEN  (compact, colorful)
    ================================================================= */
+.scene.bouw-scene { justify-content: flex-start; padding-top: clamp(28px, 4vw, 56px); padding-bottom: clamp(24px, 3vw, 48px); }
+
 .bouw-intro {
   font-family: var(--mono);
   font-weight: 600;
-  font-size: clamp(16px, 1.5vw, 22px);
-  max-width: 44ch;
-  line-height: 1.35;
-  margin-bottom: clamp(24px, 3.5vw, 44px);
-  color: rgba(247,239,220,.82);
+  font-size: clamp(14px, 1.2vw, 18px);
+  max-width: 56ch;
+  line-height: 1.4;
+  margin-bottom: clamp(18px, 2.5vw, 32px);
+  color: rgba(247,239,220,.8);
 }
 .bouw-intro em { font-style: normal; color: var(--orange); }
 
 .bouw-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 14px;
 }
 .bouw-card {
-  background: rgba(247,239,220,.06);
+  background: rgba(247,239,220,.05);
   border: 1px solid rgba(247,239,220,.16);
-  padding: 24px 24px 20px;
+  border-top-width: 3px;
+  padding: 16px 18px 14px;
+  display: flex; flex-direction: column;
 }
+/* per-card kleuraccenten */
+.bouw-card.c1 { border-top-color: var(--orange);     }
+.bouw-card.c2 { border-top-color: var(--teal-soft);  }
+.bouw-card.c3 { border-top-color: var(--cream-deep); }
+.bouw-card.c4 { border-top-color: var(--orange-soft);}
+.bouw-card.c5 { border-top-color: var(--teal);       }
+.bouw-card.c6 { border-top-color: var(--olive);      }
+.bouw-card.c1 .cnum { color: var(--orange);     }
+.bouw-card.c2 .cnum { color: var(--teal-soft);  }
+.bouw-card.c3 .cnum { color: var(--cream-deep); }
+.bouw-card.c4 .cnum { color: var(--orange-soft);}
+.bouw-card.c5 .cnum { color: var(--teal);       }
+.bouw-card.c6 .cnum { color: var(--olive);      }
+
 .bouw-card .cnum {
-  font-family: var(--mono);
-  font-weight: 800;
-  font-size: 30px;
-  line-height: .85;
-  color: var(--orange);
+  font-family: var(--mono); font-weight: 800;
+  font-size: 22px; line-height: .85;
   margin-bottom: 4px;
 }
 .bouw-card .ctitle {
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: clamp(17px, 1.7vw, 22px);
+  font-family: var(--mono); font-weight: 700;
+  font-size: 15px;
   line-height: 1.1;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   letter-spacing: -.005em;
+  color: var(--bg);
 }
-.bouw-card ul {
-  list-style: none;
-  padding: 0;
-}
+.bouw-card ul { list-style: none; padding: 0; }
 .bouw-card li {
   font-family: var(--mono);
   font-weight: 500;
-  font-size: 12.5px;
-  line-height: 1.4;
-  padding: 9px 0;
-  border-bottom: 1px solid rgba(247,239,220,.1);
+  font-size: 11.5px;
+  line-height: 1.35;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(247,239,220,.09);
   color: rgba(247,239,220,.82);
 }
 .bouw-card li:last-child { border-bottom: none; }
 
 /* =================================================================
-   09 — INTERNATIONALE REFERENTIES (grote foto's + hover info)
+   09 — INTERNATIONALE REFERENTIES  (kleinere cards)
    ================================================================= */
 .refs-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  gap: 14px;
 }
 .ref-card {
   position: relative;
   overflow: hidden;
   background: var(--ink);
-  aspect-ratio: 16 / 11;
+  aspect-ratio: 3 / 2;       /* compacter */
   cursor: pointer;
 }
 .ref-card img {
@@ -831,100 +836,84 @@ svg.chart { display: block; width: 100%; height: auto; }
   display: flex; align-items: center; justify-content: center;
   background: linear-gradient(135deg, var(--orange-dark) 0%, var(--orange) 100%);
   font-family: var(--mono); font-weight: 800;
-  font-size: clamp(28px, 3vw, 56px);
+  font-size: clamp(24px, 2.6vw, 44px);
   color: var(--bg);
   letter-spacing: -.02em;
 }
-.ref-card.tone-teal .ref-fallback {
-  background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 100%);
-}
+.ref-card.tone-teal  .ref-fallback { background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal) 100%); }
+.ref-card.tone-plum  .ref-fallback { background: linear-gradient(135deg, var(--plum) 0%, var(--ink) 100%); }
+.ref-card.tone-olive .ref-fallback { background: linear-gradient(135deg, var(--olive) 0%, var(--ink) 100%); }
+
 .ref-meta {
-  position: absolute;
-  inset: auto 0 0 0;
-  padding: 22px 26px 20px;
+  position: absolute; inset: auto 0 0 0;
+  padding: 16px 20px 14px;
   color: #fff;
-  background: linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,.6) 40%, transparent);
-  transition: padding-bottom .4s ease;
+  background: linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,.4) 60%, transparent);
 }
 .ref-place {
-  font-family: var(--mono);
-  font-weight: 800;
-  font-size: clamp(22px, 2.2vw, 34px);
-  line-height: 1;
-  margin-bottom: 4px;
+  font-family: var(--mono); font-weight: 800;
+  font-size: clamp(18px, 1.8vw, 26px);
+  line-height: 1; margin-bottom: 3px;
   letter-spacing: -.01em;
 }
 .ref-loc {
-  font-family: var(--mono);
-  font-weight: 600;
-  font-size: 11px;
+  font-family: var(--mono); font-weight: 600;
+  font-size: 10.5px;
   letter-spacing: .14em;
   text-transform: uppercase;
   opacity: .8;
 }
 .ref-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(220,74,46,.94) 0%, rgba(220,74,46,.94) 100%);
+  position: absolute; inset: 0;
+  background: rgba(220,74,46,.95);
   color: #fff;
-  padding: 28px 26px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  padding: 22px 22px;
+  display: flex; flex-direction: column; justify-content: center;
   opacity: 0;
   transition: opacity .35s ease;
 }
 .ref-card:hover .ref-overlay { opacity: 1; }
 .ref-card:hover img { transform: scale(1.06); }
 .ref-overlay .ov-tag {
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 10px;
+  font-family: var(--mono); font-weight: 700;
+  font-size: 9.5px;
   letter-spacing: .2em;
   text-transform: uppercase;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   opacity: .8;
 }
 .ref-overlay .ov-place {
-  font-family: var(--mono);
-  font-weight: 800;
-  font-size: clamp(22px, 2.2vw, 32px);
-  line-height: 1;
-  letter-spacing: -.01em;
+  font-family: var(--mono); font-weight: 800;
+  font-size: clamp(18px, 1.8vw, 26px);
+  line-height: 1; letter-spacing: -.01em;
   margin-bottom: 8px;
 }
 .ref-overlay .ov-essence {
-  font-family: var(--sans);
-  font-style: italic;
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 1.45;
-  margin-bottom: 14px;
-  max-width: 44ch;
+  font-family: var(--sans); font-style: italic;
+  font-weight: 400; font-size: 12.5px;
+  line-height: 1.4; margin-bottom: 10px;
+  max-width: 40ch;
 }
 .ref-overlay .ov-lesson {
-  font-family: var(--sans);
-  font-weight: 500;
-  font-size: 13.5px;
-  line-height: 1.45;
-  max-width: 44ch;
-  padding-top: 12px;
+  font-family: var(--sans); font-weight: 500;
+  font-size: 12px; line-height: 1.45;
+  max-width: 40ch;
+  padding-top: 10px;
   border-top: 1px solid rgba(255,255,255,.4);
 }
 .ref-overlay .ov-lesson::before {
   content: "Wat we ervan leren";
   display: block;
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 10px;
+  font-family: var(--mono); font-weight: 700;
+  font-size: 9.5px;
   letter-spacing: .2em;
   text-transform: uppercase;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   opacity: .85;
 }
 
 /* =================================================================
-   10 — 30/60/90  (groter, brutaler)
+   10 — 30/60/90
    ================================================================= */
 .plan-grid {
   display: grid;
@@ -933,36 +922,33 @@ svg.chart { display: block; width: 100%; height: auto; }
   border-top: 2px solid var(--bg);
 }
 .plan-col {
-  padding: 32px 28px 24px 0;
+  padding: 28px 24px 20px 0;
   border-right: 1px solid rgba(247,239,220,.22);
 }
-.plan-col:last-child  { border-right: none; }
-.plan-col:not(:first-child) { padding-left: 28px; }
+.plan-col:last-child { border-right: none; }
+.plan-col:not(:first-child) { padding-left: 24px; }
 .plan-phase {
-  font-family: var(--mono);
-  font-weight: 900;
-  font-size: clamp(110px, 14vw, 220px);    /* enorm */
+  font-family: var(--mono); font-weight: 900;
+  font-size: clamp(100px, 13vw, 200px);
   line-height: .82;
   letter-spacing: -.04em;
   color: var(--bg);
   margin-bottom: 4px;
 }
 .plan-when {
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 12px;
+  font-family: var(--mono); font-weight: 700;
+  font-size: 11.5px;
   letter-spacing: .18em;
   text-transform: uppercase;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   color: var(--bg);
   opacity: .8;
 }
 .plan-title {
-  font-family: var(--mono);
-  font-weight: 800;
-  font-size: clamp(22px, 2.4vw, 36px);
+  font-family: var(--mono); font-weight: 800;
+  font-size: clamp(20px, 2.2vw, 32px);
   line-height: 1;
-  margin-bottom: 22px;
+  margin-bottom: 18px;
   letter-spacing: -.01em;
   color: var(--bg);
 }
@@ -970,9 +956,9 @@ svg.chart { display: block; width: 100%; height: auto; }
 .plan-list li {
   font-family: var(--sans);
   font-weight: 400;
-  font-size: 14px;
+  font-size: 13.5px;
   line-height: 1.5;
-  padding: 11px 0;
+  padding: 10px 0;
   border-bottom: 1px solid rgba(247,239,220,.22);
   position: relative;
   padding-left: 20px;
@@ -981,8 +967,7 @@ svg.chart { display: block; width: 100%; height: auto; }
 .plan-list li:before {
   content: "—";
   position: absolute; left: 0;
-  font-family: var(--mono);
-  font-weight: 700;
+  font-family: var(--mono); font-weight: 700;
   color: var(--bg);
 }
 .plan-list li:last-child { border-bottom: none; }
@@ -992,14 +977,12 @@ svg.chart { display: block; width: 100%; height: auto; }
    ================================================================= */
 .scene.slot {
   background: var(--teal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
 }
 .slot-quote {
   font-family: var(--mono);
   font-weight: 800;
-  font-size: clamp(40px, 6vw, 100px);
+  font-size: clamp(38px, 5.5vw, 92px);
   line-height: 1.02;
   letter-spacing: -.02em;
   max-width: 24ch;
@@ -1007,19 +990,16 @@ svg.chart { display: block; width: 100%; height: auto; }
   text-align: left;
   color: var(--bg);
 }
-.slot-quote .punc { color: var(--orange); font-style: normal; }
+.slot-quote .punc { color: var(--orange); }
 
 /* =================================================================
    NAVIGATIE
    ================================================================= */
 .nav-dots {
   position: fixed;
-  right: 22px;
-  top: 50%;
+  right: 22px; top: 50%;
   transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: flex; flex-direction: column; gap: 11px;
   z-index: 50;
   mix-blend-mode: difference;
 }
@@ -1027,8 +1007,7 @@ svg.chart { display: block; width: 100%; height: auto; }
   width: 9px; height: 9px;
   border-radius: 50%;
   border: 1px solid rgba(255,255,255,.75);
-  background: transparent;
-  padding: 0; cursor: pointer;
+  background: transparent; padding: 0; cursor: pointer;
   transition: background .2s, transform .2s;
 }
 .nav-dots button:hover  { transform: scale(1.4); }
@@ -1036,7 +1015,7 @@ svg.chart { display: block; width: 100%; height: auto; }
 
 .kbd-hint {
   position: fixed;
-  bottom: 18px; left: var(--gutter);
+  bottom: 16px; left: var(--gutter);
   font-family: var(--mono);
   font-weight: 600;
   font-size: 10.5px;
@@ -1051,8 +1030,7 @@ svg.chart { display: block; width: 100%; height: auto; }
   padding: 2px 5px;
   border: 1px solid currentColor;
   margin: 0 2px;
-  font-family: var(--mono);
-  font-weight: 600;
+  font-family: var(--mono); font-weight: 600;
   font-size: 10px;
 }
 
@@ -1061,9 +1039,9 @@ svg.chart { display: block; width: 100%; height: auto; }
    ================================================================= */
 .reveal {
   opacity: 0;
-  transform: translateY(16px);
-  transition: opacity .7s cubic-bezier(.2,.6,.2,1), transform .7s cubic-bezier(.2,.6,.2,1);
-  transition-delay: calc(var(--i, 0) * 55ms);
+  transform: translateY(14px);
+  transition: opacity .65s cubic-bezier(.2,.6,.2,1), transform .65s cubic-bezier(.2,.6,.2,1);
+  transition-delay: calc(var(--i, 0) * 50ms);
 }
 .reveal.in-view { opacity: 1; transform: translateY(0); }
 @media (prefers-reduced-motion: reduce) {
@@ -1074,26 +1052,20 @@ svg.chart { display: block; width: 100%; height: auto; }
    RESPONSIVE
    ================================================================= */
 @media (max-width: 1100px) {
-  .map-layout { grid-template-columns: 1fr; height: auto; }
-  .map-host   { min-height: 500px; }
-  .map-aside  { border-left: none; border-top: 2px solid var(--ink); }
+  section.scene { height: auto; min-height: 100vh; }
+  .map-layout   { grid-template-columns: 1fr; height: auto; }
+  .map-host     { min-height: 480px; }
+  .map-aside    { border-left: none; border-top: 2px solid var(--ink); }
+  .bands-wrap   { height: auto; }
+  .bands        { flex-direction: column; min-height: 80vh; }
+  .bands:hover .band { flex-grow: 1; }
   .pitch-grid, .chart-wrap { grid-template-columns: 1fr; }
-  .photo-grid {
-    grid-template-columns: repeat(6, 1fr);
-    grid-auto-rows: clamp(180px, 28vw, 280px);
-  }
-  .photo-grid .pg-1 { grid-column: 1 / span 6; grid-row: 1; }
-  .photo-grid .pg-2 { grid-column: 1 / span 6; grid-row: 2; }
-  .photo-grid .pg-3 { grid-column: 1 / span 3; grid-row: 3; }
-  .photo-grid .pg-4 { grid-column: 4 / span 3; grid-row: 3; }
-  .photo-grid .pg-5 { grid-column: 1 / span 3; grid-row: 4; }
-  .photo-grid .pg-6 { grid-column: 4 / span 3; grid-row: 4; }
   .field-top    { grid-template-columns: 1fr; }
-  .field-cols   { grid-template-columns: 1fr; gap: 32px; }
+  .field-cols   { grid-template-columns: 1fr; gap: 24px; }
   .bouw-grid    { grid-template-columns: 1fr 1fr; }
   .refs-grid    { grid-template-columns: 1fr; }
   .plan-grid    { grid-template-columns: 1fr; }
-  .plan-col     { border-right: none; border-bottom: 1px solid rgba(247,239,220,.22); padding-bottom: 28px; }
+  .plan-col     { border-right: none; border-bottom: 1px solid rgba(247,239,220,.22); padding-bottom: 24px; }
   .scenarios    { grid-template-columns: 1.4fr 1fr 1fr 1fr; font-size: 12px; }
   .nav-dots     { display: none; }
 }
@@ -1105,33 +1077,31 @@ svg.chart { display: block; width: 100%; height: auto; }
    PRINT
    ================================================================= */
 @media print {
-  :root { --gutter: 24px; }
+  :root { --gutter: 22px; }
   html, body { background: #fff; color: #000; }
   .nav-dots, .kbd-hint { display: none; }
   section.scene {
-    min-height: auto;
+    height: auto; min-height: auto;
     page-break-after: always;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
   .reveal { opacity: 1 !important; transform: none !important; }
-  /* leaflet zoom controls verbergen bij print */
   .leaflet-control-zoom { display: none; }
   .map-layout { height: auto; grid-template-columns: 1fr; }
-  .map-host { min-height: 480px; }
+  .map-host { min-height: 420px; }
+  .bands { height: auto; min-height: 420px; }
 }
 </style>
 </head>
 <body>
 
-<!-- =================================================================
-     NAV
-     ================================================================= -->
+<!-- NAV -->
 <nav class="nav-dots" aria-label="Sectie-navigatie">
   <button data-go="1"  aria-label="1 — Cover"></button>
   <button data-go="2"  aria-label="2 — Concept"></button>
-  <button data-go="3"  aria-label="3 — Het veld"></button>
-  <button data-go="4"  aria-label="4 — Beelden"></button>
+  <button data-go="3"  aria-label="3 — Kaart"></button>
+  <button data-go="4"  aria-label="4 — Concurrenten"></button>
   <button data-go="5"  aria-label="5 — Inzichten"></button>
   <button data-go="6"  aria-label="6 — Cijfers"></button>
   <button data-go="7"  aria-label="7 — Projectie"></button>
@@ -1140,14 +1110,11 @@ svg.chart { display: block; width: 100%; height: auto; }
   <button data-go="10" aria-label="10 — 30/60/90"></button>
   <button data-go="11" aria-label="11 — Slot"></button>
 </nav>
-
 <div class="kbd-hint">
   <kbd>←</kbd><kbd>→</kbd>·<kbd>↑</kbd><kbd>↓</kbd> sectie · <kbd>1</kbd>–<kbd>9</kbd>·<kbd>0</kbd>·<kbd>End</kbd>
 </div>
 
-<!-- =================================================================
-     01 — COVER
-     ================================================================= -->
+<!-- 01 — COVER -->
 <section class="scene cover" id="sec-1" data-num="1">
   <div class="stage">
     <h1 class="reveal" style="--i:0">Side<span class="b-out">B</span></h1>
@@ -1155,9 +1122,7 @@ svg.chart { display: block; width: 100%; height: auto; }
   </div>
 </section>
 
-<!-- =================================================================
-     02 — CONCEPT
-     ================================================================= -->
+<!-- 02 — CONCEPT -->
 <section class="scene bg" id="sec-2" data-num="2">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
@@ -1167,7 +1132,6 @@ svg.chart { display: block; width: 100%; height: auto; }
         <h2>Listening bar<br/>met pooltafels.</h2>
       </div>
     </header>
-
     <div class="pitch-grid">
       <div class="pitch-text reveal" style="--i:1">
         <span class="lead">Een pool-café en listening bar in één.</span>
@@ -1177,7 +1141,6 @@ svg.chart { display: block; width: 100%; height: auto; }
         we deze combinatie nergens — of dat een gat is of een reden,
         hoort bij wat samen uit te vinden valt.
       </div>
-
       <div class="pillars">
         <div class="pillar reveal" style="--i:2">
           <div class="pnum">01</div>
@@ -1189,7 +1152,6 @@ svg.chart { display: block; width: 100%; height: auto; }
           <div class="ptitle">Muziek als ritueel</div>
           <div class="psub">— niet als achtergrond</div>
         </div>
-        <!-- Derde pijler — bewust open. Vul in als je hem hebt. -->
         <div class="pillar empty reveal" style="--i:4">
           <div class="pnum">03</div>
           <div class="ptitle">[ derde pijler ]</div>
@@ -1200,69 +1162,58 @@ svg.chart { display: block; width: 100%; height: auto; }
   </div>
 </section>
 
-<!-- =================================================================
-     03 — KAART (Leaflet)
-     ================================================================= -->
+<!-- 03 — KAART -->
 <section class="scene map-scene" id="sec-3" data-num="3">
   <div class="map-layout">
-
-    <div class="map-host">
-      <div id="map"></div>
-    </div>
-
+    <div class="map-host"><div id="map"></div></div>
     <aside class="map-aside">
       <div class="head-num">03</div>
       <div class="head-kicker">Concurrentielandschap · Amsterdam</div>
       <h2>Het Amsterdamse <em>veld.</em></h2>
       <p class="lead">
-        Elf <strong class="pool">pool-bars</strong> en vier <strong class="listen">listening bars</strong> op de kaart,
-        geclusterd rond centrum en grachtengordel. Ratings via Google Maps,
-        peildatum mei 2026.
+        Elf <strong class="pool">pool-bars</strong> en vier <strong class="listen">listening bars</strong>. Ratings via Google Maps, peildatum mei 2026.
       </p>
 
-      <div class="legend-col pool">
-        <h3 class="col-h"><span class="swatch pool"></span>Pool-bars</h3>
-        <div id="legend-pool"></div>
+      <div class="legend-wrap">
+        <div class="legend-col pool">
+          <h3 class="col-h"><span class="swatch pool"></span>Pool-bars</h3>
+          <div id="legend-pool"></div>
+        </div>
+        <div class="legend-col listen">
+          <h3 class="col-h"><span class="swatch listen"></span>Listening bars</h3>
+          <div id="legend-listen"></div>
+        </div>
       </div>
 
-      <div class="legend-col listen">
-        <h3 class="col-h"><span class="swatch listen"></span>Listening bars</h3>
-        <div id="legend-listen"></div>
-      </div>
-
-      <p class="map-foot">Kaartdata via OpenStreetMap, tile-style CARTO Voyager. Klik op een marker voor segment en rating.</p>
+      <p class="map-foot">Kaartdata via OpenStreetMap, tile-style CARTO Voyager. Klik op een marker voor details.</p>
     </aside>
-
   </div>
 </section>
 
-<!-- =================================================================
-     04 — CONCURRENTEN FOTO'S
-     ================================================================= -->
-<section class="scene ink" id="sec-4" data-num="4">
-  <div class="inner">
-    <header class="sec-head reveal" style="--i:0">
+<!-- 04 — DE GROOTSTE CONCURRENTEN -->
+<section class="scene bands-scene" id="sec-4" data-num="4">
+  <div class="bands-wrap">
+    <header class="bands-head reveal" style="--i:0">
       <div class="num">04</div>
-      <div class="title-wrap">
-        <div class="kicker">In beeld</div>
-        <h2>Hoe het er bij<br/>de buren uitziet.</h2>
+      <div>
+        <div class="kick">De grootste concurrenten</div>
+        <div class="title">Vijf zaken, één gemeenschappelijk dilemma.</div>
       </div>
     </header>
 
-    <div class="photo-grid reveal" style="--i:1">
-      <div class="photo pg-1" data-img="doka"></div>
-      <div class="photo pg-2" data-img="cue"></div>
-      <div class="photo pg-3" data-img="murmur"></div>
-      <div class="photo pg-4" data-img="loop51"></div>
-      <div class="photo pg-5" data-img="planb"></div>
-      <div class="photo pg-6" data-img="mokum"></div>
+    <div class="bands">
+      <!-- Eigen foto's: zet als ./photos/thepoolbar.jpg, ./photos/planb.jpg, etc.
+           en update IMAGES.band-* hieronder.  Plan B en Mokum hebben al een URL. -->
+      <article class="band" data-band="thepoolbar"></article>
+      <article class="band" data-band="planb"></article>
+      <article class="band" data-band="mokum"></article>
+      <article class="band" data-band="degracht"></article>
+      <article class="band" data-band="finaltouch"></article>
     </div>
   </div>
 </section>
 
-<!-- =================================================================
-     05 — INZICHTEN
-     ================================================================= -->
+<!-- 05 — INZICHTEN -->
 <section class="scene orange" id="sec-5" data-num="5">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
@@ -1279,13 +1230,11 @@ svg.chart { display: block; width: 100%; height: auto; }
         <div class="fhead">Volwassen markt,<br/>niet verzadigd.</div>
         <p>Geen zaak onder 4,3★. Slechte poolbars blijven niet open — publiek weet wat het wil.</p>
       </article>
-
       <article class="field-obs reveal" style="--i:2">
         <div class="fnum">02</div>
         <div class="fhead">The Pool Bar<br/>als anker.</div>
         <p>1.700 reviews tegen 850 voor nummer twee. Meer "place to be" dan buurtzaak.</p>
       </article>
-
       <article class="field-obs reveal" style="--i:3">
         <div class="fnum">03</div>
         <div class="fhead">Mokum als<br/>nieuwe speler.</div>
@@ -1295,31 +1244,61 @@ svg.chart { display: block; width: 100%; height: auto; }
 
     <div class="field-cols">
       <div class="field-col praise reveal" style="--i:4">
-        <h3>Wat reviews prijzen</h3>
-        <ul class="field-list">
-          <li><strong>Sfeer en muziek</strong>"Great music", "amazing vibe" — vrijwel elke positieve review. Zelden expliciet gebouwd als programmering.</li>
-          <li><strong>Tafelkwaliteit</strong>Plan B: "top notch tables." De Gracht: recent opnieuw bekleed. Hygiënefactor.</li>
-          <li><strong>Persoonlijk personeel</strong>Reviews noemen mensen bij naam: "Paco was absolutely fantastic." Differentiërend.</li>
-          <li><strong>Pricing transparency</strong>Plan B's €18,50/uur is bekend, geaccepteerd bij kwaliteit. Onduidelijke prijzen geven irritatie.</li>
-        </ul>
+        <h3 class="field-col-head">Wat reviews prijzen</h3>
+        <div class="field-cards">
+          <div class="field-card">
+            <div class="ftag">Praise</div>
+            <h4>Sfeer en muziek</h4>
+            <p>"Great music", "amazing vibe" — vrijwel elke positieve review. Zelden expliciet als programmering gebouwd.</p>
+          </div>
+          <div class="field-card">
+            <div class="ftag">Praise</div>
+            <h4>Tafelkwaliteit</h4>
+            <p>Plan B: "top notch tables." De Gracht: recent opnieuw bekleed. Hygiënefactor.</p>
+          </div>
+          <div class="field-card">
+            <div class="ftag">Praise</div>
+            <h4>Persoonlijk personeel</h4>
+            <p>Reviews noemen mensen bij naam: "Paco was absolutely fantastic." Differentiërend in dit segment.</p>
+          </div>
+          <div class="field-card">
+            <div class="ftag">Praise</div>
+            <h4>Pricing transparency</h4>
+            <p>Plan B's €18,50/uur is bekend, geaccepteerd bij kwaliteit. Onduidelijke prijzen geven irritatie.</p>
+          </div>
+        </div>
       </div>
 
       <div class="field-col crit reveal" style="--i:5">
-        <h3>Wat reviews bekritiseren</h3>
-        <ul class="field-list">
-          <li><strong>Wachtrijen in het weekend</strong>De #1 klacht. "Plan to be there an hour earlier." "Don't bother without booking."</li>
-          <li><strong>Reserveringen die falen</strong>Plan B: "I tried to book a day prior and got DENIED." Eén precedent = jarenlange TripAdvisor-schade.</li>
-          <li><strong>Versleten tafels</strong>De Keu: "tables are clearly overused and need to be refurbished." Onderhoud is hygiëne.</li>
-          <li><strong>Onduidelijkheid over capaciteit</strong>Wel of niet reserveren, hoe lang wachten — onzekerheid is een grotere ergernis dan wachten.</li>
-        </ul>
+        <h3 class="field-col-head">Wat reviews bekritiseren</h3>
+        <div class="field-cards">
+          <div class="field-card">
+            <div class="ftag">Kritiek</div>
+            <h4>Wachtrijen in het weekend</h4>
+            <p>De #1 klacht. "Plan to be there an hour earlier." "Don't bother without booking."</p>
+          </div>
+          <div class="field-card">
+            <div class="ftag">Kritiek</div>
+            <h4>Reserveringen die falen</h4>
+            <p>Plan B: "I tried to book a day prior and got DENIED." Eén precedent = jarenlange TripAdvisor-schade.</p>
+          </div>
+          <div class="field-card">
+            <div class="ftag">Kritiek</div>
+            <h4>Versleten tafels</h4>
+            <p>De Keu: "tables are clearly overused and need to be refurbished." Onderhoud is hygiëne.</p>
+          </div>
+          <div class="field-card">
+            <div class="ftag">Kritiek</div>
+            <h4>Onduidelijkheid over capaciteit</h4>
+            <p>Wel of niet reserveren, hoe lang wachten — onzekerheid is een grotere ergernis dan wachten zelf.</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- =================================================================
-     06 — CIJFERS
-     ================================================================= -->
+<!-- 06 — CIJFERS -->
 <section class="scene teal" id="sec-6" data-num="6">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
@@ -1329,14 +1308,11 @@ svg.chart { display: block; width: 100%; height: auto; }
         <h2>Drie maten<br/>om in te denken.</h2>
       </div>
     </header>
-
     <div class="scenarios reveal" style="--i:1" id="scenarios"></div>
   </div>
 </section>
 
-<!-- =================================================================
-     07 — PROJECTIE
-     ================================================================= -->
+<!-- 07 — PROJECTIE -->
 <section class="scene bg" id="sec-7" data-num="7">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
@@ -1346,22 +1322,18 @@ svg.chart { display: block; width: 100%; height: auto; }
         <h2>Opstart, opbouw,<br/>afbouw.</h2>
       </div>
     </header>
-
     <div class="chart-wrap">
       <div class="chart-svg-wrap reveal" style="--i:1" id="chart-mount"></div>
       <div class="chart-legend reveal" style="--i:2" id="chart-legend"></div>
     </div>
-
     <p class="chart-foot reveal" style="--i:3">
       Aannames: opbouw jaar 1, plateau jaar 3–4, geleidelijke afbouw. Werkelijkheid hangt af van seizoen, programmering en marketing. Geen voorspelling — een raamwerk.
     </p>
   </div>
 </section>
 
-<!-- =================================================================
-     08 — BOUWSTENEN (cards)
-     ================================================================= -->
-<section class="scene ink" id="sec-8" data-num="8">
+<!-- 08 — BOUWSTENEN -->
+<section class="scene ink bouw-scene" id="sec-8" data-num="8">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
       <div class="num">08</div>
@@ -1376,86 +1348,78 @@ svg.chart { display: block; width: 100%; height: auto; }
     </p>
 
     <div class="bouw-grid">
-
-      <article class="bouw-card reveal" style="--i:2">
+      <article class="bouw-card c1 reveal" style="--i:2">
         <div class="cnum">A</div>
         <h3 class="ctitle">Pool als sociaal spel</h3>
         <ul>
           <li>Killer Pool — eliminatie, 3–12 spelers</li>
-          <li>Cutthroat — 3-spelers, korter dan 8-ball</li>
-          <li>Album Side Game — speel terwijl een plaat-kant draait</li>
-          <li>Pool 101 — gratis instap-les zondagmiddag</li>
-          <li>"Find the King" — één tafel altijd vrij</li>
+          <li>Cutthroat — 3-spelers variant</li>
+          <li>Album Side Game — speel terwijl een plaat draait</li>
+          <li>Pool 101 — gratis instap-les zondag</li>
         </ul>
       </article>
 
-      <article class="bouw-card reveal" style="--i:3">
+      <article class="bouw-card c2 reveal" style="--i:3">
         <div class="cnum">B</div>
         <h3 class="ctitle">Weekprogrammering</h3>
         <ul>
-          <li>Maandag — Quiet Monday, ambient + freelancers</li>
-          <li>Dinsdag — Selector Series, rotatie per kwartaal</li>
-          <li>Woensdag — Album Night, begin tot eind</li>
-          <li>Vrijdag — B-Side Fridays, deep cuts</li>
-          <li>Zondag — Sunday Spinning, vinyl-brunch</li>
+          <li>Quiet Monday — ambient + freelancers</li>
+          <li>Selector Series dinsdag</li>
+          <li>Album Night woensdag</li>
+          <li>B-Side Fridays — deep cuts</li>
+          <li>Sunday Spinning — vinyl-brunch</li>
         </ul>
       </article>
 
-      <article class="bouw-card reveal" style="--i:4">
+      <article class="bouw-card c3 reveal" style="--i:4">
         <div class="cnum">C</div>
         <h3 class="ctitle">Aesthetiek &amp; materiaal</h3>
         <ul>
-          <li>Vintage Brunswick-tafels — verhaal, waarde</li>
-          <li>Vilt-kleur — niet groen, diep rood of zwart</li>
-          <li>Industriële hanglampen boven elke tafel</li>
-          <li>Messing krijthouders aan tafel-rand</li>
-          <li>Cue-rack als muurinstallatie</li>
+          <li>Vintage Brunswick-tafels</li>
+          <li>Vilt-kleur: diep rood of zwart</li>
+          <li>Industriële hanglampen per tafel</li>
+          <li>Messing krijthouders</li>
         </ul>
       </article>
 
-      <article class="bouw-card reveal" style="--i:5">
+      <article class="bouw-card c4 reveal" style="--i:5">
         <div class="cnum">D</div>
         <h3 class="ctitle">Bar &amp; food (geen kok)</h3>
         <ul>
           <li>Japanese highball als signature</li>
           <li>Natural wine op tap</li>
-          <li>Lower-ABV menu (vermouth, spritz, alcoholvrij)</li>
-          <li>Katsu sandwich €11, 3 min airfryer</li>
-          <li>Late night ramen vr/za na 23u</li>
+          <li>Lower-ABV menu</li>
+          <li>Katsu sandwich €11</li>
+          <li>Late night ramen vr/za</li>
         </ul>
       </article>
 
-      <article class="bouw-card reveal" style="--i:6">
+      <article class="bouw-card c5 reveal" style="--i:6">
         <div class="cnum">E</div>
         <h3 class="ctitle">Slimme toevoegingen</h3>
         <ul>
           <li>Listening menu — "wat draait vanavond"</li>
-          <li>Vinyl wall achter de DJ-booth</li>
+          <li>Vinyl wall achter DJ-booth</li>
           <li>Audiophile lidmaatschap €100/jaar</li>
-          <li>Koptelefoon-bar — drie high-end krukken</li>
-          <li>Polaroid Hall of Fame</li>
+          <li>Koptelefoon-bar — drie krukken</li>
         </ul>
       </article>
 
-      <article class="bouw-card reveal" style="--i:7">
+      <article class="bouw-card c6 reveal" style="--i:7">
         <div class="cnum">F</div>
         <h3 class="ctitle">Marketing &amp; opening</h3>
         <ul>
-          <li>Pre-opening Instagram, 6 maanden</li>
-          <li>Vijf besloten previews — per avond ander publiek</li>
-          <li>Soft opening 2 weken op 50% capaciteit</li>
-          <li>Industry Night maandag voor horeca</li>
-          <li>Drempelverlagende communicatie</li>
+          <li>Pre-opening Instagram 6 mnd</li>
+          <li>Vijf besloten previews</li>
+          <li>Soft opening 2 wkn op 50%</li>
+          <li>Industry Night maandag</li>
         </ul>
       </article>
-
     </div>
   </div>
 </section>
 
-<!-- =================================================================
-     09 — INTERNATIONALE REFERENTIES (hover info)
-     ================================================================= -->
+<!-- 09 — REFERENTIES -->
 <section class="scene bg" id="sec-9" data-num="9">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
@@ -1467,7 +1431,6 @@ svg.chart { display: block; width: 100%; height: auto; }
     </header>
 
     <div class="refs-grid">
-
       <article class="ref-card reveal" style="--i:1" data-img="ref-nyc">
         <div class="ref-meta">
           <div class="ref-place">Amsterdam Billiards Club</div>
@@ -1477,7 +1440,7 @@ svg.chart { display: block; width: 100%; height: auto; }
           <div class="ov-tag">01 · New York</div>
           <div class="ov-place">Amsterdam Billiards Club</div>
           <p class="ov-essence">25 Brunswick-tafels, grootste co-ed pool league van de US.</p>
-          <p class="ov-lesson">Een pool league kan een belangrijk onderdeel van de business worden — doordeweekse omzet die je niet uit walk-ins haalt.</p>
+          <p class="ov-lesson">Een league kan een belangrijk deel van de business worden — doordeweekse omzet die je niet uit walk-ins haalt.</p>
         </div>
       </article>
 
@@ -1490,14 +1453,11 @@ svg.chart { display: block; width: 100%; height: auto; }
           <div class="ov-tag">02 · Brooklyn</div>
           <div class="ov-place">Status Q</div>
           <p class="ov-essence">"Are we a bar with billiards or a billiards hall with a bar? We are both."</p>
-          <p class="ov-lesson">Twee identiteiten expliciet claimen, niet kiezen. Voorkomt dat gasten met de verkeerde verwachting binnenkomen.</p>
+          <p class="ov-lesson">Beide identiteiten claimen, niet kiezen. Voorkomt verkeerde verwachting.</p>
         </div>
       </article>
 
-      <!-- Eerste versie had "Le Brady (Paris)" maar dat blijkt een bioscoop
-           van Jean-Pierre Mocky. Vervangen door de echte Parijse pool-
-           referentie: Académie de Billard de Paris (Clichy Montmartre, 1947). -->
-      <article class="ref-card reveal" style="--i:3" data-img="ref-paris">
+      <article class="ref-card reveal tone-plum" style="--i:3" data-img="ref-paris">
         <div class="ref-meta">
           <div class="ref-place">Académie de Billard</div>
           <div class="ref-loc">Paris · Clichy-Montmartre · 1947</div>
@@ -1506,11 +1466,11 @@ svg.chart { display: block; width: 100%; height: auto; }
           <div class="ov-tag">03 · Paris</div>
           <div class="ov-place">Académie de Billard</div>
           <p class="ov-essence">Historische biljartzaal, 23 tafels, Art-Deco interieur, ongebroken traditie.</p>
-          <p class="ov-lesson">Een zaak die niet probeert mee te gaan met trends, maar consequent één ding doet, bouwt een eigen publiek.</p>
+          <p class="ov-lesson">Een zaak die niet meegaat met trends, maar consequent één ding doet, bouwt een eigen publiek.</p>
         </div>
       </article>
 
-      <article class="ref-card reveal tone-teal" style="--i:4" data-img="ref-tokyo">
+      <article class="ref-card reveal tone-olive" style="--i:4" data-img="ref-tokyo">
         <div class="ref-meta">
           <div class="ref-place">Tokio high-rise pool</div>
           <div class="ref-loc">Shibuya · Tokio</div>
@@ -1519,17 +1479,14 @@ svg.chart { display: block; width: 100%; height: auto; }
           <div class="ov-tag">04 · Tokio</div>
           <div class="ov-place">Tokio high-rise pool</div>
           <p class="ov-essence">Verstopt op de 4e en 6e verdieping van kantoorgebouwen — "hidden gems by looking up."</p>
-          <p class="ov-lesson">In de stad werkt verticaliteit. Een ongebruikelijke locatie wordt onderdeel van het verhaal, niet een obstakel.</p>
+          <p class="ov-lesson">In de stad werkt verticaliteit. Een ongebruikelijke locatie wordt onderdeel van het verhaal.</p>
         </div>
       </article>
-
     </div>
   </div>
 </section>
 
-<!-- =================================================================
-     10 — 30/60/90
-     ================================================================= -->
+<!-- 10 — 30/60/90 -->
 <section class="scene orange" id="sec-10" data-num="10">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
@@ -1539,7 +1496,6 @@ svg.chart { display: block; width: 100%; height: auto; }
         <h2>Eerst luisteren,<br/>dan bouwen.</h2>
       </div>
     </header>
-
     <div class="plan-grid">
       <div class="plan-col reveal" style="--i:1">
         <div class="plan-phase">30</div>
@@ -1552,7 +1508,6 @@ svg.chart { display: block; width: 100%; height: auto; }
           <li>Bezoeken aan Doka en enkele andere referenties</li>
         </ul>
       </div>
-
       <div class="plan-col reveal" style="--i:2">
         <div class="plan-phase">60</div>
         <div class="plan-when">Dag 31 — 60</div>
@@ -1564,7 +1519,6 @@ svg.chart { display: block; width: 100%; height: auto; }
           <li>Eén signature-investering uitgewerkt</li>
         </ul>
       </div>
-
       <div class="plan-col reveal" style="--i:3">
         <div class="plan-phase">90</div>
         <div class="plan-when">Dag 61 — 90</div>
@@ -1580,9 +1534,7 @@ svg.chart { display: block; width: 100%; height: auto; }
   </div>
 </section>
 
-<!-- =================================================================
-     11 — SLOT
-     ================================================================= -->
+<!-- 11 — SLOT -->
 <section class="scene slot" id="sec-11" data-num="11">
   <p class="slot-quote reveal" style="--i:0">
     <span class="punc">"</span>Amsterdams eerste pool + listening bar.<br/>
@@ -1590,19 +1542,14 @@ svg.chart { display: block; width: 100%; height: auto; }
   </p>
 </section>
 
-<!-- =================================================================
-     SCRIPT
-     ================================================================= -->
 <script>
 /* =================================================================
    CONFIG
    ================================================================= */
-const CONFIG = {
-  brandName: 'Side B',
-};
+const CONFIG = { brandName: 'Side B' };
 
 /* =================================================================
-   DATA — Bron: Scenarios_listening_bar.xlsx + kaartdata
+   DATA — uit Excel
    ================================================================= */
 const DATA = {
   scenarios: {
@@ -1622,14 +1569,13 @@ const DATA = {
     b: [18,171,232,232,140],
     c: [68,331,436,436,278],
   },
-
   poolBars: [
-    { num: 1,  name: "The Pool Bar",        seg: "Centrum · marktleider casual, vooral toeristen en groepen.",                                 lat: 52.3685701, lng: 4.8906426, rating: 4.5, reviews: 1700, short: "Centrum, marktleider qua bekendheid" },
+    { num: 1,  name: "The Pool Bar",        seg: "Centrum · marktleider casual, vooral toeristen en groepen.",                                  lat: 52.3685701, lng: 4.8906426, rating: 4.5, reviews: 1700, short: "Centrum, marktleider qua bekendheid" },
     { num: 2,  name: "Plan B",              seg: "Overtoom · pro-segment, tournament-kwaliteit, €18.50/u tafels.",                              lat: 52.3611816, lng: 4.8700553, rating: 4.5, reviews: 853,  short: "Overtoom, pro-segment" },
     { num: 3,  name: "Poolbar De Gracht",   seg: "Oost · recent vernieuwd, casual buurt-vibe, 11 tafels.",                                       lat: 52.3626717, lng: 4.9097059, rating: 4.3, reviews: 748,  short: "Oost, recent vernieuwd" },
     { num: 4,  name: "Final Touch",         seg: "Centrum · twee verdiepingen, snooker-zwaar, klassiek billiards.",                              lat: 52.3644252, lng: 4.8860000, rating: 4.7, reviews: 605,  short: "Centrum, twee verdiepingen" },
     { num: 5,  name: "Cafe the Palace",     seg: "Centrum · Doors-thema, betaalbaar, gedateerd interieur.",                                      lat: 52.3763180, lng: 4.8925019, rating: 4.5, reviews: 489,  short: "Centrum, Doors-thema" },
-    { num: 6,  name: "Poolcafé de Keu",     seg: "Oud-West · casual + 'great music selection' — dichtste vergelijking met ons concept.",         lat: 52.3641033, lng: 4.8779636, rating: 4.5, reviews: 410,  short: "Oud-West, casual + 'great music'" },
+    { num: 6,  name: "Poolcafé de Keu",     seg: "Oud-West · casual + 'great music selection' — dichtste vergelijking.",                         lat: 52.3641033, lng: 4.8779636, rating: 4.5, reviews: 410,  short: "Oud-West, casual + muziek" },
     { num: 7,  name: "Billiards Cafe Hermes",seg: "De Pijp · klein en niche, eigenzinnige sfeer, loyale stamgasten.",                            lat: 52.3527000, lng: 4.8892000, rating: 4.7, reviews: 353,  short: "De Pijp, klein en niche" },
     { num: 8,  name: "Pool Center Boven 't IJ", seg: "Noord · in winkelcentrum, 9ft tafels, lokaal buurtconcept.",                               lat: 52.3991313, lng: 4.9376219, rating: 4.7, reviews: 285,  short: "Noord, in winkelcentrum" },
     { num: 9,  name: "Mokum Pool & Darts",  seg: "Watergraafsmeer · premium pro, eigenaar ex-Europees kampioen.",                                lat: 52.3504428, lng: 4.9232788, rating: 4.9, reviews: 88,   short: "Watergraafsmeer, premium pro" },
@@ -1637,40 +1583,65 @@ const DATA = {
     { num: 11, name: "Bij 8 Eraf",          seg: "Slotervaart, Nieuw-West · buurt-sportsbar met pool + darts.",                                  lat: 52.3425102, lng: 4.7951646, rating: 4.5, reviews: 115,  short: "Slotervaart, buurt-sportsbar" },
   ],
   listeningBars: [
-    { letter: "A", name: "Doka",               seg: "Volkshotel kelder · 5 jaar bestaand, 98dB max. Deurbeleid drukt rating.",         lat: 52.3537886, lng: 4.9116250, rating: 3.6, reviews: 174, short: "Volkshotel kelder · 5 jaar bestaand" },
-    { letter: "B", name: "Loop 51",            seg: "De Pijp · vinyl-brunch concept. Bewijst dat daytime listening werkt.",            lat: 52.3513202, lng: 4.8895518, rating: 4.7, reviews: 511, short: "De Pijp, vinyl-brunch concept" },
-    { letter: "C", name: "CUE Bar Restaurant", seg: "Centrum · listening bar onder Michelin-restaurant, premium positionering.",       lat: 52.3644265, lng: 4.8979664, rating: 4.7, reviews: 284, short: "Centrum, onder Michelin-restaurant" },
-    { letter: "D", name: "murmur",             seg: "Noord · alleen vrijdag/zaterdag open, Libanees food + DJ-sets.",                  lat: 52.3855435, lng: 4.9280073, rating: 4.7, reviews: 171, short: "Noord, alleen vrijdag/zaterdag" },
+    { letter: "A", name: "Doka",               seg: "Volkshotel kelder · 5 jaar bestaand, 98dB max. Deurbeleid drukt rating.",         lat: 52.3537886, lng: 4.9116250, rating: 3.6, reviews: 174, short: "Volkshotel kelder, 5 jaar" },
+    { letter: "B", name: "Loop 51",            seg: "De Pijp · vinyl-brunch concept. Bewijst dat daytime listening werkt.",            lat: 52.3513202, lng: 4.8895518, rating: 4.7, reviews: 511, short: "De Pijp, vinyl-brunch" },
+    { letter: "C", name: "CUE Bar Restaurant", seg: "Centrum · listening bar onder Michelin-restaurant, premium positionering.",       lat: 52.3644265, lng: 4.8979664, rating: 4.7, reviews: 284, short: "Centrum, onder Michelin" },
+    { letter: "D", name: "murmur",             seg: "Noord · alleen vrijdag/zaterdag open, Libanees food + DJ-sets.",                  lat: 52.3855435, lng: 4.9280073, rating: 4.7, reviews: 171, short: "Noord, alleen vr/za" },
+  ],
+
+  /* sec 04 — vijf grootste pool-concurrenten + hover-detail */
+  bands: [
+    {
+      key: 'thepoolbar', num: 1, name: 'The Pool Bar',
+      stat: '★ 4.5 · 1.700 reviews · Centrum',
+      detail: 'Marktleider qua mind share. Hun klachten over wachtrijen en geen reserveringen zijn onze marketing-hook.',
+    },
+    {
+      key: 'planb', num: 2, name: 'Plan B',
+      stat: '★ 4.5 · 853 reviews · Overtoom',
+      detail: 'Tournament-kwaliteit, pro-publiek met gemengde casual welcome. In hun reviews komt reserveer-frustratie expliciet terug.',
+    },
+    {
+      key: 'mokum', num: 3, name: 'Mokum Pool & Darts',
+      stat: '★ 4.9 · 88 reviews · Watergraafsmeer',
+      detail: '16 tafels, premium club-feel, ex-EU kampioen Nick als eigenaar. Reviews suggereren breder publiek dan ik dacht — "great place for friends and family". Onderschatte concurrent.',
+    },
+    {
+      key: 'degracht', num: 4, name: 'Poolbar De Gracht',
+      stat: '★ 4.3 · 748 reviews · Oost',
+      detail: 'Recent vernieuwd, investeringsbereid. Houd in de gaten of ze zich uitbreiden naar muziek of premium hifi.',
+    },
+    {
+      key: 'finaltouch', num: 5, name: 'Final Touch',
+      stat: '★ 4.7 · 605 reviews · Centrum',
+      detail: 'Twee verdiepingen — snooker boven, pool onder. Sterk in centrum-cluster, onze directe radius.',
+    },
   ],
 };
 
 /* =================================================================
    IMAGES — venue-foto's
+   Drop eigen foto's in ./photos/ en wijs hier de URL aan.
    ================================================================= */
 const IMAGES = {
-  // sec 04 — concurrenten foto's (groot)
-  doka:    { url: 'https://www.volkshotel.nl/content/uploads/2019/10/R1-06657-006A.jpg',                                                                       credit: 'Foto · Volkshotel',                  alt: 'Doka — Volkshotel Amsterdam',    label: 'Doka',         sub: 'Volkshotel · Oost' },
-  cue:     { url: 'https://cdn.prod.website-files.com/6841a4beb5cabb956f197ea1/68542c40140606bd001a5069_CUE_1November_by_ZsofiaBodnar-4.avif',                  credit: 'Foto · Zsofia Bodnar / CUE',         alt: 'CUE Amsterdam listening bar',    label: 'CUE',          sub: 'Utrechtsestraat' },
-  murmur:  { url: 'https://www.tracksandtales.co/cdn/shop/articles/Copy_of_Phill_Argent_-_10.9.1.HG_1_c1105ae3-90ec-4e23-bf96-5d2280eb1aca.png?v=1761310720&width=1100', credit: 'Foto · Phill Argent / Tracks & Tales', alt: 'murmur Amsterdam Noord',       label: 'murmur',       sub: 'Amsterdam Noord' },
-  loop51:  { url: 'https://images.squarespace-cdn.com/content/v1/680155b8ea1a2d02a37bf2e3/54be601d-f51f-40ac-bc26-a734ad74f21b/P1025308.jpg',                    credit: 'Foto · Loop 51',                     alt: 'Loop 51 — Vinyl Brunch De Pijp', label: 'Loop 51',      sub: 'De Pijp' },
-  planb:   { url: 'https://www.planbovertoom.nl/wp-content/uploads/2024/11/DSC01881-scaled.jpg',                                                                credit: 'Foto · Plan B',                      alt: 'Plan B — Amsterdam',             label: 'Plan B',       sub: 'Overtoom' },
-  mokum:   { url: 'https://poolen-amsterdam.nl/wp-content/uploads/Mokum-Pool-Darts-03-1-2048x1365.jpg',                                                         credit: 'Foto · Mokum Pool & Darts',          alt: 'Mokum Pool & Darts',             label: 'Mokum Pool',   sub: 'Watergraafsmeer' },
+  /* sec 04 — bands */
+  'band-thepoolbar':  { url: './photos/thepoolbar.jpg',  alt: 'The Pool Bar' },
+  'band-planb':       { url: './photos/planb.jpg',       alt: 'Plan B Overtoom',     fallback: 'https://www.planbovertoom.nl/wp-content/uploads/2024/11/DSC01881-scaled.jpg' },
+  'band-mokum':       { url: './photos/mokum.jpg',       alt: 'Mokum Pool & Darts',  fallback: 'https://poolen-amsterdam.nl/wp-content/uploads/Mokum-Pool-Darts-03-1-2048x1365.jpg' },
+  'band-degracht':    { url: './photos/degracht.jpg',    alt: 'Poolbar De Gracht' },
+  'band-finaltouch':  { url: './photos/finaltouch.jpg',  alt: 'Final Touch' },
 
-  // sec 09 — internationale referenties
-  'ref-nyc':     { url: 'https://amsterdambilliards.com/wp-content/uploads/2026/04/Amsterdam-Billiards-and-Bar.jpg', credit: 'Foto · Amsterdam Billiards Club', alt: 'Amsterdam Billiards Club NYC', label: 'NYC' },
-  'ref-statusq': { url: null, credit: '', alt: 'Status Q Brooklyn',     label: 'Status Q' },
-  'ref-paris':   { url: null, credit: '', alt: 'Académie de Billard',   label: 'Paris' },
-  'ref-tokyo':   { url: null, credit: '', alt: 'Tokyo high-rise pool',  label: 'Tokio' },
+  /* sec 09 — internationale referenties */
+  'ref-nyc':     { url: 'https://amsterdambilliards.com/wp-content/uploads/2026/04/Amsterdam-Billiards-and-Bar.jpg', alt: 'Amsterdam Billiards Club NYC', label: 'NYC' },
+  'ref-statusq': { url: null, alt: 'Status Q Brooklyn',     label: 'Status Q' },
+  'ref-paris':   { url: null, alt: 'Académie de Billard',   label: 'Paris' },
+  'ref-tokyo':   { url: null, alt: 'Tokyo high-rise pool',  label: 'Tokio' },
 };
 
 /* =================================================================
-   RENDER — config, kaart, foto's, scenarios, chart
+   RENDER
    ================================================================= */
 (function renderConfig() {
-  document.querySelectorAll('[data-cfg]').forEach(el => {
-    const key = el.dataset.cfg;
-    if (CONFIG[key] != null) el.textContent = CONFIG[key];
-  });
   document.title = `${CONFIG.brandName} — Concept-voorstel`;
 })();
 
@@ -1704,12 +1675,7 @@ const IMAGES = {
   const y = v => PAD.t + ((maxY - v) * (H - PAD.t - PAD.b)) / maxY;
   const path = a => a.map((v,i) => (i?'L':'M') + x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ');
 
-  /* duidelijk verschil A/C:
-     A = teal, dunne ononderbroken lijn
-     B = oranje, dik ononderbroken
-     C = grijs, gestippeld (dots, niet dashes) */
   const colA = '#1F5F5F', colB = '#DC4A2E', colC = '#6B5F50';
-
   const grid = [];
   for (let i = 0; i <= 5; i++) {
     const yv = (maxY * i) / 5;
@@ -1722,24 +1688,22 @@ const IMAGES = {
   const xLab = p.years.map((yr,i) =>
     `<text x="${x(i)}" y="${H-PAD.b+22}" text-anchor="middle" font-family="Geist Mono,monospace" font-size="11" font-weight="500" fill="#6B5F50">${yr}</text>`
   ).join('');
-
   const dots = (arr, col) => arr.map((v,i) =>
     `<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="#EBE0CB" stroke="${col}" stroke-width="2"><title>${p.years[i]} — €${v}k</title></circle>`
   ).join('');
 
   const svg = `
-    <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="5-jaar EBIT projectie per scenario">
+    <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="5-jaar EBIT projectie">
       ${grid.join('')}
-      <path d="${path(p.a)}" fill="none" stroke="${colA}" stroke-width="2"   stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="${path(p.b)}" fill="none" stroke="${colB}" stroke-width="4"   stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="${path(p.c)}" fill="none" stroke="${colC}" stroke-width="3"   stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.5 6"/>
+      <path d="${path(p.a)}" fill="none" stroke="${colA}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="${path(p.b)}" fill="none" stroke="${colB}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="${path(p.c)}" fill="none" stroke="${colC}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.5 6"/>
       ${dots(p.a, colA)}
       ${dots(p.b, colB)}
       ${dots(p.c, colC)}
       ${xLab}
       <text x="${PAD.l-50}" y="${PAD.t-4}" font-family="Geist Mono,monospace" font-size="10" font-weight="700" fill="#6B5F50" letter-spacing="2">EBIT</text>
-    </svg>
-  `;
+    </svg>`;
   document.getElementById('chart-mount').innerHTML = svg;
 
   const totA = p.a.reduce((s,v)=>s+v,0), totB = p.b.reduce((s,v)=>s+v,0), totC = p.c.reduce((s,v)=>s+v,0);
@@ -1764,67 +1728,87 @@ const IMAGES = {
         <div class="leg-name">C · Volwaardig</div>
         <div class="leg-val">12 tafels · cumulatief €${totC}k</div>
       </div>
-    </div>
-  `;
+    </div>`;
 })();
 
 (function renderLegendList() {
-  const fmtRow = (n, b, klass) => `
+  const fmtRow = (n, b) => `
     <div class="legend-row">
       <span class="lnum">${n}</span>
       <span class="lname">${b.name}<small>${b.short}</small></span>
       <span class="lrate">★ ${b.rating} <small>· ${b.reviews.toLocaleString('nl-NL')}</small></span>
     </div>`;
-  document.getElementById('legend-pool').innerHTML   = DATA.poolBars.map(b => fmtRow(b.num, b, 'pool')).join('');
-  document.getElementById('legend-listen').innerHTML = DATA.listeningBars.map(b => fmtRow(b.letter, b, 'listen')).join('');
+  document.getElementById('legend-pool').innerHTML   = DATA.poolBars.map(b => fmtRow(b.num, b)).join('');
+  document.getElementById('legend-listen').innerHTML = DATA.listeningBars.map(b => fmtRow(b.letter, b)).join('');
 })();
 
-(function renderPhotos() {
-  document.querySelectorAll('[data-img]').forEach(el => {
-    const key = el.dataset.img;
-    const meta = IMAGES[key];
-    if (!meta) return;
-    if (meta.url) {
-      if (el.classList.contains('ref-card')) {
-        const img = document.createElement('img');
-        img.src = meta.url;
-        img.alt = meta.alt || '';
-        img.loading = 'lazy';
-        img.referrerPolicy = 'no-referrer';
-        img.onerror = () => { img.remove(); makeRefFallback(el, meta); };
-        el.insertBefore(img, el.firstChild);
-      } else {
-        const img = document.createElement('img');
-        img.src = meta.url;
-        img.alt = meta.alt || '';
-        img.loading = 'lazy';
-        img.referrerPolicy = 'no-referrer';
-        img.onerror = () => { el.innerHTML = ''; renderPhotoPlaceholder(el, meta); };
-        el.appendChild(img);
-        if (meta.credit || meta.label) {
-          const cap = document.createElement('div');
-          cap.className = 'caption';
-          cap.innerHTML = `${meta.label || ''}<div class="sub">${meta.sub || ''} · ${meta.credit || ''}</div>`;
-          el.appendChild(cap);
-        }
-      }
+/* sec 04 — bands */
+(function renderBands() {
+  document.querySelectorAll('[data-band]').forEach(el => {
+    const key  = el.dataset.band;
+    const info = DATA.bands.find(b => b.key === key);
+    const img  = IMAGES['band-' + key];
+    if (!info) return;
+
+    // Altijd eerst overlay (label + detail), zit boven foto via z-index
+    renderBandOverlay(el, info);
+
+    // Foto eronder zetten — eerst lokale URL, val terug op fallback, anders placeholder
+    if (img && img.url) {
+      const im = document.createElement('img');
+      im.src = img.url;
+      im.alt = img.alt || info.name;
+      im.loading = 'lazy';
+      im.referrerPolicy = 'no-referrer';
+      im.onerror = () => {
+        if (img.fallback && im.src !== img.fallback) { im.src = img.fallback; return; }
+        im.remove();
+        el.classList.add('no-img');
+      };
+      el.insertBefore(im, el.firstChild);
     } else {
-      if (el.classList.contains('ref-card')) {
-        makeRefFallback(el, meta);
-      } else {
-        renderPhotoPlaceholder(el, meta);
-      }
+      el.classList.add('no-img');
     }
   });
 })();
-function renderPhotoPlaceholder(el, meta) {
-  el.classList.add('no-img');
-  el.innerHTML = `
-    <div>
-      <div class="ph-label">${meta.label || ''}</div>
-      <div class="ph-sub">${meta.sub || ''}</div>
-    </div>`;
+function renderBandOverlay(el, info) {
+  const label = document.createElement('div');
+  label.className = 'band-label';
+  label.innerHTML = `
+    <div class="band-num">0${info.num}</div>
+    <div class="band-name">${info.name}</div>
+    <div class="band-stat">${info.stat}</div>`;
+  el.appendChild(label);
+
+  const det = document.createElement('div');
+  det.className = 'band-detail';
+  det.innerHTML = `
+    <div class="det-num">0${info.num} · concurrent</div>
+    <div class="det-name">${info.name}</div>
+    <div class="det-stat">${info.stat}</div>
+    <p class="det-body">${info.detail}</p>`;
+  el.appendChild(det);
 }
+
+/* sec 09 — refs */
+(function renderRefs() {
+  document.querySelectorAll('.ref-card[data-img]').forEach(el => {
+    const key  = el.dataset.img;
+    const meta = IMAGES[key];
+    if (!meta) return;
+    if (meta.url) {
+      const im = document.createElement('img');
+      im.src = meta.url;
+      im.alt = meta.alt || '';
+      im.loading = 'lazy';
+      im.referrerPolicy = 'no-referrer';
+      im.onerror = () => { im.remove(); makeRefFallback(el, meta); };
+      el.insertBefore(im, el.firstChild);
+    } else {
+      makeRefFallback(el, meta);
+    }
+  });
+})();
 function makeRefFallback(el, meta) {
   const fb = document.createElement('div');
   fb.className = 'ref-fallback';
@@ -1853,28 +1837,23 @@ function makeRefFallback(el, meta) {
     const icon = L.divIcon({
       className: '',
       html: `<div class="marker-wrap"><div class="marker-circle ${klass}">${label}</div><div class="marker-rating">★ ${b.rating}</div></div>`,
-      iconSize: [80, 56],
-      iconAnchor: [40, 17],
+      iconSize: [80, 56], iconAnchor: [40, 17],
     });
     const m = L.marker([b.lat, b.lng], { icon }).addTo(map);
     m.bindPopup(`
       <div class="popup-tag ${klass}">${klass === 'pool' ? 'POOL · #'+label : 'LISTENING · '+label}</div>
       <div class="popup-name">${b.name}</div>
       <div class="popup-segment">${b.seg}</div>
-      <div class="popup-rate">★ ${b.rating} <span>· ${b.reviews.toLocaleString('nl-NL')} reviews</span></div>
-    `);
+      <div class="popup-rate">★ ${b.rating} <span>· ${b.reviews.toLocaleString('nl-NL')} reviews</span></div>`);
   };
-
   DATA.poolBars.forEach(b => mkMarker(b, 'pool', b.num));
   DATA.listeningBars.forEach(b => mkMarker(b, 'listen', b.letter));
 
-  const allPoints = [
+  map.fitBounds([
     ...DATA.poolBars.map(b => [b.lat, b.lng]),
     ...DATA.listeningBars.map(b => [b.lat, b.lng]),
-  ];
-  map.fitBounds(allPoints, { padding: [40, 40] });
+  ], { padding: [40, 40] });
 
-  // herzichting bij section in/out (Leaflet vraagt invalidateSize bij grootteveranderingen)
   const obs = new IntersectionObserver(entries => {
     entries.forEach(en => { if (en.isIntersecting) setTimeout(() => map.invalidateSize(), 100); });
   }, { threshold: 0.2 });
@@ -1882,7 +1861,7 @@ function makeRefFallback(el, meta) {
 })();
 
 /* =================================================================
-   NAVIGATIE — toetsenbord (←→↑↓) + dots + observer
+   NAVIGATIE
    ================================================================= */
 const sections = Array.from(document.querySelectorAll('.scene'));
 const dots = Array.from(document.querySelectorAll('.nav-dots button'));
@@ -1901,28 +1880,21 @@ document.addEventListener('keydown', (e) => {
 
   const k = e.key;
   if (k === 'ArrowDown' || k === 'ArrowRight' || k === 'PageDown' || k === ' ') {
-    e.preventDefault();
-    goTo(cur + 1);
+    e.preventDefault(); goTo(cur + 1);
   } else if (k === 'ArrowUp' || k === 'ArrowLeft' || k === 'PageUp') {
-    e.preventDefault();
-    goTo(cur - 1);
+    e.preventDefault(); goTo(cur - 1);
   } else if (k === 'Home') {
-    e.preventDefault();
-    goTo(0);
+    e.preventDefault(); goTo(0);
   } else if (k === 'End') {
-    e.preventDefault();
-    goTo(sections.length - 1);
+    e.preventDefault(); goTo(sections.length - 1);
   } else if (/^[1-9]$/.test(k)) {
-    e.preventDefault();
-    goTo(parseInt(k, 10) - 1);
+    e.preventDefault(); goTo(parseInt(k, 10) - 1);
   } else if (k === '0') {
-    e.preventDefault();
-    goTo(9); // sectie 10
+    e.preventDefault(); goTo(9);
   }
 });
 dots.forEach((btn, i) => btn.addEventListener('click', () => goTo(i)));
 
-/* observer: zorgt dat scrollen met muiswiel ook `cur` bijhoudt + dots actualiseert */
 const dotObserver = new IntersectionObserver((entries) => {
   entries.forEach(en => {
     if (en.isIntersecting && en.intersectionRatio > 0.55) {
@@ -1936,7 +1908,6 @@ const dotObserver = new IntersectionObserver((entries) => {
 }, { threshold: [0.55] });
 sections.forEach(s => dotObserver.observe(s));
 
-/* reveal on scroll */
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(en => {
     if (en.isIntersecting) {
