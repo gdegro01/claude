@@ -12,7 +12,7 @@
 <style>
 /* =================================================================
    SIDE B — sollicitatie-presentatie bedrijfsleider
-   Eén bestand. Editorial layout, geïnspireerd op Modernline-template.
+   Eén bestand. Editorial layout, Modernline-template-inspiratie.
    Aanpassen: zie CONFIG / DATA / IMAGES onderaan in <script>.
    ================================================================= */
 
@@ -24,6 +24,7 @@
   --orange-dark:  #C73E1F;
   --teal:         #1E4D52;
   --teal-dark:    #143438;
+  --ink-bg:       #1A1815;
   --ink:          #181715;
   --ink-soft:     #2A2823;
   --mute:         #6B6B6B;
@@ -33,7 +34,7 @@
   --serif-heavy:   'Archivo Black', 'Inter', sans-serif;
   --sans:          'Inter', system-ui, -apple-system, sans-serif;
 
-  --gutter: clamp(24px, 4vw, 80px);
+  --gutter: clamp(20px, 4vw, 80px);
   --max:    1400px;
 }
 
@@ -43,7 +44,7 @@ html, body {
   background: var(--cream);
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   scroll-behavior: smooth;
@@ -54,21 +55,23 @@ html, body {
 
 /* ---------- shared layout ---------- */
 section.scene {
+  /* gebruik small viewport waar beschikbaar — geen overlap met browser UI */
   min-height: 100vh;
-  padding: clamp(48px, 7vw, 110px) var(--gutter);
+  min-height: 100svh;
+  padding: clamp(36px, 5.5vw, 90px) var(--gutter);
   display: flex;
   flex-direction: column;
   justify-content: center;
   position: relative;
-  scroll-snap-align: start;
   break-after: page;
   page-break-after: always;
 }
 .scene.cream     { background: var(--cream); }
 .scene.cream-alt { background: var(--cream-soft); }
-.scene.orange    { background: var(--orange); color: var(--cream); }
-.scene.teal      { background: var(--teal); color: var(--cream); }
-.scene.orange .mute, .scene.teal .mute { color: rgba(255,255,255,.7); }
+.scene.orange    { background: var(--orange);  color: var(--cream); }
+.scene.teal      { background: var(--teal);    color: var(--cream); }
+.scene.ink       { background: var(--ink-bg);  color: var(--cream); }
+.scene.orange .mute, .scene.teal .mute, .scene.ink .mute { color: rgba(255,255,255,.7); }
 
 .inner {
   max-width: var(--max);
@@ -78,10 +81,10 @@ section.scene {
 
 /* ---------- type ---------- */
 h1, h2, h3, h4 { font-family: var(--serif-display); font-weight: normal; letter-spacing: -.01em; line-height: .95; }
-.display-xl    { font-size: clamp(80px, 14vw, 240px); }
-.display-l     { font-size: clamp(56px, 9vw, 140px); }
-.display-m     { font-size: clamp(40px, 6vw, 88px); }
-.display-s     { font-size: clamp(28px, 3.4vw, 52px); }
+.display-xl    { font-size: clamp(72px, 13vw, 220px); }
+.display-l     { font-size: clamp(48px, 8vw, 120px); }
+.display-m     { font-size: clamp(36px, 5.5vw, 80px); }
+.display-s     { font-size: clamp(26px, 3.2vw, 48px); }
 .heavy         { font-family: var(--serif-heavy); }
 
 p { max-width: 60ch; }
@@ -89,242 +92,45 @@ p + p { margin-top: 1em; }
 
 .mute  { color: var(--mute); font-size: .85em; letter-spacing: .04em; text-transform: uppercase; font-weight: 500; }
 .lead  { font-size: 1.25em; line-height: 1.45; max-width: 36ch; }
-.tiny  { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; font-weight: 600; }
-.callout { color: var(--orange); font-weight: 600; }
-.scene.orange .callout, .scene.teal .callout { color: var(--cream-soft); border-bottom: 1px dashed currentColor; padding-bottom: 2px; }
+.tiny  { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
 
-/* ---------- section header (groot nummer + titel) ---------- */
+/* ---------- section header ---------- */
 .sec-head {
   display: flex;
   align-items: flex-end;
-  gap: 28px;
-  margin-bottom: clamp(32px, 5vw, 72px);
+  gap: 24px;
+  margin-bottom: clamp(24px, 4vw, 56px);
   border-bottom: 1px solid var(--rule);
-  padding-bottom: 18px;
+  padding-bottom: 14px;
 }
-.scene.orange .sec-head, .scene.teal .sec-head { border-color: rgba(255,255,255,.25); }
+.scene.orange .sec-head, .scene.teal .sec-head, .scene.ink .sec-head { border-color: rgba(255,255,255,.22); }
 .sec-num {
   font-family: var(--serif-display);
-  font-size: clamp(60px, 9vw, 130px);
+  font-size: clamp(52px, 8vw, 110px);
   line-height: .8;
   color: var(--orange);
 }
 .scene.orange .sec-num { color: var(--teal); }
-.scene.teal .sec-num   { color: var(--orange); }
+.scene.teal   .sec-num { color: var(--orange); }
+.scene.ink    .sec-num { color: var(--orange); }
 .sec-title {
   font-family: var(--serif-display);
-  font-size: clamp(28px, 3.6vw, 58px);
+  font-size: clamp(26px, 3.2vw, 50px);
   line-height: 1;
   flex: 1;
 }
 .sec-kicker {
   font-family: var(--sans);
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing: .14em;
   text-transform: uppercase;
   font-weight: 600;
   color: var(--mute);
-  margin-bottom: 8px;
-}
-.scene.orange .sec-kicker, .scene.teal .sec-kicker { color: rgba(255,255,255,.7); }
-
-/* =================================================================
-   01 — COVER
-   ================================================================= */
-.cover {
-  background: var(--orange);
-  color: var(--cream);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto 1fr auto;
-  gap: 32px;
-  padding: 48px var(--gutter);
-}
-.cover-meta-top    { grid-column: 1 / 2; }
-.cover-meta-topr   { grid-column: 2 / 3; text-align: right; }
-.cover-center      { grid-column: 1 / -1; align-self: center; }
-.cover-meta-bot    { grid-column: 1 / 2; align-self: end; }
-.cover-meta-botr   { grid-column: 2 / 3; align-self: end; text-align: right; }
-.cover h1 {
-  font-family: var(--serif-display);
-  font-size: clamp(120px, 22vw, 420px);
-  letter-spacing: -.02em;
-  line-height: .85;
-  margin-left: -.04em;
-}
-.cover h1 .b-flip {
-  display: inline-block;
-  color: transparent;
-  -webkit-text-stroke: 6px var(--cream);
-  text-stroke: 6px var(--cream);
-  margin-left: -.08em;
-}
-.cover .tagline {
-  font-family: var(--serif-display);
-  font-size: clamp(20px, 1.8vw, 28px);
-  font-weight: 400;
-  margin-top: 36px;
-  max-width: 22ch;
-  line-height: 1.15;
-  letter-spacing: .005em;
-}
-.cover .scroll-hint {
-  font-size: 12px;
-  letter-spacing: .15em;
-  text-transform: uppercase;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.scroll-hint .arrow {
-  display: inline-block;
-  animation: bob 2s ease-in-out infinite;
-}
-@keyframes bob {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(4px); }
-}
-
-/* =================================================================
-   02 — CONCEPT-PITCH
-   ================================================================= */
-.pitch-grid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: clamp(40px, 5vw, 80px);
-  align-items: start;
-}
-.pitch-text {
-  font-size: clamp(20px, 1.7vw, 26px);
-  line-height: 1.45;
-  font-weight: 400;
-  max-width: 28ch;
-}
-.pitch-text .lead-emph { font-family: var(--serif-display); display: block; margin-bottom: 16px; font-size: 1.4em; line-height: 1; }
-.pitch-text strong { font-weight: 600; }
-.pitch-foot { margin-top: 24px; font-size: 14px; color: var(--mute); }
-
-.pillars {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.pillar {
-  background: var(--cream-deep);
-  padding: 24px 28px;
-  position: relative;
-}
-.pillar-num {
-  font-family: var(--serif-display);
-  font-size: 48px;
-  line-height: .8;
-  color: var(--orange);
   margin-bottom: 6px;
 }
-.pillar-title {
-  font-family: var(--serif-heavy);
-  font-size: 22px;
-  line-height: 1.15;
-  letter-spacing: -.005em;
-}
-.pillar-sub {
-  font-family: var(--sans);
-  font-size: 13px;
-  color: var(--mute);
-  margin-top: 6px;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-}
-.pillar.empty {
-  background: transparent;
-  border: 1.5px dashed var(--rule);
-}
-.pillar.empty .pillar-num   { color: var(--rule); }
-.pillar.empty .pillar-title { font-family: var(--serif-display); font-weight: normal; color: var(--mute); font-style: italic; font-size: 20px; }
-.pillar.empty .pillar-sub   { color: var(--rule); }
+.scene.orange .sec-kicker, .scene.teal .sec-kicker, .scene.ink .sec-kicker { color: rgba(255,255,255,.65); }
 
-/* =================================================================
-   03 — CONCURRENTIELANDSCHAP
-   ================================================================= */
-.insight-line {
-  font-family: var(--serif-display);
-  font-size: clamp(24px, 2.4vw, 38px);
-  line-height: 1.15;
-  max-width: 26ch;
-  margin-bottom: 48px;
-  color: var(--teal);
-}
-.insight-line em { font-style: normal; color: var(--orange); }
-
-.tables-wrap {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  margin-bottom: 56px;
-}
-.tbl-label {
-  font-family: var(--sans);
-  font-weight: 600;
-  font-size: 12px;
-  letter-spacing: .15em;
-  text-transform: uppercase;
-  color: var(--orange);
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1.5px solid var(--orange);
-}
-table.editorial {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-table.editorial th,
-table.editorial td {
-  text-align: left;
-  padding: 12px 8px 10px 0;
-  border-bottom: 1px solid var(--rule);
-  vertical-align: top;
-}
-table.editorial th {
-  font-family: var(--sans);
-  font-size: 11px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: var(--mute);
-  padding-top: 0;
-  padding-bottom: 8px;
-}
-table.editorial td.name {
-  font-family: var(--serif-heavy);
-  font-size: 15px;
-  letter-spacing: -.005em;
-  padding-right: 16px;
-  white-space: nowrap;
-}
-table.editorial tr {
-  transition: background .12s ease;
-}
-table.editorial tbody tr:hover {
-  background: var(--cream-deep);
-}
-table.editorial td.pos { color: var(--ink-soft); }
-table.editorial td.note { color: var(--mute); font-size: 13px; }
-
-.competitor-photos {
-  display: grid;
-  grid-template-columns: 2fr 1.5fr 1.5fr 2fr;
-  grid-template-rows: 160px 200px;
-  gap: 16px;
-}
-.competitor-photos .ph-1 { grid-column: 1 / 2; grid-row: 1 / 3; }
-.competitor-photos .ph-2 { grid-column: 2 / 3; grid-row: 1 / 2; }
-.competitor-photos .ph-3 { grid-column: 3 / 4; grid-row: 1 / 2; }
-.competitor-photos .ph-4 { grid-column: 2 / 4; grid-row: 2 / 3; }
-.competitor-photos .ph-5 { grid-column: 4 / 5; grid-row: 1 / 3; }
-
-/* shared photo tile */
+/* shared photo tile (placeholder + img) */
 .photo {
   position: relative;
   overflow: hidden;
@@ -341,28 +147,27 @@ table.editorial td.note { color: var(--mute); font-size: 13px; }
 .photo .caption {
   position: absolute;
   inset: auto 0 0 0;
-  background: linear-gradient(to top, rgba(0,0,0,.6), transparent);
+  background: linear-gradient(to top, rgba(0,0,0,.7), transparent 70%);
   color: #fff;
   font-family: var(--sans);
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: .1em;
   text-transform: uppercase;
   font-weight: 600;
-  padding: 24px 12px 10px;
+  padding: 32px 12px 10px;
 }
 .photo .credit {
   font-weight: 400;
   text-transform: none;
   letter-spacing: 0;
-  font-size: 10px;
-  opacity: .75;
+  font-size: 9.5px;
+  opacity: .7;
   margin-top: 2px;
 }
-/* placeholder when no img */
 .photo.no-img {
   display: flex;
   align-items: flex-end;
-  padding: 16px;
+  padding: 14px;
   background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
   color: var(--cream);
 }
@@ -375,12 +180,12 @@ table.editorial td.note { color: var(--mute); font-size: 13px; }
 }
 .photo.no-img .ph-label {
   font-family: var(--serif-display);
-  font-size: clamp(18px, 1.8vw, 28px);
+  font-size: clamp(15px, 1.6vw, 24px);
   line-height: 1;
-  max-width: 12ch;
+  max-width: 14ch;
 }
 .photo.no-img .ph-sub {
-  font-size: 10px;
+  font-size: 9.5px;
   letter-spacing: .12em;
   text-transform: uppercase;
   opacity: .6;
@@ -388,7 +193,259 @@ table.editorial td.note { color: var(--mute); font-size: 13px; }
 }
 
 /* =================================================================
-   04 — FINANCIËLE SCENARIOS
+   01 — COVER
+   ================================================================= */
+.cover {
+  background: var(--orange);
+  color: var(--cream);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr auto;
+  gap: 24px;
+  padding: 36px var(--gutter);
+}
+.cover-meta-top    { grid-column: 1 / 2; }
+.cover-meta-topr   { grid-column: 2 / 3; text-align: right; }
+.cover-center      { grid-column: 1 / -1; align-self: center; }
+.cover-meta-bot    { grid-column: 1 / 2; align-self: end; }
+.cover-meta-botr   { grid-column: 2 / 3; align-self: end; text-align: right; }
+.cover h1 {
+  font-family: var(--serif-display);
+  font-size: clamp(110px, 21vw, 380px);
+  letter-spacing: -.02em;
+  line-height: .85;
+  margin-left: -.04em;
+}
+.cover h1 .b-flip {
+  display: inline-block;
+  color: transparent;
+  -webkit-text-stroke: 5px var(--cream);
+  text-stroke: 5px var(--cream);
+  margin-left: -.07em;
+}
+.cover .tagline {
+  font-family: var(--serif-display);
+  font-size: clamp(18px, 1.7vw, 26px);
+  font-weight: 400;
+  margin-top: 28px;
+  max-width: 24ch;
+  line-height: 1.15;
+  letter-spacing: .005em;
+}
+.cover .scroll-hint {
+  font-size: 11px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.scroll-hint .arrow { display: inline-block; animation: bob 2s ease-in-out infinite; }
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(4px); }
+}
+
+/* =================================================================
+   02 — CONCEPT
+   ================================================================= */
+.pitch-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: clamp(32px, 5vw, 72px);
+  align-items: start;
+}
+.pitch-text {
+  font-size: clamp(18px, 1.6vw, 23px);
+  line-height: 1.45;
+  font-weight: 400;
+  max-width: 28ch;
+}
+.pitch-text .lead-emph { font-family: var(--serif-display); display: block; margin-bottom: 16px; font-size: 1.35em; line-height: 1; }
+.pitch-text strong { font-weight: 600; }
+.pitch-foot { margin-top: 22px; font-size: 13px; color: var(--mute); line-height: 1.5; }
+
+.pillars { display: flex; flex-direction: column; gap: 14px; }
+.pillar {
+  background: var(--cream-deep);
+  padding: 22px 26px;
+  position: relative;
+}
+.pillar-num {
+  font-family: var(--serif-display);
+  font-size: 44px;
+  line-height: .8;
+  color: var(--orange);
+  margin-bottom: 6px;
+}
+.pillar-title {
+  font-family: var(--serif-heavy);
+  font-size: 20px;
+  line-height: 1.15;
+  letter-spacing: -.005em;
+}
+.pillar-sub {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--mute);
+  margin-top: 6px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.pillar.empty { background: transparent; border: 1.5px dashed var(--rule); }
+.pillar.empty .pillar-num   { color: var(--rule); }
+.pillar.empty .pillar-title { font-family: var(--serif-display); font-weight: normal; color: var(--mute); font-style: italic; font-size: 19px; }
+.pillar.empty .pillar-sub   { color: var(--rule); }
+
+/* =================================================================
+   03 — CONCURRENTIELANDSCHAP
+   ================================================================= */
+.insight-line {
+  font-family: var(--serif-display);
+  font-size: clamp(22px, 2.2vw, 34px);
+  line-height: 1.15;
+  max-width: 28ch;
+  margin-bottom: 40px;
+  color: var(--teal);
+}
+.insight-line em { font-style: normal; color: var(--orange); }
+
+.tables-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 44px;
+}
+.tbl-label {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid var(--orange);
+}
+table.editorial {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+table.editorial th,
+table.editorial td {
+  text-align: left;
+  padding: 10px 8px 9px 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+table.editorial th {
+  font-family: var(--sans);
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--mute);
+  padding-top: 0;
+  padding-bottom: 8px;
+}
+table.editorial td.name {
+  font-family: var(--serif-heavy);
+  font-size: 14px;
+  letter-spacing: -.005em;
+  padding-right: 14px;
+  white-space: nowrap;
+}
+table.editorial tr { transition: background .12s ease; }
+table.editorial tbody tr:hover { background: var(--cream-deep); }
+table.editorial td.pos { color: var(--ink-soft); }
+table.editorial td.note { color: var(--mute); font-size: 12.5px; }
+
+/* concurrenten foto-grid — 6 venues */
+.competitor-photos {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: 150px 150px;
+  gap: 14px;
+}
+.competitor-photos .ph-1 { grid-column: 1 / 3; grid-row: 1 / 3; }   /* groot links */
+.competitor-photos .ph-2 { grid-column: 3 / 4; grid-row: 1 / 2; }
+.competitor-photos .ph-3 { grid-column: 4 / 5; grid-row: 1 / 2; }
+.competitor-photos .ph-4 { grid-column: 3 / 5; grid-row: 2 / 3; }
+.competitor-photos .ph-5 { grid-column: 5 / 7; grid-row: 1 / 2; }
+.competitor-photos .ph-6 { grid-column: 5 / 7; grid-row: 2 / 3; }
+
+/* =================================================================
+   04 — INZICHTEN UIT HET VELD
+   ================================================================= */
+.field-top {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-bottom: clamp(36px, 5vw, 64px);
+}
+.field-obs {
+  border-top: 2px solid var(--orange);
+  padding-top: 18px;
+}
+.field-obs .field-num {
+  font-family: var(--serif-display);
+  font-size: 32px;
+  line-height: .9;
+  color: var(--orange);
+  margin-bottom: 8px;
+}
+.field-obs .field-head {
+  font-family: var(--serif-display);
+  font-size: clamp(18px, 1.7vw, 24px);
+  line-height: 1.1;
+  margin-bottom: 12px;
+  color: var(--cream);
+}
+.field-obs p {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: rgba(239,231,214,.75);
+}
+
+.field-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  border-top: 1px solid rgba(255,255,255,.18);
+  padding-top: 32px;
+}
+.field-col-head {
+  font-family: var(--serif-display);
+  font-size: clamp(22px, 2.2vw, 32px);
+  line-height: 1;
+  margin-bottom: 24px;
+}
+.field-col.praise .field-col-head { color: var(--cream); }
+.field-col.praise .field-col-head::before { content: "+ "; color: var(--orange); }
+.field-col.crit   .field-col-head { color: var(--cream); }
+.field-col.crit   .field-col-head::before { content: "− "; color: var(--orange); }
+
+.field-list { list-style: none; padding: 0; margin: 0; }
+.field-list li {
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: rgba(239,231,214,.85);
+}
+.field-list li strong {
+  display: block;
+  font-family: var(--serif-heavy);
+  font-size: 14px;
+  color: var(--cream);
+  margin-bottom: 4px;
+  letter-spacing: -.005em;
+}
+
+/* =================================================================
+   05 — FINANCIËLE SCENARIOS
    ================================================================= */
 .scenarios {
   display: grid;
@@ -397,14 +454,12 @@ table.editorial td.note { color: var(--mute); font-size: 13px; }
   border-top: 2px solid var(--cream);
   border-bottom: 2px solid var(--cream);
 }
-.scenarios .row {
-  display: contents;
-}
+.scenarios .row { display: contents; }
 .scenarios .lbl,
 .scenarios .v {
-  padding: 18px 20px;
+  padding: 14px 18px;
   border-bottom: 1px solid rgba(255,255,255,.15);
-  font-size: 15px;
+  font-size: 14px;
   display: flex;
   align-items: center;
 }
@@ -412,75 +467,65 @@ table.editorial td.note { color: var(--mute); font-size: 13px; }
   color: var(--cream-soft);
   text-transform: uppercase;
   letter-spacing: .08em;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
 }
 .scenarios .v {
   font-family: var(--serif-heavy);
-  font-size: 22px;
+  font-size: 19px;
   letter-spacing: -.01em;
   color: var(--cream);
 }
-.scenarios .v.small { font-family: var(--sans); font-size: 14px; font-weight: 500; }
-.scenarios .col-b { background: rgba(233,75,38,.18); }
+.scenarios .v.small { font-family: var(--sans); font-size: 13px; font-weight: 500; }
+.scenarios .col-b { background: rgba(30,77,82,.18); }
 .scenarios .col-head {
   font-family: var(--serif-display);
-  font-size: clamp(22px, 2.2vw, 38px);
-  padding: 22px 20px 18px;
+  font-size: clamp(20px, 2vw, 34px);
+  padding: 18px 18px 14px;
   border-bottom: 2px solid var(--cream);
   color: var(--cream);
   line-height: 1;
 }
-.scenarios .col-head.col-b {
-  background: var(--orange);
-  color: var(--cream);
-}
+.scenarios .col-head.col-b { background: var(--teal); color: var(--cream); }
 .scenarios .col-head .col-tag {
   display: block;
   font-family: var(--sans);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
   letter-spacing: .14em;
   text-transform: uppercase;
   margin-top: 6px;
-  opacity: .75;
+  opacity: .8;
 }
-.scenarios .col-head.col-b .col-tag { opacity: 1; }
-.scenarios .row.foot .lbl { padding-top: 22px; }
-.scenarios .row.foot .v   { padding-top: 22px; }
 .scen-foot {
-  margin-top: 36px;
+  margin-top: 28px;
   font-family: var(--serif-display);
-  font-size: clamp(20px, 2.2vw, 32px);
-  max-width: 32ch;
+  font-size: clamp(18px, 2vw, 28px);
+  max-width: 38ch;
   line-height: 1.2;
 }
-.scen-foot em { font-style: normal; color: var(--orange); }
+.scen-foot em { font-style: normal; color: var(--teal); background: var(--cream-soft); padding: 0 6px; }
 
 /* =================================================================
-   05 — 5-JAAR PROJECTIE
+   06 — 5-JAAR PROJECTIE
    ================================================================= */
 .chart-wrap {
   display: grid;
   grid-template-columns: 2.2fr 1fr;
-  gap: 56px;
+  gap: 48px;
   align-items: center;
 }
 .chart-svg-wrap {
   background: var(--cream-soft);
-  padding: 36px;
+  padding: 28px;
   border: 1px solid var(--rule);
 }
-svg.chart {
-  display: block;
-  width: 100%;
-  height: auto;
-}
+svg.chart { display: block; width: 100%; height: auto; }
 .chart-legend {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  font-size: 14px;
+  gap: 14px;
+  font-size: 13.5px;
 }
 .chart-legend .leg-item {
   display: flex;
@@ -497,11 +542,11 @@ svg.chart {
 }
 .chart-legend .leg-name {
   font-family: var(--serif-heavy);
-  font-size: 16px;
+  font-size: 15px;
   flex: 1;
 }
 .chart-legend .leg-val {
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--mute);
   letter-spacing: .04em;
 }
@@ -513,113 +558,115 @@ svg.chart {
 }
 .chart-foot {
   font-family: var(--serif-display);
-  font-size: clamp(20px, 2vw, 28px);
-  max-width: 50ch;
-  margin-top: 40px;
-  line-height: 1.2;
+  font-size: clamp(17px, 1.7vw, 24px);
+  max-width: 52ch;
+  margin-top: 32px;
+  line-height: 1.25;
+  color: var(--ink-soft);
 }
 
 /* =================================================================
-   06 — DRIE UNIQUE ELEMENTEN
+   07 — BOUWSTENEN
    ================================================================= */
-.uniques {
+.bouw-intro {
+  font-family: var(--serif-display);
+  font-size: clamp(20px, 2vw, 30px);
+  max-width: 44ch;
+  line-height: 1.2;
+  margin-bottom: clamp(28px, 4vw, 48px);
+}
+.bouw-intro em { font-style: normal; color: var(--orange); }
+
+.bouw-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 32px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
 }
-.uniq {
-  display: flex;
-  flex-direction: column;
+.bouw-card {
+  border-top: 2px solid var(--cream);
+  padding-top: 18px;
 }
-.uniq .photo { height: 280px; margin-bottom: 24px; }
-.uniq .uniq-num {
+.bouw-card .cat-num {
   font-family: var(--serif-display);
   font-size: 32px;
-  color: var(--cream-soft);
-  line-height: 1;
+  line-height: .85;
+  color: var(--orange);
   margin-bottom: 6px;
-  opacity: .85;
 }
-.uniq .uniq-title {
+.bouw-card .cat-title {
   font-family: var(--serif-display);
-  font-size: clamp(22px, 2vw, 32px);
+  font-size: clamp(18px, 1.7vw, 24px);
   line-height: 1.05;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
-.uniq .uniq-body {
-  font-size: 14.5px;
-  line-height: 1.5;
-  color: var(--cream-soft);
+.bouw-list { list-style: none; padding: 0; margin: 0; }
+.bouw-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,.14);
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: rgba(239,231,214,.82);
 }
-.uniq .uniq-meta {
-  font-size: 11px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--cream-deep);
-  margin-top: 14px;
-  border-top: 1px solid rgba(255,255,255,.25);
-  padding-top: 10px;
-  opacity: .8;
+.bouw-list li strong {
+  display: block;
+  font-family: var(--serif-heavy);
+  font-size: 13px;
+  color: var(--cream);
+  margin-bottom: 3px;
+  letter-spacing: -.005em;
 }
-.scene.orange .uniq .photo.no-img {
-  background: linear-gradient(135deg, var(--orange-dark) 0%, #8E2D14 100%);
-}
+.bouw-list li:last-child { border-bottom: none; }
 
 /* =================================================================
-   07 — INTERNATIONALE REFERENTIES
+   08 — INTERNATIONALE REFERENTIES
    ================================================================= */
 .refs {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 48px;
+  gap: 36px 40px;
 }
 .ref {
   display: grid;
-  grid-template-columns: 130px 1fr;
-  gap: 24px;
+  grid-template-columns: 120px 1fr;
+  gap: 20px;
   border-top: 1.5px solid var(--ink);
-  padding-top: 20px;
+  padding-top: 18px;
 }
-.ref .ref-photo {
-  height: 130px;
-}
-.ref .ref-text {
-  display: flex;
-  flex-direction: column;
-}
+.ref .ref-photo { height: 120px; }
+.ref .ref-text { display: flex; flex-direction: column; }
 .ref-place {
   font-family: var(--serif-display);
-  font-size: clamp(22px, 2vw, 30px);
+  font-size: clamp(20px, 1.9vw, 28px);
   line-height: 1;
   margin-bottom: 4px;
 }
 .ref-loc {
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--mute);
   font-weight: 600;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 .ref-essence {
   font-style: italic;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--ink-soft);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   line-height: 1.45;
 }
 .ref-lesson {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--ink);
   line-height: 1.45;
   border-left: 2px solid var(--orange);
-  padding-left: 14px;
+  padding-left: 12px;
   margin-top: auto;
 }
 .ref-lesson::before {
-  content: "LES";
+  content: "WAT WE ERVAN LEREN";
   display: block;
-  font-size: 10px;
+  font-size: 9.5px;
   letter-spacing: .18em;
   font-weight: 700;
   color: var(--orange);
@@ -627,7 +674,7 @@ svg.chart {
 }
 
 /* =================================================================
-   08 — 30/60/90 PLAN
+   09 — 30/60/90
    ================================================================= */
 .plan {
   display: grid;
@@ -636,107 +683,101 @@ svg.chart {
   border-top: 2px solid var(--cream);
 }
 .plan-col {
-  padding: 36px 28px 36px 0;
+  padding: 28px 24px 28px 0;
   border-right: 1px solid rgba(255,255,255,.18);
 }
 .plan-col:last-child { border-right: none; }
-.plan-col:not(:first-child) { padding-left: 28px; }
+.plan-col:not(:first-child) { padding-left: 24px; }
 .plan-phase {
   font-family: var(--serif-display);
-  font-size: clamp(48px, 6vw, 96px);
+  font-size: clamp(44px, 5.5vw, 84px);
   line-height: .85;
-  color: var(--orange);
-  margin-bottom: 6px;
+  color: var(--teal);
+  margin-bottom: 4px;
 }
 .plan-when {
-  font-size: 11px;
+  font-size: 10.5px;
   letter-spacing: .15em;
   text-transform: uppercase;
   font-weight: 600;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   color: var(--cream-soft);
 }
 .plan-title {
   font-family: var(--serif-display);
-  font-size: clamp(20px, 2vw, 30px);
+  font-size: clamp(18px, 1.8vw, 26px);
   line-height: 1.05;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   color: var(--cream);
 }
-.plan-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
+.plan-list { list-style: none; padding: 0; margin: 0; }
 .plan-list li {
-  font-size: 14px;
+  font-size: 13.5px;
   color: var(--cream-soft);
   line-height: 1.45;
-  padding: 10px 0;
+  padding: 8px 0;
   border-bottom: 1px solid rgba(255,255,255,.15);
   position: relative;
-  padding-left: 18px;
+  padding-left: 16px;
 }
 .plan-list li:before {
   content: "—";
   position: absolute;
   left: 0;
-  color: var(--orange);
+  color: var(--teal);
 }
 .plan-list li:last-child { border-bottom: none; }
 
 /* =================================================================
-   09 — SLOT
+   10 — SLOT
    ================================================================= */
 .slot {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: stretch;
   text-align: left;
-  background: var(--orange);
+  background: var(--teal);
   color: var(--cream);
 }
 .slot-quote {
   font-family: var(--serif-display);
-  font-size: clamp(40px, 5.5vw, 96px);
+  font-size: clamp(36px, 5vw, 88px);
   line-height: 1;
   letter-spacing: -.01em;
   max-width: 22ch;
   margin: 0 auto;
-  position: relative;
 }
 .slot-quote .open,
 .slot-quote .close {
-  color: var(--teal);
+  color: var(--orange);
   font-style: normal;
 }
 .slot-meta {
-  margin-top: clamp(48px, 6vw, 96px);
+  margin-top: clamp(40px, 5vw, 80px);
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   border-top: 1px solid rgba(255,255,255,.3);
-  padding-top: 24px;
-  font-size: 12px;
+  padding-top: 22px;
+  font-size: 11.5px;
   letter-spacing: .12em;
   text-transform: uppercase;
   font-weight: 600;
 }
-.slot-meta .contact-name { font-family: var(--serif-display); font-size: clamp(20px, 1.8vw, 28px); letter-spacing: 0; text-transform: none; font-weight: normal; }
+.slot-meta .contact-name { font-family: var(--serif-display); font-size: clamp(18px, 1.7vw, 26px); letter-spacing: 0; text-transform: none; font-weight: normal; }
 .slot-meta .contact-detail { opacity: .85; }
 
 /* =================================================================
-   NAVIGATIE — kleine dot-strip rechts
+   NAVIGATIE
    ================================================================= */
 .nav-dots {
   position: fixed;
-  right: 24px;
+  right: 22px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   z-index: 50;
   mix-blend-mode: difference;
 }
@@ -748,19 +789,16 @@ svg.chart {
   background: transparent;
   padding: 0;
   cursor: pointer;
-  transition: background .2s ease, transform .2s ease;
+  transition: background .2s, transform .2s;
 }
 .nav-dots button:hover { transform: scale(1.4); }
-.nav-dots button.active {
-  background: rgba(255,255,255,.95);
-  transform: scale(1.3);
-}
+.nav-dots button.active { background: rgba(255,255,255,.95); transform: scale(1.3); }
 
 .kbd-hint {
   position: fixed;
-  bottom: 20px;
-  left: 24px;
-  font-size: 11px;
+  bottom: 18px;
+  left: var(--gutter);
+  font-size: 10.5px;
   letter-spacing: .12em;
   text-transform: uppercase;
   font-weight: 600;
@@ -770,55 +808,60 @@ svg.chart {
 }
 .kbd-hint kbd {
   display: inline-block;
-  padding: 2px 6px;
+  padding: 2px 5px;
   border: 1px solid currentColor;
   border-radius: 2px;
   margin: 0 2px;
   font-family: var(--sans);
-  font-size: 10px;
+  font-size: 9.5px;
 }
 
 /* =================================================================
-   ANIMATIONS — reveal on scroll
+   ANIMATIES
    ================================================================= */
 .reveal {
   opacity: 0;
-  transform: translateY(18px);
-  transition: opacity .7s cubic-bezier(.2,.6,.2,1), transform .7s cubic-bezier(.2,.6,.2,1);
-  transition-delay: calc(var(--i, 0) * 60ms);
+  transform: translateY(16px);
+  transition: opacity .65s cubic-bezier(.2,.6,.2,1), transform .65s cubic-bezier(.2,.6,.2,1);
+  transition-delay: calc(var(--i, 0) * 55ms);
 }
-.reveal.in-view {
-  opacity: 1;
-  transform: translateY(0);
-}
+.reveal.in-view { opacity: 1; transform: translateY(0); }
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
   .scroll-hint .arrow { animation: none; }
 }
 
 /* =================================================================
-   RESPONSIVE — desktop-first, redelijk leesbaar onder 1024
+   RESPONSIVE
    ================================================================= */
 @media (max-width: 1024px) {
   .pitch-grid, .chart-wrap { grid-template-columns: 1fr; }
   .tables-wrap { grid-template-columns: 1fr; }
-  .competitor-photos { grid-template-columns: 1fr 1fr; grid-template-rows: 180px 180px; }
+  .competitor-photos { grid-template-columns: 1fr 1fr; grid-template-rows: 160px 160px 160px; }
   .competitor-photos .ph-1 { grid-column: 1 / 3; grid-row: 1 / 2; }
   .competitor-photos .ph-2 { grid-column: 1 / 2; grid-row: 2 / 3; }
   .competitor-photos .ph-3 { grid-column: 2 / 3; grid-row: 2 / 3; }
-  .competitor-photos .ph-4, .competitor-photos .ph-5 { display: none; }
-  .uniques, .refs, .plan { grid-template-columns: 1fr; }
-  .scenarios { grid-template-columns: 1.4fr 1fr 1fr 1fr; font-size: 13px; }
-  .cover { grid-template-columns: 1fr; }
+  .competitor-photos .ph-4 { grid-column: 1 / 2; grid-row: 3 / 4; }
+  .competitor-photos .ph-5 { grid-column: 2 / 3; grid-row: 3 / 4; }
+  .competitor-photos .ph-6 { display: none; }
+  .field-top   { grid-template-columns: 1fr; }
+  .field-cols  { grid-template-columns: 1fr; gap: 32px; }
+  .bouw-grid   { grid-template-columns: 1fr 1fr; }
+  .refs, .plan { grid-template-columns: 1fr; }
+  .scenarios   { grid-template-columns: 1.4fr 1fr 1fr 1fr; font-size: 12px; }
+  .cover       { grid-template-columns: 1fr; }
   .cover-meta-topr, .cover-meta-botr { text-align: left; }
-  .nav-dots { display: none; }
+  .nav-dots    { display: none; }
+}
+@media (max-width: 640px) {
+  .bouw-grid { grid-template-columns: 1fr; }
 }
 
 /* =================================================================
    PRINT
    ================================================================= */
 @media print {
-  :root { --gutter: 32px; }
+  :root { --gutter: 28px; }
   html, body { background: #fff; color: #000; }
   .nav-dots, .kbd-hint { display: none; }
   section.scene {
@@ -828,7 +871,7 @@ svg.chart {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .scene.orange, .scene.teal, .cover, .slot { color: #fff; }
+  .scene.orange, .scene.teal, .scene.ink, .cover, .slot { color: #fff; }
   .reveal { opacity: 1 !important; transform: none !important; }
   .scroll-hint, .arrow { display: none; }
 }
@@ -840,19 +883,20 @@ svg.chart {
      NAVIGATIE
      ================================================================= -->
 <nav class="nav-dots" aria-label="Sectie-navigatie">
-  <button data-go="1" aria-label="Sectie 1 — Cover"></button>
-  <button data-go="2" aria-label="Sectie 2 — Concept"></button>
-  <button data-go="3" aria-label="Sectie 3 — Concurrentie"></button>
-  <button data-go="4" aria-label="Sectie 4 — Cijfers"></button>
-  <button data-go="5" aria-label="Sectie 5 — Projectie"></button>
-  <button data-go="6" aria-label="Sectie 6 — Unique"></button>
-  <button data-go="7" aria-label="Sectie 7 — Referenties"></button>
-  <button data-go="8" aria-label="Sectie 8 — 30/60/90"></button>
-  <button data-go="9" aria-label="Sectie 9 — Slot"></button>
+  <button data-go="1"  aria-label="1 — Cover"></button>
+  <button data-go="2"  aria-label="2 — Concept"></button>
+  <button data-go="3"  aria-label="3 — Concurrentie"></button>
+  <button data-go="4"  aria-label="4 — Inzichten"></button>
+  <button data-go="5"  aria-label="5 — Cijfers"></button>
+  <button data-go="6"  aria-label="6 — Projectie"></button>
+  <button data-go="7"  aria-label="7 — Bouwstenen"></button>
+  <button data-go="8"  aria-label="8 — Referenties"></button>
+  <button data-go="9"  aria-label="9 — 30/60/90"></button>
+  <button data-go="10" aria-label="10 — Slot"></button>
 </nav>
 
 <div class="kbd-hint">
-  <kbd>↑</kbd><kbd>↓</kbd> sectie  ·  <kbd>1</kbd>–<kbd>9</kbd> direct
+  <kbd>↑</kbd><kbd>↓</kbd> sectie · <kbd>1</kbd>–<kbd>9</kbd>·<kbd>0</kbd> direct
 </div>
 
 <!-- =================================================================
@@ -868,7 +912,7 @@ svg.chart {
 
   <div class="cover-center reveal" style="--i:2">
     <h1>Side<span class="b-flip">B</span></h1>
-    <p class="tagline">Voor mensen die muziek serieus nemen maar zichzelf niet.</p>
+    <p class="tagline">Voor mensen die muziek serieus nemen<br/>maar zichzelf niet.</p>
   </div>
 
   <div class="cover-meta-bot reveal" style="--i:3">
@@ -881,7 +925,7 @@ svg.chart {
 </section>
 
 <!-- =================================================================
-     02 — CONCEPT-PITCH
+     02 — CONCEPT
      ================================================================= -->
 <section class="scene cream" id="sec-2" data-num="2">
   <div class="inner">
@@ -889,17 +933,17 @@ svg.chart {
       <div class="sec-num">02</div>
       <div style="flex:1">
         <div class="sec-kicker">Het concept</div>
-        <h2 class="sec-title">Listening bar met<br/>acht pooltafels.</h2>
+        <h2 class="sec-title">Listening bar met<br/>pooltafels.</h2>
       </div>
     </header>
 
     <div class="pitch-grid">
       <div class="pitch-text reveal" style="--i:1">
         <span class="lead-emph">Side B is een pool-café en listening bar in één.</span>
-        Een tijdelijk leegstandspand, vijf jaar. Hoogwaardige hifi en acht tafels.
-        Doelgroep: <strong>25–40 jaar</strong>, casual sociaal publiek dat
+        Hoogwaardige hifi en een aantal tafels in één ruimte. Doelgroep:
+        <strong>25–40 jaar</strong>, een casual sociaal publiek dat
         muziek serieus neemt maar zichzelf niet.
-        <span class="pitch-foot">Initiatief van eigenaren van Sisi's, Lokaal Lokaal, The Other Side en Borodin. Niemand in Amsterdam combineert beide werelden — daar zit het gat.</span>
+        <span class="pitch-foot">Initiatief van de eigenaren van Sisi's, Lokaal Lokaal, The Other Side en Borodin. In Amsterdam zien we deze combinatie nergens — of dat een gat is of een reden, hoort bij wat we samen uit te vinden hebben.</span>
       </div>
 
       <div class="pillars">
@@ -914,10 +958,10 @@ svg.chart {
           <div class="pillar-sub">— niet als achtergrond</div>
         </div>
         <!-- Derde pijler — bewust open gehouden. Vul in als je hem hebt.
-             Suggesties die je kunt overwegen:
-               · "Tijdelijkheid als ontwerp — niet als beperking"
+             Mogelijke richtingen vanuit het concept:
                · "Curatie als signatuur — niet als hindernis"
                · "Plek als ritueel — niet als bestemming"
+               · "Casual als kompas — niet als compromis"
         -->
         <div class="pillar empty reveal" style="--i:4">
           <div class="pillar-num">03</div>
@@ -937,83 +981,138 @@ svg.chart {
     <header class="sec-head reveal" style="--i:0">
       <div class="sec-num">03</div>
       <div style="flex:1">
-        <div class="sec-kicker">Concurrentielandschap</div>
-        <h2 class="sec-title">Veertien zaken,<br/>nul combinaties.</h2>
+        <div class="sec-kicker">Het veld</div>
+        <h2 class="sec-title">Veertien zaken,<br/>geen combinatie.</h2>
       </div>
     </header>
 
     <p class="insight-line reveal" style="--i:1">
       In Amsterdam: <em>10 pool-bars</em> en <em>4 listening bars</em>.
-      <br/>Geen enkele combineert beide. Daar zit ons gat.
+      <br/>De combinatie staat open.
     </p>
 
     <div class="tables-wrap">
       <div class="reveal" style="--i:2">
-        <div class="tbl-label">Pool-bars · directe concurrent</div>
+        <div class="tbl-label">Pool-bars · directe overlap</div>
         <table class="editorial">
-          <thead>
-            <tr><th>Naam</th><th>Positionering</th><th>Sterk</th><th>Zwak</th></tr>
-          </thead>
+          <thead><tr><th>Naam</th><th>Positionering</th><th>Sterk</th><th>Zwak</th></tr></thead>
           <tbody id="tbl-pool"></tbody>
         </table>
-        <p class="mute" style="margin-top:14px;font-size:12px;text-transform:none;letter-spacing:0">Plus 4 secundaire pool-zaken (Final Touch, Cafe the Palace, Billiards Hermes, Pool Center Noord).</p>
+        <p class="mute" style="margin-top:12px;font-size:11.5px;text-transform:none;letter-spacing:0">Plus 4 secundaire zaken (Final Touch, Cafe the Palace, Billiards Hermes, Pool Center Noord).</p>
       </div>
 
       <div class="reveal" style="--i:3">
         <div class="tbl-label">Listening bars · referentie-segment</div>
         <table class="editorial">
-          <thead>
-            <tr><th>Naam</th><th>Positionering</th><th>Sterk</th><th>Zwak</th></tr>
-          </thead>
+          <thead><tr><th>Naam</th><th>Positionering</th><th>Sterk</th><th>Zwak</th></tr></thead>
           <tbody id="tbl-listen"></tbody>
         </table>
-        <p class="mute" style="margin-top:14px;font-size:12px;text-transform:none;letter-spacing:0">Doka geeft 3.6★ — klachten over deurbeleid, niet het concept. Service is onze kans.</p>
+        <p class="mute" style="margin-top:12px;font-size:11.5px;text-transform:none;letter-spacing:0">Doka geeft 3.6★ — klachten gaan over deurbeleid, niet over het concept.</p>
       </div>
     </div>
 
-    <!-- Foto-grid · 4 venue-foto's + 1 placeholder (De Keu — geen rechtenvrije foto beschikbaar) -->
+    <!-- 6 venue-foto's: Doka, CUE, Murmur, Loop 51, Plan B, Mokum -->
     <div class="competitor-photos reveal" style="--i:4">
-      <div class="photo" data-img="doka"></div>      <!-- ph-1 · groot links -->
-      <div class="photo" data-img="loop51"></div>    <!-- ph-2 · klein boven -->
-      <div class="photo" data-img="dekeu"></div>     <!-- ph-3 · klein boven (placeholder) -->
-      <div class="photo" data-img="mokum"></div>     <!-- ph-4 · brede onderkant -->
-      <div class="photo" data-img="planb"></div>     <!-- ph-5 · groot rechts -->
+      <div class="photo ph-1" data-img="doka"></div>
+      <div class="photo ph-2" data-img="cue"></div>
+      <div class="photo ph-3" data-img="murmur"></div>
+      <div class="photo ph-4" data-img="loop51"></div>
+      <div class="photo ph-5" data-img="planb"></div>
+      <div class="photo ph-6" data-img="mokum"></div>
     </div>
   </div>
 </section>
 
 <!-- =================================================================
-     04 — FINANCIËLE SCENARIOS
+     04 — INZICHTEN UIT HET VELD  (NEW)
      ================================================================= -->
-<section class="scene teal" id="sec-4" data-num="4">
+<section class="scene ink" id="sec-4" data-num="4">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
       <div class="sec-num">04</div>
       <div style="flex:1">
-        <div class="sec-kicker">Financiële scenarios</div>
-        <h2 class="sec-title">Drie maten,<br/>één keuze.</h2>
+        <div class="sec-kicker">Inzichten uit reviews</div>
+        <h2 class="sec-title">Wat het veld<br/>vertelt.</h2>
+      </div>
+    </header>
+
+    <div class="field-top">
+      <article class="field-obs reveal" style="--i:1">
+        <div class="field-num">01</div>
+        <div class="field-head">Volwassen markt,<br/>niet verzadigd.</div>
+        <p>Geen enkele zaak onder 4,3★. Slechte poolbars blijven niet open. Het is een markt waar publiek weet wat het wil.</p>
+      </article>
+
+      <article class="field-obs reveal" style="--i:2">
+        <div class="field-num">02</div>
+        <div class="field-head">The Pool Bar<br/>als anker.</div>
+        <p>1.700 reviews tegen 850 voor de nummer twee. Dat is meer "place to be" dan buurtzaak — een onevenredig aandeel van de aandacht.</p>
+      </article>
+
+      <article class="field-obs reveal" style="--i:3">
+        <div class="field-num">03</div>
+        <div class="field-head">Mokum als<br/>recente speler.</div>
+        <p>4,9★ met 88 reviews betekent recent geopend, directe tractie. Eigenaars zijn ex-EU kampioenen — een duidelijke USP via expertise.</p>
+      </article>
+    </div>
+
+    <div class="field-cols">
+      <div class="field-col praise reveal" style="--i:4">
+        <h3 class="field-col-head">Wat reviews prijzen</h3>
+        <ul class="field-list">
+          <li><strong>Sfeer en muziek</strong>"Great music," "amazing vibe." Vrijwel elke positieve review noemt het. Bij De Keu is het ankerpunt, bij The Pool Bar nadrukkelijk genoemd. Zelden expliciet als programmering gebouwd.</li>
+          <li><strong>Tafelkwaliteit</strong>Poolbar De Gracht (recent opnieuw bekleed), Plan B ("top notch tables"), Final Touch ("regulation size"). Slechte tafels = slechte reviews, ongeacht de rest.</li>
+          <li><strong>Persoonlijk personeel</strong>Reviews noemen mensen bij naam: "Paco was absolutely fantastic", "Rikki and Hans". Persoonlijke service is in dit segment onderscheidend.</li>
+          <li><strong>Combinatie van games</strong>Pool naast darts, shuffleboard, board games. Gasten zien het als plus, niet als afgeleid.</li>
+          <li><strong>Pricing transparency</strong>Plan B's €18,50/uur is bekend, mensen accepteren het bij kwaliteit. Onduidelijke prijzen geven irritatie.</li>
+        </ul>
+      </div>
+
+      <div class="field-col crit reveal" style="--i:5">
+        <h3 class="field-col-head">Wat reviews bekritiseren</h3>
+        <ul class="field-list">
+          <li><strong>Wachtrijen in het weekend</strong>De #1 klacht bij populaire zaken. "Plan to be there at least an hour earlier" (The Pool Bar). "Don't bother turning up without booking" (Plan B).</li>
+          <li><strong>Reserveringen die niet werken</strong>Plan B: "I tried to book one day prior and got DENIED." Checkpoint Charlie: bevestigde reservering voor 17 personen afgezegd. Eén precedent zet de zaak op TripAdvisor.</li>
+          <li><strong>Versleten tafels</strong>De Keu krijgt expliciet "tables are clearly overused and need to be refurbished." Onderhoud is een hygiënefactor.</li>
+          <li><strong>Personeel-incidenten</strong>Vooral bij grote groepen of conflicten over rekeningen. Eén manager-fout = jarenlange schade.</li>
+          <li><strong>Onduidelijkheid over capaciteit</strong>Wel of niet reserveren? Hoe lang wachten? Tafel beschikbaar? Onzekerheid is een grotere ergernis dan wachten zelf.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================================================================
+     05 — FINANCIËLE SCENARIOS
+     ================================================================= -->
+<section class="scene orange" id="sec-5" data-num="5">
+  <div class="inner">
+    <header class="sec-head reveal" style="--i:0">
+      <div class="sec-num">05</div>
+      <div style="flex:1">
+        <div class="sec-kicker">Drie scenarios</div>
+        <h2 class="sec-title">Drie maten<br/>om in te denken.</h2>
       </div>
     </header>
 
     <div class="scenarios reveal" style="--i:1" id="scenarios"></div>
 
     <p class="scen-foot reveal" style="--i:2">
-      Scenario B is het realistisch uitgangspunt. <em>De verschil-maker:
-      huurkorting via leegstandscontract.</em>
+      Drie scenario's, geen aanbeveling. <em>Welke past, hangt af van locatie, vergunningen en wat de eigenaren willen bouwen.</em>
     </p>
   </div>
 </section>
 
 <!-- =================================================================
-     05 — 5-JAAR PROJECTIE
+     06 — 5-JAAR PROJECTIE
      ================================================================= -->
-<section class="scene cream" id="sec-5" data-num="5">
+<section class="scene cream" id="sec-6" data-num="6">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
-      <div class="sec-num">05</div>
+      <div class="sec-num">06</div>
       <div style="flex:1">
-        <div class="sec-kicker">5-jaar projectie</div>
-        <h2 class="sec-title">Opstart, piek, oogst.</h2>
+        <div class="sec-kicker">Vijf jaar in beeld</div>
+        <h2 class="sec-title">Opstart, opbouw,<br/>afbouw.</h2>
       </div>
     </header>
 
@@ -1023,64 +1122,108 @@ svg.chart {
     </div>
 
     <p class="chart-foot reveal" style="--i:3">
-      Investering in jaar 2 ruim terugverdiend. Jaar 3 en 4 zijn de piekjaren.
-      Jaar 5 wordt het afsluitings-jaar — een marketing-event.
+      De curve is een aanname op basis van vergelijkbare horeca-cases:
+      opbouw in jaar 1, plateau jaar 3–4, geleidelijke afbouw. Werkelijkheid
+      hangt af van seizoen, programmering en marketing — geen voorspelling, een raamwerk.
     </p>
   </div>
 </section>
 
 <!-- =================================================================
-     06 — DRIE UNIQUE ELEMENTEN
+     07 — BOUWSTENEN
      ================================================================= -->
-<section class="scene orange" id="sec-6" data-num="6">
+<section class="scene teal" id="sec-7" data-num="7">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
-      <div class="sec-num">06</div>
+      <div class="sec-num">07</div>
       <div style="flex:1">
-        <div class="sec-kicker">Drie eigen ideeën</div>
-        <h2 class="sec-title">Bouwstenen die geen<br/>ander heeft.</h2>
+        <div class="sec-kicker">Open lijst van opties</div>
+        <h2 class="sec-title">Bouwstenen<br/>om uit te kiezen.</h2>
       </div>
     </header>
 
-    <div class="uniques">
+    <p class="bouw-intro reveal" style="--i:1">
+      Geen vast pakket. <em>Een lijst om uit te kiezen wat past</em> — bij locatie, budget en smaak van de eigenaars.
+    </p>
 
-      <article class="uniq reveal" style="--i:1">
-        <div class="photo" data-img="parra"></div>
-        <div class="uniq-num">01</div>
-        <div class="uniq-title">Designer-vilt door Parra</div>
-        <p class="uniq-body">
-          Vijf tafels in een tijdelijk pand, bekleed met werk van de
-          Amsterdamse illustrator Parra. Iwan Simonis-vilt, custom
-          geweven. Bij sluiting jaar 5 worden de vilten geveild aan
-          stamgasten als limited art-piece.
-        </p>
-        <div class="uniq-meta">Investering · ±€5–8k extra · Marketing-effect · massief</div>
+    <div class="bouw-grid">
+
+      <article class="bouw-card reveal" style="--i:2">
+        <div class="cat-num">A</div>
+        <h3 class="cat-title">Pool als sociaal spel</h3>
+        <ul class="bouw-list">
+          <li><strong>Killer Pool</strong>Eliminatiespel voor 3–12 spelers tegelijk. Lage drempel.</li>
+          <li><strong>Cutthroat</strong>3-spelers variant, korter dan 8-ball, meer interactie.</li>
+          <li><strong>Album Side Game</strong>Wint je terwijl een plaat-kant draait? Bij stilte: gelijk.</li>
+          <li><strong>Pool 101</strong>Gratis instap-les op zondagmiddag. Drempel voor nieuwe gasten weg.</li>
+          <li><strong>"Find the King"</strong>Eén tafel altijd vrij beschikbaar buiten piekuren.</li>
+          <li><strong>Hot Seat</strong>Winnaar blijft, verliezer achteraan. Natuurlijke roulatie.</li>
+        </ul>
       </article>
 
-      <article class="uniq reveal" style="--i:2">
-        <div class="photo" data-img="replay"></div>
-        <div class="uniq-num">02</div>
-        <div class="uniq-title">Replay-camera systeem</div>
-        <p class="uniq-body">
-          Boven elke tafel een camera, knop op de zijkant. Druk —
-          laatste 30 seconden opgeslagen, deel via WhatsApp.
-          Eerste pool-bar in Europa met dit systeem. Geleend uit
-          padel (PUSHIT, CourtMaster).
-        </p>
-        <div class="uniq-meta">Eenmalig · €5k · Recurring · €2,4k/jaar</div>
+      <article class="bouw-card reveal" style="--i:3">
+        <div class="cat-num">B</div>
+        <h3 class="cat-title">Weekprogrammering</h3>
+        <ul class="bouw-list">
+          <li><strong>Maandag — Quiet Monday</strong>Ambient, vroeg open. Voor freelancers.</li>
+          <li><strong>Dinsdag — Selector Series</strong>Gast-selectors, rotatie per kwartaal.</li>
+          <li><strong>Woensdag — Album Night</strong>Eén klassieker, begin tot eind.</li>
+          <li><strong>Donderdag — Lokaal &amp; Vers</strong>Amsterdamse producers en labels.</li>
+          <li><strong>Vrijdag — B-Side Fridays</strong>Deep cuts en B-kanten.</li>
+          <li><strong>Zondag — Sunday Spinning</strong>Vinyl-brunch met natural wine.</li>
+        </ul>
       </article>
 
-      <article class="uniq reveal" style="--i:3">
-        <div class="photo" data-img="killer"></div>
-        <div class="uniq-num">03</div>
-        <div class="uniq-title">Killer Pool, zondagmiddag</div>
-        <p class="uniq-body">
-          Sociaal eliminatiespel voor 3–12 spelers tegelijk.
-          Doorlopend zondag 16–19u: kom binnen, sluit aan.
-          Sociaal anker van de week, lage instapdrempel.
-          Geen kost — alleen programmering.
-        </p>
-        <div class="uniq-meta">Investering · €0 · Bezetting zondag · sterk</div>
+      <article class="bouw-card reveal" style="--i:4">
+        <div class="cat-num">C</div>
+        <h3 class="cat-title">Aesthetiek &amp; materiaal</h3>
+        <ul class="bouw-list">
+          <li><strong>Vintage Brunswick-tafels</strong>Verhaal te vertellen, houden waarde.</li>
+          <li><strong>Vilt-kleur</strong>Niet groen — diep rood of zwart als signatuur.</li>
+          <li><strong>Industriële hanglampen</strong>Boven elke tafel een eigen "eiland" van licht.</li>
+          <li><strong>Messing krijthouders</strong>€15/stuk, groot verschil in detail.</li>
+          <li><strong>Cue-rack als muurinstallatie</strong>Visueel anker, niet plastic standaard.</li>
+          <li><strong>Houten scoring-borden</strong>Analoog, past bij de rest.</li>
+        </ul>
+      </article>
+
+      <article class="bouw-card reveal" style="--i:5">
+        <div class="cat-num">D</div>
+        <h3 class="cat-title">Bar &amp; food (geen kok)</h3>
+        <ul class="bouw-list">
+          <li><strong>Japanese highball</strong>Kissa-klassieker. Hoge marge, lage complexiteit.</li>
+          <li><strong>Natural wine op tap</strong>Lagere prijs, hogere marge.</li>
+          <li><strong>Lower-ABV menu</strong>Vermouth, spritzes, alcoholvrije cocktails.</li>
+          <li><strong>Katsu sandwich (€11)</strong>Vooraf gepaneerd, 3 min airfryer.</li>
+          <li><strong>Hot dogs uit airfryer</strong>Premium worst op brioche.</li>
+          <li><strong>Late night ramen (vr/za na 23u)</strong>Eén item, 8 min, €14.</li>
+        </ul>
+      </article>
+
+      <article class="bouw-card reveal" style="--i:6">
+        <div class="cat-num">E</div>
+        <h3 class="cat-title">Slimme toevoegingen</h3>
+        <ul class="bouw-list">
+          <li><strong>Listening menu</strong>Kaartje "wat draait vanavond" naast de drankkaart.</li>
+          <li><strong>Vinyl wall</strong>Visueel statement achter de DJ-booth.</li>
+          <li><strong>Audiophile lidmaatschap</strong>€100/jaar — vroege toegang, naamplaatje.</li>
+          <li><strong>Koptelefoon-bar</strong>Drie krukken met high-end koptelefoons.</li>
+          <li><strong>Polaroid Hall of Fame</strong>Mooie shots krijgen een foto op de muur.</li>
+          <li><strong>Boekenkast</strong>Audio-magazines, fanzines. Maakt het derde plek.</li>
+        </ul>
+      </article>
+
+      <article class="bouw-card reveal" style="--i:7">
+        <div class="cat-num">F</div>
+        <h3 class="cat-title">Marketing &amp; opening</h3>
+        <ul class="bouw-list">
+          <li><strong>Pre-opening Instagram</strong>6 maanden bouw-content: speakers, tuning, vinyl.</li>
+          <li><strong>Vijf besloten previews</strong>Per avond ander publiek — iedereen voelt insider.</li>
+          <li><strong>Soft opening 2 weken</strong>50% capaciteit, bewust onderbemand om operatie te schreeuwen.</li>
+          <li><strong>Industry Night maandag</strong>Voor horeca-werkers — netwerk + rustige dag.</li>
+          <li><strong>Pers-hooks per kwartaal</strong>Nieuwe selector, vinyl-aankoop, samenwerking.</li>
+          <li><strong>Drempelverlagende communicatie</strong>"Nieuw bij pool? Welkom" — tegenovergestelde van Mokum/Plan B.</li>
+        </ul>
       </article>
 
     </div>
@@ -1088,15 +1231,15 @@ svg.chart {
 </section>
 
 <!-- =================================================================
-     07 — INTERNATIONALE REFERENTIES
+     08 — INTERNATIONALE REFERENTIES
      ================================================================= -->
-<section class="scene cream" id="sec-7" data-num="7">
+<section class="scene cream" id="sec-8" data-num="8">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
-      <div class="sec-num">07</div>
+      <div class="sec-num">08</div>
       <div style="flex:1">
         <div class="sec-kicker">Internationale referenties</div>
-        <h2 class="sec-title">Wie het ergens<br/>al laat werken.</h2>
+        <h2 class="sec-title">Wat anderen<br/>laten zien.</h2>
       </div>
     </header>
 
@@ -1107,7 +1250,7 @@ svg.chart {
           <div class="ref-place">Amsterdam Billiards Club</div>
           <div class="ref-loc">New York · sinds 1989</div>
           <p class="ref-essence">25 Brunswick-tafels, grootste co-ed pool league van de US.</p>
-          <p class="ref-lesson">Een pool league kan het hart van de business worden. Verzekerde doordeweekse omzet.</p>
+          <p class="ref-lesson">Een pool league kan een belangrijk onderdeel van de business worden. Doordeweekse omzet die je niet uit walk-ins haalt.</p>
         </div>
       </article>
 
@@ -1117,17 +1260,21 @@ svg.chart {
           <div class="ref-place">Status Q</div>
           <div class="ref-loc">Brooklyn · New York</div>
           <p class="ref-essence">"Are we a bar with billiards or a billiards hall with a bar? We are both."</p>
-          <p class="ref-lesson">Claim beide identiteiten expliciet. Voorkomt verkeerde verwachting bij gasten en personeel.</p>
+          <p class="ref-lesson">Twee identiteiten expliciet claimen, niet kiezen. Voorkomt dat gasten met verkeerde verwachting komen.</p>
         </div>
       </article>
 
+      <!-- Eerst stond hier "Le Brady (Paris)" maar dat blijkt een bioscoop
+           van Jean-Pierre Mocky, geen pool-bar. Vervangen door de echte
+           Parijse pool-referentie: Académie de Billard de Paris (Clichy
+           Montmartre), historische biljartzaal sinds 1947. -->
       <article class="ref reveal" style="--i:3">
-        <div class="photo ref-photo" data-img="lebrady"></div>
+        <div class="photo ref-photo" data-img="paris"></div>
         <div class="ref-text">
-          <div class="ref-place">Le Brady</div>
-          <div class="ref-loc">Paris · 10e arrondissement</div>
-          <p class="ref-essence">Naamloze gevel sinds de jaren 60. 24/7, alleen ingewijden weten het.</p>
-          <p class="ref-lesson">Niet alles communiceren is een strategie. Past bij ons tijdelijkheid-verhaal.</p>
+          <div class="ref-place">Académie de Billard</div>
+          <div class="ref-loc">Paris · Clichy-Montmartre · 1947</div>
+          <p class="ref-essence">Historische biljartzaal, 23 tafels, Art-Deco interieur, ongebroken traditie.</p>
+          <p class="ref-lesson">Een zaak die niet probeert mee te gaan met trends, maar consequent één ding doet, bouwt een eigen publiek.</p>
         </div>
       </article>
 
@@ -1136,8 +1283,8 @@ svg.chart {
         <div class="ref-text">
           <div class="ref-place">Tokio high-rise pool</div>
           <div class="ref-loc">Shibuya · Tokio</div>
-          <p class="ref-essence">Verstopt op de 4e en 6e verdieping van kantoorgebouwen.</p>
-          <p class="ref-lesson">Als ons pand niet op de begane grond is, wordt dat onderdeel van de experience.</p>
+          <p class="ref-essence">Verstopt op de 4e en 6e verdieping van kantoorgebouwen — "hidden gems by looking up."</p>
+          <p class="ref-lesson">In de stad werkt verticaliteit. Een ongebruikelijke locatie wordt onderdeel van het verhaal in plaats van een obstakel.</p>
         </div>
       </article>
     </div>
@@ -1145,52 +1292,52 @@ svg.chart {
 </section>
 
 <!-- =================================================================
-     08 — 30/60/90 PLAN
+     09 — 30/60/90
      ================================================================= -->
-<section class="scene teal" id="sec-8" data-num="8">
+<section class="scene orange" id="sec-9" data-num="9">
   <div class="inner">
     <header class="sec-head reveal" style="--i:0">
-      <div class="sec-num">08</div>
+      <div class="sec-num">09</div>
       <div style="flex:1">
         <div class="sec-kicker">Eerste negentig dagen</div>
-        <h2 class="sec-title">Luisteren,<br/>uitproberen, plannen.</h2>
+        <h2 class="sec-title">Eerst luisteren,<br/>dan bouwen.</h2>
       </div>
     </header>
 
     <div class="plan">
       <div class="plan-col reveal" style="--i:1">
         <div class="plan-phase">30</div>
-        <div class="plan-when">Dag 1 – 30</div>
+        <div class="plan-when">Dag 1 — 30</div>
         <h3 class="plan-title">Luisteren en meten</h3>
         <ul class="plan-list">
-          <li>Persoonlijke kennismaking met team en gasten</li>
+          <li>Persoonlijke kennismaking met team, gasten en buurt</li>
           <li>Operationele audit: tafels, geluidsinstallatie, programmering</li>
-          <li>Eerste meet-systeem voor bezetting en gemiddelde besteding</li>
-          <li>Bezoek aan Doka, Le Brady en twee tot drie andere referenties</li>
+          <li>Basis-metingen: bezetting per avond, gemiddelde besteding</li>
+          <li>Bezoeken aan Doka en twee tot drie andere referenties</li>
         </ul>
       </div>
 
       <div class="plan-col reveal" style="--i:2">
         <div class="plan-phase">60</div>
-        <div class="plan-when">Dag 31 – 60</div>
+        <div class="plan-when">Dag 31 — 60</div>
         <h3 class="plan-title">Quick wins</h3>
         <ul class="plan-list">
-          <li>Werkend reserveringssysteem live</li>
-          <li>Killer Sundays als doorlopend programma</li>
-          <li>Eerste samenwerkingen met DJ's en vinyl-selectors</li>
-          <li>Designer-vilt opdracht uitgezet bij gekozen ontwerper</li>
+          <li>Reserveringssysteem werkend en transparant</li>
+          <li>Eerste laagdrempelige programmering op een rustige dag</li>
+          <li>Samenwerking met enkele vinyl-selectors uit de scene</li>
+          <li>Eén signature-investering uitgewerkt (vilt, krijthouders of bar)</li>
         </ul>
       </div>
 
       <div class="plan-col reveal" style="--i:3">
         <div class="plan-phase">90</div>
-        <div class="plan-when">Dag 61 – 90</div>
-        <h3 class="plan-title">Jaarplan</h3>
+        <div class="plan-when">Dag 61 — 90</div>
+        <h3 class="plan-title">Een jaarplan</h3>
         <ul class="plan-list">
-          <li>Volledig jaarplan met thema-maanden</li>
-          <li>Replay-camera systeem geïnstalleerd</li>
+          <li>Jaarplan met thema-maanden en programmering</li>
           <li>Eerste Pool 101-sessies live</li>
-          <li>Marketing-pipeline met persaandacht voor "first in EU"</li>
+          <li>Marketing-kalender met pers-momenten ingepland</li>
+          <li>Evaluatie-cyclus met eigenaars maandelijks vastgelegd</li>
         </ul>
       </div>
     </div>
@@ -1198,15 +1345,14 @@ svg.chart {
 </section>
 
 <!-- =================================================================
-     09 — SLOT
+     10 — SLOT
      ================================================================= -->
-<section class="scene slot" id="sec-9" data-num="9">
+<section class="scene slot" id="sec-10" data-num="10">
   <div class="inner" style="display:flex;flex-direction:column;justify-content:center;flex:1;width:100%">
 
     <p class="slot-quote reveal" style="--i:0">
-      <span class="open">"</span>Amsterdams eerste pool + listening bar.
-      Vijf jaar in tijdelijk leegstand. Voor mensen die muziek serieus
-      nemen maar zichzelf niet.<span class="close">"</span>
+      <span class="open">"</span>Amsterdams eerste pool + listening bar.<br/>
+      Voor mensen die muziek serieus nemen<br/>maar zichzelf niet.<span class="close">"</span>
     </p>
 
     <div class="slot-meta reveal" style="--i:1">
@@ -1224,11 +1370,11 @@ svg.chart {
 </section>
 
 <!-- =================================================================
-     SCRIPT — config, data, render, nav, animaties
+     SCRIPT — config, data, render, nav
      ================================================================= -->
 <script>
 /* =================================================================
-   CONFIG — pas aan: merk-naam, datum, contactgegevens
+   CONFIG — merk-naam, datum, contact
    ================================================================= */
 const CONFIG = {
   brandName:    'Side B',
@@ -1243,22 +1389,20 @@ const CONFIG = {
    DATA — Bron: Scenarios_listening_bar.xlsx (definitief)
    ================================================================= */
 const DATA = {
-  // Sectie 03 — Concurrenten (selectie uit Excel-tab 'Concurrenten')
   pool: [
     { naam: 'The Pool Bar',       pos: 'Marktleider casual',         sterk: '1.700 reviews',          zwak: 'Geen muziek-USP' },
-    { naam: 'Poolcafé de Keu',    pos: 'Casual + "great music"',     sterk: 'Dichtste positionering', zwak: 'Geen hifi-investering' },
+    { naam: 'Poolcafé de Keu',    pos: 'Casual + "great music"',     sterk: 'Dichtste positionering', zwak: 'Versleten tafels' },
     { naam: 'Poolbar De Gracht',  pos: 'Buurt casual Oost',          sterk: 'Recent vernieuwd',       zwak: 'Geen muziek-USP' },
-    { naam: 'Plan B',             pos: 'Pro-segment',                sterk: 'Tournament-kwaliteit',   zwak: 'Ander publiek' },
+    { naam: 'Plan B',             pos: 'Pro-segment',                sterk: 'Tournament-kwaliteit',   zwak: 'Reserveringsfrustratie' },
     { naam: 'Mokum Pool',         pos: 'Premium pro',                sterk: 'Ex-EU kampioen',         zwak: 'Pro-only' },
   ],
   listen: [
     { naam: 'Doka',     pos: '5jr Volkshotel · 98dB',     sterk: 'Programmering',           zwak: 'Deurbeleid 3.6★' },
     { naam: 'Loop 51',  pos: 'Vinyl-brunch De Pijp',      sterk: 'Daytime listening',       zwak: 'Alleen overdag' },
     { naam: 'CUE',      pos: 'Onder Michelin-resto',      sterk: 'Premium positionering',   zwak: 'Alleen avond' },
-    { naam: 'Murmur',   pos: 'Alleen vr/za in Noord',     sterk: 'Exclusiviteit',           zwak: 'Te exclusief' },
+    { naam: 'Murmur',   pos: 'Alleen vr/za in Noord',     sterk: 'Exclusiviteit',           zwak: 'Beperkt verdienmodel' },
   ],
 
-  // Sectie 04 — Hoofdtabel A/B/C (uit Scenarios-tab)
   scenarios: {
     rows: [
       { lbl: 'Pooltafels',               a: '5',           b: '8',           c: '12' },
@@ -1271,48 +1415,35 @@ const DATA = {
     ],
   },
 
-  // Sectie 05 — 5-jaar projectie (EBIT na afschrijving, uit Excel-tab '5-jaar plan')
   projection: {
     years: ['Jaar 1', 'Jaar 2', 'Jaar 3', 'Jaar 4', 'Jaar 5'],
-    a:    [12, 103, 139, 139, 85],   // €k
+    a:    [12, 103, 139, 139, 85],
     b:    [18, 171, 232, 232, 140],
     c:    [68, 331, 436, 436, 278],
   },
 };
 
 /* =================================================================
-   IMAGES — venue-foto's
-   Vul URL in en de placeholder wordt automatisch vervangen.
-   Format: { url, credit, alt }
-   Source-voorkeur: Wikimedia Commons > venue-persfoto > hotlink > null (placeholder)
+   IMAGES — venue-foto's. URL=null → styled placeholder.
    ================================================================= */
 const IMAGES = {
-  // sec 03 — concurrenten
-  doka:    { url: 'https://www.volkshotel.nl/content/uploads/2019/10/R1-06657-006A.jpg',      credit: 'Foto · Volkshotel', alt: 'Doka — Volkshotel Amsterdam',    label: 'Doka',            sub: 'Volkshotel · Oost' },
-  dekeu:   { url: null,                                                                       credit: '',                  alt: 'Poolcafé de Keu — Amsterdam',    label: 'De Keu',          sub: 'Oud-West' },
-  planb:   { url: 'https://www.planbovertoom.nl/wp-content/uploads/2024/11/DSC01881-scaled.jpg', credit: 'Foto · Plan B',  alt: 'Plan B — Amsterdam',             label: 'Plan B',          sub: 'Oud-West' },
+  // sec 03 — concurrenten (6 foto's)
+  doka:    { url: 'https://www.volkshotel.nl/content/uploads/2019/10/R1-06657-006A.jpg', credit: 'Foto · Volkshotel', alt: 'Doka — Volkshotel Amsterdam', label: 'Doka', sub: 'Volkshotel · Oost' },
+  cue:     { url: 'https://cdn.prod.website-files.com/6841a4beb5cabb956f197ea1/68542c40140606bd001a5069_CUE_1November_by_ZsofiaBodnar-4.avif', credit: 'Foto · Zsofia Bodnar / CUE', alt: 'CUE Amsterdam listening bar', label: 'CUE', sub: 'Utrechtsestraat' },
+  murmur:  { url: 'https://www.tracksandtales.co/cdn/shop/articles/Copy_of_Phill_Argent_-_10.9.1.HG_1_c1105ae3-90ec-4e23-bf96-5d2280eb1aca.png?v=1761310720&width=1100', credit: 'Foto · Phill Argent / Tracks &amp; Tales', alt: 'Murmur Amsterdam Noord', label: 'Murmur', sub: 'Amsterdam Noord' },
   loop51:  { url: 'https://images.squarespace-cdn.com/content/v1/680155b8ea1a2d02a37bf2e3/54be601d-f51f-40ac-bc26-a734ad74f21b/P1025308.jpg', credit: 'Foto · Loop 51', alt: 'Loop 51 — Vinyl Brunch De Pijp', label: 'Loop 51', sub: 'De Pijp' },
-  mokum:   { url: 'https://poolen-amsterdam.nl/wp-content/uploads/Mokum-Pool-Darts-03-1-2048x1365.jpg', credit: 'Foto · Mokum Pool & Darts', alt: 'Mokum Pool & Darts — Amsterdam', label: 'Mokum Pool',  sub: 'Amstel' },
+  planb:   { url: 'https://www.planbovertoom.nl/wp-content/uploads/2024/11/DSC01881-scaled.jpg', credit: 'Foto · Plan B', alt: 'Plan B — Amsterdam', label: 'Plan B', sub: 'Oud-West' },
+  mokum:   { url: 'https://poolen-amsterdam.nl/wp-content/uploads/Mokum-Pool-Darts-03-1-2048x1365.jpg', credit: 'Foto · Mokum Pool &amp; Darts', alt: 'Mokum Pool & Darts — Amsterdam', label: 'Mokum Pool', sub: 'Amstel' },
 
-  // sec 06 — unique elementen (sfeerbeeld, geen specifieke venue)
-  parra:   { url: null, credit: '', alt: 'Designer-vilt referentie',  label: 'Iwan Simonis × Parra', sub: 'Sfeerbeeld',    tone: 'cream' },
-  replay:  { url: null, credit: '', alt: 'Replay-camera systeem',     label: 'Overhead replay',      sub: 'PUSHIT-stijl',  tone: 'cream' },
-  killer:  { url: null, credit: '', alt: 'Killer Pool sociaal',       label: 'Killer Sunday',        sub: 'Sociaal anker', tone: 'cream' },
-
-  // sec 07 — internationale referenties
-  nyc:     { url: 'https://amsterdambilliards.com/wp-content/uploads/2026/04/Amsterdam-Billiards-and-Bar.jpg', credit: 'Foto · Amsterdam Billiards Club', alt: 'Amsterdam Billiards Club NYC', label: 'Amsterdam Billiards Club', sub: 'NYC sinds 1989' },
-  statusq: { url: null, credit: '', alt: 'Status Q Brooklyn',     label: 'Status Q',            sub: 'Brooklyn' },
-  // ⚠ LET OP: "Le Brady" (39 bd de Strasbourg, Paris 10e) is een BIOSCOOP van Jean-Pierre Mocky,
-  // geen pool-bar. Het "naamloze gevel, 24/7, alleen ingewijden"-verhaal klopt voor de bioscoop,
-  // maar is verwarrend als pool-referentie. Mogelijke vervanging:
-  // Académie de Billard de Paris (Clichy-Montmartre) — historische biljartzaal in Parijs.
-  // Beslissing aan jou; tekst in sectie 7 staat ongewijzigd tot je hem aanpast.
-  lebrady: { url: null, credit: '', alt: 'Le Brady Paris',        label: 'Le Brady',            sub: 'Paris 10e' },
-  tokyo:   { url: null, credit: '', alt: 'Tokyo high-rise pool',  label: 'Shibuya billiards',   sub: 'Tokio' },
+  // sec 08 — internationale referenties (4 foto's)
+  nyc:     { url: 'https://amsterdambilliards.com/wp-content/uploads/2026/04/Amsterdam-Billiards-and-Bar.jpg', credit: 'Foto · Amsterdam Billiards', alt: 'Amsterdam Billiards Club NYC', label: 'Amsterdam Billiards Club', sub: 'NYC · sinds 1989' },
+  statusq: { url: null, credit: '', alt: 'Status Q Brooklyn',       label: 'Status Q',            sub: 'Brooklyn' },
+  paris:   { url: null, credit: '', alt: 'Académie de Billard',     label: 'Académie de Billard', sub: 'Paris · 1947' },
+  tokyo:   { url: null, credit: '', alt: 'Tokyo high-rise pool',    label: 'Shibuya billiards',   sub: 'Tokio' },
 };
 
 /* =================================================================
-   RENDER — config, tabellen, scenarios, chart, photos
+   RENDER
    ================================================================= */
 (function renderConfig() {
   document.querySelectorAll('[data-cfg]').forEach(el => {
@@ -1333,17 +1464,16 @@ const IMAGES = {
 (function renderScenarios() {
   const mount = document.getElementById('scenarios');
   const cols = [
-    { tag: 'A',   sub: 'Compact'    },
-    { tag: 'B',   sub: 'Medium · realistisch' },
-    { tag: 'C',   sub: 'Volwaardig' },
+    { tag: 'A', sub: 'Compact'    },
+    { tag: 'B', sub: 'Medium'     },
+    { tag: 'C', sub: 'Volwaardig' },
   ];
   let html = '<div class="lbl col-head" style="border-bottom:2px solid var(--cream)"></div>';
   cols.forEach((c, i) => {
     html += `<div class="col-head ${i===1?'col-b':''}">${c.tag}<span class="col-tag">${c.sub}</span></div>`;
   });
-  DATA.scenarios.rows.forEach((r, idx) => {
-    const last = idx === DATA.scenarios.rows.length - 1;
-    html += `<div class="row ${last?'foot':''}">`;
+  DATA.scenarios.rows.forEach((r) => {
+    html += `<div class="row">`;
     html += `<div class="lbl">${r.lbl}</div>`;
     html += `<div class="v">${r.a}</div>`;
     html += `<div class="v col-b">${r.b}</div>`;
@@ -1354,10 +1484,10 @@ const IMAGES = {
 })();
 
 (function renderChart() {
-  const W = 720, H = 420, PAD = { t: 30, r: 30, b: 50, l: 60 };
+  const W = 720, H = 400, PAD = { t: 30, r: 30, b: 50, l: 60 };
   const p = DATA.projection;
   const allVals = [...p.a, ...p.b, ...p.c];
-  const maxY = Math.ceil(Math.max(...allVals) / 50) * 50;     // round up to 50
+  const maxY = Math.ceil(Math.max(...allVals) / 50) * 50;
   const minY = 0;
 
   const xs = p.years.length;
@@ -1366,9 +1496,9 @@ const IMAGES = {
 
   const path = arr => arr.map((v, i) => `${i===0?'M':'L'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
 
+  // Op een orange-section is de chart-wrap cream — kleuren werken in beide tinten
   const colors = { a: '#1E4D52', b: '#E94B26', c: '#6B6B6B' };
 
-  // grid lines + y labels
   const gridLines = [];
   const yTicks = 5;
   for (let i = 0; i <= yTicks; i++) {
@@ -1380,20 +1510,12 @@ const IMAGES = {
     );
   }
 
-  // x labels
   const xLabels = p.years.map((yr, i) =>
     `<text x="${x(i)}" y="${H - PAD.b + 22}" text-anchor="middle" font-family="Inter" font-size="11" fill="#6B6B6B">${yr}</text>`
   ).join('');
 
-  // break-even marker — verticale stippellijn op jaar 2
-  const beX = x(1);
-  const beMarker =
-    `<line x1="${beX}" x2="${beX}" y1="${PAD.t}" y2="${H - PAD.b}" stroke="#E94B26" stroke-dasharray="3 4" stroke-width="1" opacity=".5"/>` +
-    `<text x="${beX + 8}" y="${PAD.t + 14}" font-family="Inter" font-size="10" font-weight="600" fill="#E94B26" letter-spacing="1.5">INVESTERING TERUGVERDIEND</text>`;
-
-  // points on each line
   const dotsFor = (arr, color) => arr.map((v, i) =>
-    `<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="#EFE7D6" stroke="${color}" stroke-width="2">
+    `<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="#F5EFE2" stroke="${color}" stroke-width="2">
        <title>${p.years[i]} — €${v}k</title>
      </circle>`
   ).join('');
@@ -1401,10 +1523,9 @@ const IMAGES = {
   const svg = `
     <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="5-jaar EBIT projectie per scenario">
       ${gridLines.join('')}
-      ${beMarker}
-      <path d="${path(p.a)}" fill="none" stroke="${colors.a}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".8"/>
+      <path d="${path(p.a)}" fill="none" stroke="${colors.a}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>
       <path d="${path(p.b)}" fill="none" stroke="${colors.b}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="${path(p.c)}" fill="none" stroke="${colors.c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 4" opacity=".75"/>
+      <path d="${path(p.c)}" fill="none" stroke="${colors.c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 4" opacity=".70"/>
       ${dotsFor(p.a, colors.a)}
       ${dotsFor(p.b, colors.b)}
       ${dotsFor(p.c, colors.c)}
@@ -1414,7 +1535,6 @@ const IMAGES = {
   `;
   document.getElementById('chart-mount').innerHTML = svg;
 
-  // legend
   const totA = p.a.reduce((s, v) => s + v, 0);
   const totB = p.b.reduce((s, v) => s + v, 0);
   const totC = p.c.reduce((s, v) => s + v, 0);
@@ -1423,21 +1543,21 @@ const IMAGES = {
       <span class="leg-swatch" style="background:${colors.a}"></span>
       <div style="flex:1">
         <div class="leg-name">A · Compact</div>
-        <div class="leg-val">5 tafels · €${totA}k EBIT cumulatief</div>
+        <div class="leg-val">5 tafels · cumulatief €${totA}k</div>
       </div>
     </div>
     <div class="leg-item is-b">
       <span class="leg-swatch" style="background:${colors.b};height:3px"></span>
       <div style="flex:1">
         <div class="leg-name">B · Medium</div>
-        <div class="leg-val">8 tafels · €${totB}k EBIT cumulatief — uitgangspunt</div>
+        <div class="leg-val">8 tafels · cumulatief €${totB}k</div>
       </div>
     </div>
     <div class="leg-item">
       <span class="leg-swatch" style="background:${colors.c};border-top:2px dashed ${colors.c};height:0"></span>
       <div style="flex:1">
         <div class="leg-name">C · Volwaardig</div>
-        <div class="leg-val">12 tafels · €${totC}k EBIT cumulatief</div>
+        <div class="leg-val">12 tafels · cumulatief €${totC}k</div>
       </div>
     </div>
   `;
@@ -1453,7 +1573,8 @@ const IMAGES = {
       img.src = meta.url;
       img.alt = meta.alt || '';
       img.loading = 'lazy';
-      img.onerror = () => { renderPlaceholder(el, meta); };
+      img.referrerPolicy = 'no-referrer';
+      img.onerror = () => { el.innerHTML = ''; renderPlaceholder(el, meta); };
       el.appendChild(img);
       if (meta.credit) {
         const cap = document.createElement('div');
@@ -1479,7 +1600,7 @@ function renderPlaceholder(el, meta) {
 }
 
 /* =================================================================
-   NAVIGATIE — pijltjes, spatie, 1–9, dots
+   NAVIGATIE
    ================================================================= */
 const sections = Array.from(document.querySelectorAll('.scene'));
 const dots = Array.from(document.querySelectorAll('.nav-dots button'));
@@ -1520,14 +1641,14 @@ document.addEventListener('keydown', (e) => {
   } else if (/^[1-9]$/.test(k)) {
     e.preventDefault();
     goTo(parseInt(k, 10));
+  } else if (k === '0') {
+    e.preventDefault();
+    goTo(10);
   }
 });
 
 dots.forEach(btn => btn.addEventListener('click', () => goTo(parseInt(btn.dataset.go, 10))));
 
-/* =================================================================
-   ACTIEVE DOT op basis van zichtbare sectie
-   ================================================================= */
 const dotObserver = new IntersectionObserver((entries) => {
   entries.forEach(en => {
     if (en.isIntersecting && en.intersectionRatio > 0.5) {
@@ -1538,9 +1659,6 @@ const dotObserver = new IntersectionObserver((entries) => {
 }, { threshold: [0.5] });
 sections.forEach(s => dotObserver.observe(s));
 
-/* =================================================================
-   REVEAL on scroll
-   ================================================================= */
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(en => {
     if (en.isIntersecting) {
@@ -1549,10 +1667,8 @@ const revealObserver = new IntersectionObserver((entries) => {
     }
   });
 }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-
 document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-/* Eerste sectie: trigger meteen */
 document.querySelectorAll('#sec-1 .reveal').forEach(el => {
   setTimeout(() => el.classList.add('in-view'), 50);
 });
