@@ -5,9 +5,6 @@ const nextConfig: NextConfig = {
   basePath: "/spin-app",
   trailingSlash: true,
   images: { unoptimized: true },
-  experimental: {
-    typedRoutes: true,
-  },
 };
 
 export default nextConfig;
