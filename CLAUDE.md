@@ -100,3 +100,20 @@ Geen statische tijden ("17:30"). Wel: "Speelt · 47m", "Start over · 18m",
 - Push direct naar `main`.
 - `--no-verify`, `--force` push, of amend van gepushte commits zonder expliciete ask.
 - Commit secrets, `.env`, credentials, grote binaries, of font-licenties zonder check.
+
+## Mismatch met eerdere context — eerst vragen, niet acteren
+Als iets dat binnenkomt afwijkt van wat eerder is afgesproken (briefing,
+CLAUDE.md, eerdere keuze in de sessie), **stop en vraag voordat je het
+verwerkt**. Geen aannames, geen "ik ga er vast mee aan de slag".
+
+Concreet:
+- Briefing zegt **Fragment Mono**, je krijgt een file `PPFraktionMono.otf` →
+  vraag: "Klopt het dat je nu PP Fraktion Mono wil ipv Fragment Mono?"
+- Briefing zegt **Parabolica**, geen file aanwezig → vraag wat je moet
+  doen (wachten, Google-fallback, of een specifieke andere font), kies
+  niet zelf een proxy.
+- Asset komt binnen met andere naam, weight, formaat dan verwacht → vraag.
+- Spec verandert tussen sessies → bevestig welke versie leidend is.
+
+Goedkoper voor jou om één vraag te stellen dan voor mij om verkeerd werk
+te ontdoen.
