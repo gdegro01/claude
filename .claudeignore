@@ -1,0 +1,61 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+.yarn/
+vendor/
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+target/
+.gradle/
+.m2/
+
+# Build artifacts
+dist/
+build/
+out/
+.next/
+.nuxt/
+.svelte-kit/
+.turbo/
+*.tsbuildinfo
+
+# Coverage / reports
+coverage/
+.nyc_output/
+htmlcov/
+.coverage
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs / temp
+*.log
+tmp/
+.tmp/
+
+# Data / large files
+*.parquet
+*.arrow
+*.sqlite
+*.db
+data/raw/
+checkpoints/
+*.ckpt
+*.bin
+*.safetensors
+
+# Secrets (never want these in context anyway)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
