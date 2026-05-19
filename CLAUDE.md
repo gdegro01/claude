@@ -14,8 +14,22 @@ Boutique hotel software × Japanse listening bars × premium airline ops × mode
 Vermijd: gaming UI · nightclub neon · startup SaaS · flashy startup-animaties.
 
 ## Primary deliverable
-Figma (design & pitch). Coded motion references zijn ter inspiratie — tenzij
-expliciet uitgebreid naar een coded prototype (zie `docs/scope.md` zodra besloten).
+**Coded web prototype** — geen Figma. De briefing noemt "primair Figma",
+maar we draaien dat om: het volledige prototype wordt in code gebouwd en
+live in de browser gedemonstreerd tijdens de pitch.
+
+### Stack
+- Next.js 15 (App Router) · TypeScript · React 19
+- Tailwind CSS v4 (design tokens uit de SPIN-kleurtabel)
+- Motion (motion/react) voor alle animatie — shared layout, AnimatePresence
+- next/font local voor Parabolica + Fragment Mono
+- pnpm als package manager
+
+### Routes
+- `/` · landing
+- `/book/*` · gast-flow (mobile-first)
+- `/ops/*` · operator dashboard (desktop/tablet)
+- `/demo/*` · losstaande hero-momenten voor in de pitch (waitlist claim, occupancy rings, …)
 
 ## Brand — typografie
 - **Headings · buttons · timers · grote nummers** → Parabolica Bold / SemiBold
