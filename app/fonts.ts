@@ -1,5 +1,5 @@
 import localFont from "next/font/local";
-import { Fragment_Mono, Allura } from "next/font/google";
+import { Allura } from "next/font/google";
 
 export const fontDisplay = localFont({
   src: [
@@ -33,11 +33,16 @@ export const fontDisplay = localFont({
   variable: "--font-parabolica",
 });
 
-export const fontMono = Fragment_Mono({
-  subsets: ["latin"],
+export const fontMono = localFont({
+  src: [
+    {
+      path: "../public/fonts/FragmentMono-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+  ],
   display: "swap",
   variable: "--font-fragment-mono",
-  weight: "400",
 });
 
 export const fontScript = Allura({
