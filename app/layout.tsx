@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { fontDisplay, fontMono } from "./fonts";
+import { fontDisplay, fontMono, fontScript } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="nl" className={`${fontDisplay.variable} ${fontMono.variable}`}>
+    <html lang="nl" className={`${fontDisplay.variable} ${fontMono.variable} ${fontScript.variable}`}>
       <body>{children}</body>
     </html>
   );

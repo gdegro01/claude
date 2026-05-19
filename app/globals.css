@@ -12,6 +12,7 @@
 
   --font-display: var(--font-parabolica), "Iowan Old Style", ui-serif, Georgia, serif;
   --font-mono: var(--font-fragment-mono), ui-monospace, "SFMono-Regular", "JetBrains Mono", Menlo, monospace;
+  --font-script-stack: var(--font-script), "Snell Roundhand", "Apple Chancery", cursive;
 }
 
 html, body {
@@ -26,16 +27,16 @@ html, body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-  letter-spacing: -0.025em;
-  font-weight: 600;
-  line-height: 0.95;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  line-height: 0.92;
 }
 
-/* Italic display passages — used for "jouw tafel.", "datum.", "is vol." etc */
+/* Italic display passages — used for "jouw tafel.", "datum.", "zaterdag." */
 .spin-em {
   font-style: italic;
-  font-weight: 500;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  letter-spacing: -0.015em;
 }
 
 ::selection {

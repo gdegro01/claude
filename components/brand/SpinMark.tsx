@@ -17,11 +17,12 @@ export function SpinMark({ size = "md", className }: SpinMarkProps) {
   return (
     <span
       className={cn(
-        "font-[family-name:var(--font-display)] font-bold uppercase",
+        "font-[family-name:var(--font-display)] uppercase",
         "leading-none inline-block",
         sizeClasses[size],
         className
       )}
+      style={{ fontWeight: 900 }}
       aria-label="SPIN."
     >
       SPIN.
