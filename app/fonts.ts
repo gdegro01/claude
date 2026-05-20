@@ -1,12 +1,17 @@
 import localFont from "next/font/local";
 import { Allura } from "next/font/google";
 
-export const fontDisplay = localFont({
+export const parabolica = localFont({
   src: [
     {
       path: "../public/fonts/Parabolica-HairlineOblique.otf",
       weight: "100",
       style: "italic",
+    },
+    {
+      path: "../public/fonts/Parabolica-Regular.otf",
+      weight: "400",
+      style: "normal",
     },
     {
       path: "../public/fonts/Parabolica-Bold.otf",
@@ -33,7 +38,7 @@ export const fontDisplay = localFont({
   variable: "--font-parabolica",
 });
 
-export const fontMono = localFont({
+export const fragmentMono = localFont({
   src: [
     {
       path: "../public/fonts/FragmentMono-Regular.ttf",
@@ -45,7 +50,7 @@ export const fontMono = localFont({
   variable: "--font-fragment-mono",
 });
 
-export const fontScript = Allura({
+export const script = Allura({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-script",
