@@ -2,16 +2,19 @@
 """
 Creates a YouTube playlist from the tracks found in the chat screenshots.
 Uses YouTube Data API v3 with OAuth2.
+
+Works in remote/headless environments: prints an auth URL, you log in
+via your browser, then paste the redirect URL back here.
 """
 
-import os
 import json
 import sys
 from pathlib import Path
+from urllib.parse import urlparse, parse_qs
 
-from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 
 SCOPES = ["https://www.googleapis.com/auth/youtube"]
@@ -29,10 +32,15 @@ TRACKS = [
 ]
 
 PLAYLIST_TITLE = "Chat Discoveries - Antilles / Afro / Boogie / Soca"
-PLAYLIST_DESCRIPTION = "Rodrigue Gauthier, Nany, Deodato, MYEL, Laser, K.C. And The Internationals, Cito Jarvis, C. Thompson"
+PLAYLIST_DESCRIPTION = (
+    "Rodrigue Gauthier, Nany, Deodato, MYEL, Laser, "
+    "K.C. And The Internationals, Cito Jarvis, C. Thompson"
+)
 
 CREDENTIALS_FILE = Path(__file__).parent / "client_secret.json"
 TOKEN_FILE = Path(__file__).parent / "token.json"
+
+REDIRECT_URI = "http://localhost:8085"
 
 
 def get_credentials():
@@ -45,43 +53,59 @@ def get_credentials():
         return creds
 
     if creds and creds.expired and creds.refresh_token:
+        print("→ Token verlopen, wordt ververst...")
         creds.refresh(Request())
         TOKEN_FILE.write_text(creds.to_json())
         return creds
 
     if not CREDENTIALS_FILE.exists():
-        print("\n╔══════════════════════════════════════════════════════════════╗")
-        print("║  client_secret.json niet gevonden!                          ║")
-        print("║                                                              ║")
-        print("║  Volg deze stappen:                                          ║")
-        print("║  1. Ga naar https://console.cloud.google.com                 ║")
-        print("║  2. Maak een project (of selecteer een bestaand)             ║")
-        print("║  3. Zoek 'YouTube Data API v3' → Enable                      ║")
-        print("║  4. Ga naar Credentials → Create Credentials → OAuth 2.0    ║")
-        print("║  5. Kies 'Desktop app' als type                             ║")
-        print("║  6. Download de JSON en sla op als:                          ║")
-        print(f"║     {CREDENTIALS_FILE}  ║")
-        print("║  7. Run dit script opnieuw                                   ║")
-        print("╚══════════════════════════════════════════════════════════════╝\n")
+        print("✗ client_secret.json niet gevonden!")
+        print("  Download je OAuth credentials van Google Cloud Console")
+        print(f"  en sla op als: {CREDENTIALS_FILE}")
         sys.exit(1)
 
-    flow = InstalledAppFlow.from_client_secrets_file(str(CREDENTIALS_FILE), SCOPES)
+    flow = Flow.from_client_secrets_file(
+        str(CREDENTIALS_FILE),
+        scopes=SCOPES,
+        redirect_uri=REDIRECT_URI,
+    )
 
-    print("\n→ Een browser-URL wordt geopend voor authenticatie.")
-    print("  Als de redirect niet werkt (remote omgeving), kopieer de URL")
-    print("  uit je adresbalk na het inloggen en plak die hieronder.\n")
+    auth_url, _ = flow.authorization_url(
+        access_type="offline",
+        include_granted_scopes="true",
+        prompt="consent",
+    )
 
-    try:
-        creds = flow.run_local_server(port=0, open_browser=False)
-    except Exception:
-        creds = flow.run_console()
+    print("\n╔══════════════════════════════════════════════════════════╗")
+    print("║  STAP 1: Open deze URL in je browser en log in:        ║")
+    print("╚══════════════════════════════════════════════════════════╝")
+    print(f"\n{auth_url}\n")
+    print("╔══════════════════════════════════════════════════════════╗")
+    print("║  STAP 2: Na inloggen word je doorgestuurd naar een      ║")
+    print("║  pagina die NIET laadt (localhost). Dat is normaal.     ║")
+    print("║  Kopieer de VOLLEDIGE URL uit je adresbalk en plak      ║")
+    print("║  die hieronder.                                         ║")
+    print("╚══════════════════════════════════════════════════════════╝\n")
+
+    callback_url = input("Plak hier de URL: ").strip()
+
+    parsed = urlparse(callback_url)
+    code = parse_qs(parsed.query).get("code")
+    if not code:
+        print("✗ Geen authorization code gevonden in de URL.")
+        print("  Zorg dat je de volledige URL plakt, inclusief ?code=...")
+        sys.exit(1)
+
+    flow.fetch_token(code=code[0])
+    creds = flow.credentials
 
     TOKEN_FILE.write_text(creds.to_json())
+    print("✓ Authenticatie gelukt! Token opgeslagen.\n")
     return creds
 
 
 def create_playlist(youtube):
-    request = youtube.playlists().insert(
+    response = youtube.playlists().insert(
         part="snippet,status",
         body={
             "snippet": {
@@ -90,10 +114,10 @@ def create_playlist(youtube):
             },
             "status": {"privacyStatus": "private"},
         },
-    )
-    response = request.execute()
+    ).execute()
+
     playlist_id = response["id"]
-    print(f"\n✓ Playlist aangemaakt: {PLAYLIST_TITLE}")
+    print(f"✓ Playlist aangemaakt: {PLAYLIST_TITLE}")
     print(f"  https://www.youtube.com/playlist?list={playlist_id}\n")
     return playlist_id
 
@@ -120,14 +144,17 @@ def add_videos(youtube, playlist_id):
 
 
 def main():
+    print("\n🎵 YouTube Playlist Creator\n")
+
     creds = get_credentials()
     youtube = build("youtube", "v3", credentials=creds)
 
     playlist_id = create_playlist(youtube)
     add_videos(youtube, playlist_id)
 
-    print(f"\n✓ Klaar! Playlist: https://www.youtube.com/playlist?list={playlist_id}")
-    print("  (Status: private — je kunt dit wijzigen op YouTube)")
+    url = f"https://www.youtube.com/playlist?list={playlist_id}"
+    print(f"\n✓ Klaar! Playlist: {url}")
+    print("  (Status: private — je kunt dit wijzigen op YouTube)\n")
 
 
 if __name__ == "__main__":
