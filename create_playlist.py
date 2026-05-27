@@ -7,10 +7,12 @@ Works in remote/headless environments: prints an auth URL, you log in
 via your browser, then paste the redirect URL back here.
 """
 
+import json
 import sys
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
+import google.oauth2.credentials
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -38,6 +40,7 @@ PLAYLIST_DESCRIPTION = (
 
 CREDENTIALS_FILE = Path(__file__).parent / "client_secret.json"
 TOKEN_FILE = Path(__file__).parent / "token.json"
+FLOW_STATE_FILE = Path(__file__).parent / ".oauth_flow_state.json"
 
 def get_credentials():
     creds = None
@@ -60,13 +63,46 @@ def get_credentials():
         print(f"  en sla op als: {CREDENTIALS_FILE}")
         sys.exit(1)
 
+    redirect_uri = "http://localhost:8085/"
+
+    if len(sys.argv) > 1:
+        callback_url = sys.argv[1].strip()
+        if not FLOW_STATE_FILE.exists():
+            print("✗ Geen opgeslagen flow state gevonden. Run eerst zonder argument.")
+            sys.exit(1)
+
+        state = json.loads(FLOW_STATE_FILE.read_text())
+        flow = InstalledAppFlow.from_client_secrets_file(
+            str(CREDENTIALS_FILE), SCOPES, redirect_uri=redirect_uri
+        )
+        flow.code_verifier = state["code_verifier"]
+
+        parsed = urlparse(callback_url)
+        code = parse_qs(parsed.query).get("code")
+        if not code:
+            print("\n✗ Geen authorization code gevonden in de URL.")
+            print("  Zorg dat je de volledige URL plakt inclusief ?code=...")
+            sys.exit(1)
+
+        flow.fetch_token(code=code[0])
+        creds = flow.credentials
+        TOKEN_FILE.write_text(creds.to_json())
+        FLOW_STATE_FILE.unlink(missing_ok=True)
+        print("✓ Authenticatie gelukt! Token opgeslagen.\n")
+        return creds
+
     flow = InstalledAppFlow.from_client_secrets_file(
-        str(CREDENTIALS_FILE), SCOPES, redirect_uri="http://localhost:8085/"
+        str(CREDENTIALS_FILE), SCOPES, redirect_uri=redirect_uri
     )
 
-    auth_url, _ = flow.authorization_url(
+    auth_url, state = flow.authorization_url(
         access_type="offline", prompt="consent"
     )
+
+    FLOW_STATE_FILE.write_text(json.dumps({
+        "code_verifier": flow.code_verifier,
+        "state": state,
+    }))
 
     print("\n╔═══════════════════════════════════════════════════════╗")
     print("║  STAP 1: Open deze URL in je browser:                ║")
@@ -76,24 +112,10 @@ def get_credentials():
     print("║  STAP 2: Log in en geef toestemming.                 ║")
     print("║  Je wordt doorgestuurd naar een pagina die NIET      ║")
     print("║  laadt (localhost:8085). Dat is normaal!              ║")
-    print("║  Kopieer de VOLLEDIGE URL uit je adresbalk.           ║")
+    print("║  Kopieer de VOLLEDIGE URL uit je adresbalk en geef   ║")
+    print("║  die aan mij terug.                                   ║")
     print("╚═══════════════════════════════════════════════════════╝\n")
-
-    callback_url = input("Plak de URL hier: ").strip()
-
-    parsed = urlparse(callback_url)
-    code = parse_qs(parsed.query).get("code")
-    if not code:
-        print("\n✗ Geen authorization code gevonden in de URL.")
-        print("  Zorg dat je de volledige URL plakt inclusief ?code=...")
-        sys.exit(1)
-
-    flow.fetch_token(code=code[0])
-    creds = flow.credentials
-
-    TOKEN_FILE.write_text(creds.to_json())
-    print("\n✓ Authenticatie gelukt! Token opgeslagen.\n")
-    return creds
+    sys.exit(0)
 
 
 def create_playlist(youtube):
