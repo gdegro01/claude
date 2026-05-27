@@ -7,14 +7,13 @@ Works in remote/headless environments: prints an auth URL, you log in
 via your browser, then paste the redirect URL back here.
 """
 
-import json
 import sys
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import Flow
+from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 SCOPES = ["https://www.googleapis.com/auth/youtube"]
@@ -40,9 +39,6 @@ PLAYLIST_DESCRIPTION = (
 CREDENTIALS_FILE = Path(__file__).parent / "client_secret.json"
 TOKEN_FILE = Path(__file__).parent / "token.json"
 
-REDIRECT_URI = "http://localhost:8085"
-
-
 def get_credentials():
     creds = None
 
@@ -64,43 +60,39 @@ def get_credentials():
         print(f"  en sla op als: {CREDENTIALS_FILE}")
         sys.exit(1)
 
-    flow = Flow.from_client_secrets_file(
-        str(CREDENTIALS_FILE),
-        scopes=SCOPES,
-        redirect_uri=REDIRECT_URI,
+    flow = InstalledAppFlow.from_client_secrets_file(
+        str(CREDENTIALS_FILE), SCOPES, redirect_uri="http://localhost:8085/"
     )
 
     auth_url, _ = flow.authorization_url(
-        access_type="offline",
-        include_granted_scopes="true",
-        prompt="consent",
+        access_type="offline", prompt="consent"
     )
 
-    print("\n╔══════════════════════════════════════════════════════════╗")
-    print("║  STAP 1: Open deze URL in je browser en log in:        ║")
-    print("╚══════════════════════════════════════════════════════════╝")
+    print("\n╔═══════════════════════════════════════════════════════╗")
+    print("║  STAP 1: Open deze URL in je browser:                ║")
+    print("╚═══════════════════════════════════════════════════════╝")
     print(f"\n{auth_url}\n")
-    print("╔══════════════════════════════════════════════════════════╗")
-    print("║  STAP 2: Na inloggen word je doorgestuurd naar een      ║")
-    print("║  pagina die NIET laadt (localhost). Dat is normaal.     ║")
-    print("║  Kopieer de VOLLEDIGE URL uit je adresbalk en plak      ║")
-    print("║  die hieronder.                                         ║")
-    print("╚══════════════════════════════════════════════════════════╝\n")
+    print("╔═══════════════════════════════════════════════════════╗")
+    print("║  STAP 2: Log in en geef toestemming.                 ║")
+    print("║  Je wordt doorgestuurd naar een pagina die NIET      ║")
+    print("║  laadt (localhost:8085). Dat is normaal!              ║")
+    print("║  Kopieer de VOLLEDIGE URL uit je adresbalk.           ║")
+    print("╚═══════════════════════════════════════════════════════╝\n")
 
-    callback_url = input("Plak hier de URL: ").strip()
+    callback_url = input("Plak de URL hier: ").strip()
 
     parsed = urlparse(callback_url)
     code = parse_qs(parsed.query).get("code")
     if not code:
-        print("✗ Geen authorization code gevonden in de URL.")
-        print("  Zorg dat je de volledige URL plakt, inclusief ?code=...")
+        print("\n✗ Geen authorization code gevonden in de URL.")
+        print("  Zorg dat je de volledige URL plakt inclusief ?code=...")
         sys.exit(1)
 
     flow.fetch_token(code=code[0])
     creds = flow.credentials
 
     TOKEN_FILE.write_text(creds.to_json())
-    print("✓ Authenticatie gelukt! Token opgeslagen.\n")
+    print("\n✓ Authenticatie gelukt! Token opgeslagen.\n")
     return creds
 
 
