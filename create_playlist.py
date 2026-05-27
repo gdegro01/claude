@@ -8,11 +8,16 @@ via your browser, then paste the redirect URL back here.
 """
 
 import json
+import os
 import sys
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
-import google.oauth2.credentials
+os.environ.setdefault("HTTPLIB2_CA_CERTS", "/etc/ssl/certs/ca-certificates.crt")
+
+import httplib2
+httplib2.CA_CERTS = "/etc/ssl/certs/ca-certificates.crt"
+
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
