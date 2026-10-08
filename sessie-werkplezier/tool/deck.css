@@ -1,0 +1,110 @@
+/* ── Het scherm: dezelfde opmaak als sessie 4 ─────────────────────────
+   Alles hangt onder .slide, zodat de regie dezelfde slides als voorbeeld kan
+   tonen zonder dat de opmaak van het scherm weglekt. Tokens en fonts komen
+   uit ds/mw.css. --k gaat omlaag als iets niet past (deck.js). */
+.slide{--accent:var(--mw-teal);--links:var(--mw-teal);--rechts:var(--mw-orange);--k:1;color:var(--mw-on-dark);font-family:var(--font-reading)}
+.stage{position:fixed;inset:0;overflow:hidden}
+.canvas{width:1920px;height:1080px;position:absolute;left:50%;top:50%;transform-origin:center center;transform:translate(-50%,-50%)}
+.slide{position:absolute;inset:0;background:var(--mw-ink);padding:84px 120px 64px;display:grid;grid-template-rows:auto 1fr auto;visibility:hidden}
+.slide.on{visibility:visible}
+.slide .s-top{display:flex;justify-content:space-between;align-items:center;gap:40px}
+.slide .over{font-family:var(--font-mono);font-size:22px;letter-spacing:var(--tracking-wider);text-transform:uppercase;color:var(--accent)}
+.slide .mark{width:62px;height:auto;display:block;color:var(--accent)}
+.slide .s-foot{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--font-mono);font-size:18px;
+  letter-spacing:var(--tracking-wider);text-transform:uppercase;color:var(--mw-on-dark-muted)}
+.slide .s-foot .n{letter-spacing:.08em;font-variant-numeric:tabular-nums}
+.slide .s-body{display:flex;flex-direction:column;justify-content:center;gap:calc(52px*var(--k));min-height:0;padding:28px 0;position:relative}
+.slide h1{font-family:var(--font-display);font-weight:700;font-size:calc(76px*var(--k));line-height:1.04;letter-spacing:var(--tracking-tight);
+  color:var(--mw-white);margin:0;max-width:1560px;text-wrap:balance}
+.slide .lead{font-size:calc(40px*var(--k));line-height:1.42;color:var(--mw-on-dark-muted);margin:0;max-width:1400px}
+.slide .url{font-family:var(--font-mono);font-weight:500;font-size:56px;color:var(--mw-lime-light)}
+.slide .url.klein{font-size:32px;white-space:nowrap}
+.slide .wacht{font-family:var(--font-mono);font-size:26px;letter-spacing:var(--tracking-wide);text-transform:uppercase;color:var(--mw-on-dark-muted);margin:0;
+  padding:26px 32px;border:2px dashed var(--mw-ink-4);border-radius:var(--radius-lg);align-self:flex-start}
+.slide .ihead{display:flex;justify-content:space-between;align-items:flex-end;gap:40px}
+
+/* Titel */
+.slide.t-titel .s-body{gap:44px}
+.slide.t-titel .big{font-family:var(--font-display);font-weight:800;font-size:168px;line-height:.94;letter-spacing:var(--tracking-tight);
+  text-transform:uppercase;color:var(--mw-white);margin:0}
+.slide.t-titel .big span{display:block}
+.slide.t-titel .big span+span{color:var(--accent)}
+.slide.t-titel .sub{font-family:var(--font-display);font-weight:500;font-size:44px;line-height:1.25;color:var(--mw-on-dark);margin:0;max-width:1400px;text-wrap:balance}
+
+/* Intro */
+.slide .introtekst{font-family:var(--font-display);font-weight:600;font-size:calc(64px*var(--k));line-height:1.18;letter-spacing:-.02em;
+  color:var(--mw-white);margin:0;padding-left:48px;border-left:6px solid var(--accent);max-width:1580px;text-wrap:pretty}
+.slide .introregel{font-size:calc(38px*var(--k));line-height:1.4;color:var(--mw-lime-light);margin:0;max-width:1400px;padding-left:54px}
+
+/* Open: het adres voor de telefoon */
+.slide .openrow{display:flex;justify-content:space-between;align-items:flex-end;gap:60px;margin-top:10px}
+.slide .openrow .lap{display:flex;flex-direction:column;gap:10px}
+.slide .openrow .lap i{font-style:normal;font-family:var(--font-mono);font-size:22px;letter-spacing:var(--tracking-wider);text-transform:uppercase;color:var(--mw-on-dark-muted)}
+
+/* Deel 1: de ideeën */
+.slide.t-ideeen .s-body,.slide.t-verdeling .s-body,.slide.t-tegels .s-body,.slide.t-hoeken .s-body{justify-content:flex-start;padding-top:22px}
+.slide.t-ideeen h1,.slide.t-verdeling h1,.slide.t-tegels h1,.slide.t-hoeken h1{font-size:calc(58px*var(--k))}
+.slide .ideeen{list-style:none;margin:0;padding:0;column-count:3;column-gap:56px}
+.slide .ideeen li{break-inside:avoid;font-family:var(--font-display);font-weight:500;font-size:calc(30px*var(--k));line-height:1.22;color:var(--mw-white);
+  padding:calc(12px*var(--k)) 0 calc(12px*var(--k)) 26px;position:relative;border-bottom:1px solid var(--mw-ink-3)}
+.slide .ideeen li::before{content:"";position:absolute;left:0;top:calc(.62em + 12px*var(--k));width:11px;height:11px;border-radius:50%;background:var(--accent)}
+.slide .ideeen li b{font-family:var(--font-mono);font-weight:500;font-size:.8em;color:var(--mw-lime-light);margin-left:8px}
+
+/* Deel 2: de verdeling */
+.slide .verd{display:flex;flex-direction:column}
+.slide .vr{display:grid;grid-template-columns:minmax(0,820px) minmax(0,1fr) 170px 150px;gap:28px;align-items:center;
+  padding:calc(10px*var(--k)) 0;border-bottom:1px solid var(--mw-ink-3)}
+.slide .vr .t{font-family:var(--font-display);font-weight:500;font-size:calc(27px*var(--k));line-height:1.18;color:var(--mw-white)}
+.slide .vr .vbalk{height:calc(22px*var(--k));background:var(--mw-ink-2);border-radius:999px;overflow:hidden}
+.slide .vr .vbalk i{display:block;height:100%;background:var(--accent);border-radius:999px}
+.slide .vr b{font-family:var(--font-mono);font-weight:500;font-size:calc(28px*var(--k));color:var(--mw-lime-light);text-align:right;font-variant-numeric:tabular-nums}
+.slide .vr .n{font-family:var(--font-mono);font-size:calc(22px*var(--k));color:var(--mw-on-dark-muted);text-align:right}
+.slide .vr.nul .t,.slide .vr.nul b{color:var(--mw-on-dark-muted)}
+
+/* Deel 3: tegels en detail */
+.slide .tegels{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:calc(24px*var(--k))}
+.slide .tegel{font:inherit;text-align:left;cursor:pointer;background:var(--mw-ink-2);border:0;border-top:7px solid var(--accent);border-radius:var(--radius-lg);
+  padding:calc(30px*var(--k)) 28px calc(32px*var(--k));display:flex;flex-direction:column;gap:calc(14px*var(--k));color:inherit;min-height:calc(330px*var(--k))}
+.slide .tegel:nth-child(n+6){border-top-color:var(--mw-lime)}
+.slide .tegel b{font-family:var(--font-display);font-weight:600;font-size:calc(31px*var(--k));line-height:1.12;color:var(--mw-white)}
+.slide .tegel span{font-size:calc(22px*var(--k));line-height:1.38;color:var(--mw-on-dark-muted)}
+.slide .tegel em{font-style:normal;margin-top:auto;font-family:var(--font-mono);font-size:calc(24px*var(--k));color:var(--mw-lime-light)}
+.slide .tegel:hover{background:var(--mw-ink-3)}
+.slide .detail{position:absolute;inset:0;background:rgba(30,32,38,.94);display:flex;align-items:center;justify-content:center;z-index:3;cursor:pointer}
+.slide .dkaart{background:var(--mw-ink-2);border-radius:var(--radius-xl);border-top:8px solid var(--accent);padding:56px 64px 60px;max-width:1500px;
+  display:flex;flex-direction:column;gap:26px}
+.slide .dkaart .over{font-size:20px;margin:0}
+.slide .dkaart h2{font-family:var(--font-display);font-weight:700;font-size:64px;line-height:1.05;letter-spacing:var(--tracking-tight);color:var(--mw-white);margin:0}
+.slide .dkaart .duitleg{font-size:34px;line-height:1.4;color:var(--mw-on-dark);margin:0}
+.slide .dgrid{display:grid;grid-template-columns:1fr 1fr;gap:48px;padding-top:26px;border-top:1px solid var(--mw-ink-4)}
+.slide .dgrid i{font-style:normal;font-family:var(--font-mono);font-size:20px;letter-spacing:var(--tracking-wider);text-transform:uppercase;color:var(--mw-lime-light)}
+.slide .dgrid p{font-size:29px;line-height:1.42;color:var(--mw-on-dark);margin:12px 0 0}
+
+/* Deel 4: twee hoeken */
+.slide.t-hoek .s-body{gap:calc(56px*var(--k))}
+.slide .hoek{display:grid;grid-template-columns:1fr 1fr;gap:80px}
+.slide .kant{background:var(--mw-ink-2);border-radius:var(--radius-lg);padding:48px 52px;border-top:8px solid var(--links)}
+.slide .kant.r{border-top-color:var(--rechts);text-align:right}
+.slide .kant b{font-family:var(--font-display);font-weight:600;font-size:calc(50px*var(--k));line-height:1.14;color:var(--mw-white);text-wrap:balance}
+.slide .huit{display:flex;flex-direction:column;gap:18px}
+.slide .hbaan{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) 30px repeat(3,minmax(0,1fr));gap:10px}
+.slide .hbaan span:nth-child(4){grid-column:5}
+.slide .hbaan span{min-height:76px;border-radius:12px;background:var(--mw-ink-2);display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:8px;padding:12px}
+.slide .hbaan span i{width:24px;height:24px;border-radius:50%;background:var(--links)}
+.slide .hbaan span.r i{background:var(--rechts)}
+.slide .htel{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--font-mono);font-size:30px}
+.slide .htel .l{color:var(--links)} .slide .htel .r{color:var(--rechts)}
+.slide .htel i{font-style:normal;font-size:20px;letter-spacing:var(--tracking-wide);text-transform:uppercase;color:var(--mw-on-dark-muted)}
+
+/* Deel 4: alle hoeken */
+.slide .hrijen{display:flex;flex-direction:column}
+.slide .hrij{display:grid;grid-template-columns:minmax(0,1fr) 560px minmax(0,1fr);gap:36px;align-items:center;padding:calc(16px*var(--k)) 0;border-bottom:1px solid var(--mw-ink-3)}
+.slide .hrij .t{font-family:var(--font-display);font-weight:500;font-size:calc(28px*var(--k));line-height:1.2;color:var(--mw-white)}
+.slide .hrij .t.r{text-align:right}
+.slide .hrij .c{display:flex;flex-direction:column;gap:6px}
+.slide .hrij .hbaan{gap:6px;grid-template-columns:repeat(3,minmax(0,1fr)) 12px repeat(3,minmax(0,1fr))}
+.slide .hrij .hbaan span{min-height:calc(40px*var(--k));padding:6px;gap:5px;border-radius:8px}
+.slide .hrij .hbaan span i{width:14px;height:14px}
+.slide .hrij em{font-style:normal;display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:20px}
+.slide .hrij em .l{color:var(--links);font-weight:500} .slide .hrij em .r{color:var(--rechts);font-weight:500}
+.slide .voet{font-family:var(--font-mono);font-size:18px;letter-spacing:var(--tracking-wide);text-transform:uppercase;color:var(--mw-on-dark-muted);margin:0}

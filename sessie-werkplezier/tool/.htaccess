@@ -1,0 +1,3 @@
+# Eigen projectmap op de company hosting: de Kirby-router in de root moet
+# hier niets oppakken (zie mw-server README).
+RewriteEngine Off
