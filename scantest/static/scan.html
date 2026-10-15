@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Scanner</title>
+<style>
+  :root {
+    --bg: #111; --fg: #f4f4f4; --muted: #9a9a9a; --card: #1d1d1d; --line: #333;
+    --ok: #1f9d55; --warn: #e8a317; --bad: #d64545; --idle: #555;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg);
+    font: 16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  button, input { font: inherit; }
+  .hidden { display: none !important; }
+
+  /* instellen */
+  #setup { max-width: 420px; margin: 0 auto; padding: 48px 16px; }
+  #setup h1 { font-size: 24px; margin: 0 0 6px; }
+  #setup p { color: var(--muted); margin: 0 0 28px; }
+  label { display: block; font-size: 14px; color: var(--muted); margin: 18px 0 6px; }
+  input { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--card); color: var(--fg); font-size: 18px; }
+  .primary { width: 100%; margin-top: 28px; padding: 16px; border: 0; border-radius: 12px;
+    background: var(--fg); color: var(--bg); font-weight: 600; font-size: 18px; }
+  .error { color: #ff7b7b; min-height: 1.4em; margin-top: 14px; }
+
+  /* scannen */
+  #scan { position: fixed; inset: 0; display: flex; flex-direction: column; }
+  #bar { display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+    padding-top: max(10px, env(safe-area-inset-top)); background: #000; }
+  #bar .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  #bar .count { color: var(--muted); font-size: 14px; white-space: nowrap; }
+  #bar button { white-space: nowrap; flex-shrink: 0; }
+  #bar .spacer { flex: 1; }
+  .ghost { background: transparent; color: var(--fg); border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 12px; font-size: 14px; }
+  #viewport { position: relative; flex: 1; overflow: hidden; background: #000; }
+  video { width: 100%; height: 100%; object-fit: cover; }
+  #hint { position: absolute; left: 0; right: 0; bottom: max(20px, env(safe-area-inset-bottom));
+    text-align: center; color: #fff; text-shadow: 0 1px 3px #000; font-size: 15px; }
+  #checking { position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,.7); padding: 6px 14px; border-radius: 999px; font-size: 14px; }
+
+  /* resultaat */
+  #result { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; text-align: center; padding: 24px 16px; color: #fff; z-index: 10; }
+  #result.geldig { background: var(--ok); }
+  #result.al_gescand { background: var(--warn); color: #1a1200; }
+  #result.ongeldig, #result.onbekend { background: var(--bad); }
+  #result.fout { background: var(--idle); }
+  #result .icon { font-size: 96px; line-height: 1; font-weight: 700; }
+  #result .title { font-size: 34px; font-weight: 800; margin-top: 16px; letter-spacing: .02em; }
+  #result .naam { font-size: 26px; margin-top: 18px; font-weight: 600; overflow-wrap: anywhere; }
+  #result .detail { font-size: 18px; margin-top: 10px; opacity: .9; }
+  #result .tap { position: absolute; bottom: max(24px, env(safe-area-inset-bottom)); font-size: 14px; opacity: .75; }
+
+  /* handmatig */
+  #manual { position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 5;
+    display: flex; align-items: flex-start; justify-content: center; padding: 80px 16px; }
+  #manual .box { width: 100%; max-width: 420px; }
+  #manual .row { display: flex; gap: 10px; margin-top: 12px; }
+  #manual .row button { flex: 1; margin: 0; }
+  #manual input { text-transform: uppercase; letter-spacing: .12em; }
+</style>
+</head>
+<body>
+
+<section id="setup" class="hidden">
+  <h1>Scanner</h1>
+  <p>Vul de PIN in en geef deze telefoon een naam, bijvoorbeeld de ingang waar je staat.</p>
+  <form id="setupForm">
+    <label for="pin">PIN</label>
+    <input id="pin" inputmode="numeric" autocomplete="off" required>
+    <label for="scanner">Naam van deze scanner</label>
+    <input id="scanner" placeholder="Ingang 1" maxlength="40" required>
+    <button class="primary" type="submit">Start scanner</button>
+    <div class="error" id="setupError"></div>
+  </form>
+</section>
+
+<section id="scan" class="hidden">
+  <div id="bar">
+    <span class="name" id="scannerName"></span>
+    <span class="count" id="count"></span>
+    <span class="spacer"></span>
+    <button class="ghost" id="typeBtn" type="button">Typen</button>
+    <button class="ghost" id="settingsBtn" type="button">Instellen</button>
+  </div>
+  <div id="viewport">
+    <video id="video" muted playsinline></video>
+    <div id="checking" class="hidden">Controleren…</div>
+    <div id="hint">Richt de camera op de QR-code</div>
+  </div>
+</section>
+
+<section id="manual" class="hidden">
+  <form class="box" id="manualForm">
+    <label for="manualCode">Ticketcode</label>
+    <input id="manualCode" autocomplete="off" autocapitalize="characters" placeholder="ABCD-EFGH">
+    <div class="row">
+      <button class="ghost" type="button" id="manualCancel">Annuleren</button>
+      <button class="primary" type="submit">Controleren</button>
+    </div>
+  </form>
+</section>
+
+<section id="result" class="hidden" role="alert">
+  <div class="icon" id="rIcon"></div>
+  <div class="title" id="rTitle"></div>
+  <div class="naam" id="rNaam"></div>
+  <div class="detail" id="rDetail"></div>
+  <div class="tap">Tik om verder te scannen</div>
+</section>
+
+<script type="module">
+import QrScanner from "/static/qr-scanner.min.js";
+
+const $ = (id) => document.getElementById(id);
+const store = {
+  get(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+};
+
+let pin = store.get("scan_pin");
+let scannerName = store.get("scan_naam");
+let scanner = null;
+let busy = false;
+let lastCode = "";
+let lastAt = 0;
+let hideTimer = null;
+let admitted = 0;
+let audio = null;
+
+const RESULT_MS = 2200;      // zo lang blijft de kleur staan
+const SAME_CODE_MS = 4000;   // dezelfde code binnen deze tijd negeren
+
+function show(id) {
+  for (const s of ["setup", "scan"]) $(s).classList.toggle("hidden", s !== id);
+}
+
+function updateBar() {
+  $("scannerName").textContent = scannerName;
+  $("count").textContent = admitted ? `${admitted} binnen` : "";
+}
+
+function formatCode(code) {
+  return code && code.length === 8 ? code.slice(0, 4) + "-" + code.slice(4) : code;
+}
+
+function formatTime(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  const sameDay = d.toDateString() === new Date().toDateString();
+  const time = d.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" });
+  return sameDay ? time : d.toLocaleDateString("nl-NL", { day: "numeric", month: "short" }) + " " + time;
+}
+
+// geluid en trillen
+function beep(pattern) {
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    let t = audio.currentTime;
+    for (const [freq, dur, gap] of pattern) {
+      const osc = audio.createOscillator();
+      const gain = audio.createGain();
+      osc.frequency.value = freq;
+      osc.type = "square";
+      gain.gain.setValueAtTime(0.15, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      osc.connect(gain).connect(audio.destination);
+      osc.start(t);
+      osc.stop(t + dur);
+      t += dur + gap;
+    }
+  } catch (e) {}
+}
+const SOUNDS = {
+  geldig: [[1320, 0.12, 0]],
+  al_gescand: [[660, 0.12, 0.08], [660, 0.12, 0]],
+  ongeldig: [[220, 0.45, 0]],
+  onbekend: [[220, 0.45, 0]],
+  fout: [[330, 0.25, 0]],
+};
+const VIBRATE = { geldig: [80], al_gescand: [80, 60, 80], ongeldig: [400], onbekend: [400], fout: [200] };
+
+function showResult(kind, data) {
+  const r = $("result");
+  r.className = kind;
+  const naam = data.naam || "";
+  const texts = {
+    geldig: ["✓", "GELDIG", naam, ""],
+    al_gescand: ["!", "AL GESCAND", naam,
+      `om ${formatTime(data.gescand_op)}${data.gescand_door ? " door " + data.gescand_door : ""}`],
+    ongeldig: ["✕", "ONGELDIG", naam, "Dit ticket is ongeldig gemaakt"],
+    onbekend: ["✕", "ONBEKEND", "", `Code ${formatCode(data.code || "")} staat niet op de lijst`],
+    fout: ["?", "GEEN ANTWOORD", "", data.bericht || "Controleer de verbinding en scan opnieuw"],
+  }[kind];
+  [$("rIcon").textContent, $("rTitle").textContent, $("rNaam").textContent, $("rDetail").textContent] = texts;
+  beep(SOUNDS[kind]);
+  try { navigator.vibrate && navigator.vibrate(VIBRATE[kind]); } catch (e) {}
+  clearTimeout(hideTimer);
+  hideTimer = setTimeout(hideResult, kind === "geldig" ? RESULT_MS : RESULT_MS + 1500);
+}
+
+function hideResult() {
+  clearTimeout(hideTimer);
+  $("result").className = "hidden";
+  lastAt = Date.now();
+  busy = false;
+}
+$("result").addEventListener("click", hideResult);
+
+async function api(path, options = {}) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 6000);
+  try {
+    return await fetch(path, {
+      ...options,
+      signal: ctrl.signal,
+      headers: { "Content-Type": "application/json", "X-Scan-Pin": pin, ...(options.headers || {}) },
+    });
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+async function check(raw) {
+  const code = (raw || "").trim();
+  if (!code || busy) return;
+  if (code === lastCode && Date.now() - lastAt < SAME_CODE_MS) return;
+  busy = true;
+  lastCode = code;
+  $("checking").classList.remove("hidden");
+  try {
+    const res = await api("/api/scan", { method: "POST", body: JSON.stringify({ code, scanner: scannerName }) });
+    if (res.status === 401) {
+      busy = false;
+      return openSetup("De PIN klopt niet meer. Vul hem opnieuw in.");
+    }
+    const data = await res.json();
+    if (!res.ok) return showResult("fout", { bericht: data.fout });
+    if (data.resultaat === "geldig") { admitted++; updateBar(); }
+    showResult(data.resultaat, data);
+  } catch (e) {
+    showResult("fout", {});
+  } finally {
+    $("checking").classList.add("hidden");
+  }
+}
+
+async function startScanner() {
+  show("scan");
+  updateBar();
+  if (!scanner) {
+    scanner = new QrScanner($("video"), (result) => check(result.data), {
+      returnDetailedScanResult: true,
+      preferredCamera: "environment",
+      maxScansPerSecond: 12,
+      highlightScanRegion: true,
+      highlightCodeOutline: true,
+    });
+  }
+  try {
+    await scanner.start();
+    $("hint").textContent = "Richt de camera op de QR-code";
+  } catch (e) {
+    $("hint").textContent = "Geen toegang tot de camera. Sta cameratoegang toe voor deze site en herlaad de pagina.";
+  }
+}
+
+function openSetup(message) {
+  if (scanner) scanner.stop();
+  $("pin").value = pin;
+  $("scanner").value = scannerName;
+  $("setupError").textContent = message || "";
+  show("setup");
+}
+
+$("setupForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  beep([[1, 0.01, 0]]); // geluid ontgrendelen tijdens een tik (iOS)
+  pin = $("pin").value.trim();
+  scannerName = $("scanner").value.trim() || "Scanner";
+  $("setupError").textContent = "";
+  try {
+    const res = await api("/api/ping");
+    if (res.status === 401) return ($("setupError").textContent = "Verkeerde PIN.");
+    if (!res.ok) return ($("setupError").textContent = (await res.json()).fout || "Er ging iets mis.");
+  } catch (err) {
+    return ($("setupError").textContent = "Server niet bereikbaar.");
+  }
+  store.set("scan_pin", pin);
+  store.set("scan_naam", scannerName);
+  startScanner();
+});
+
+$("settingsBtn").addEventListener("click", () => openSetup());
+$("typeBtn").addEventListener("click", () => {
+  $("manual").classList.remove("hidden");
+  $("manualCode").value = "";
+  $("manualCode").focus();
+});
+$("manualCancel").addEventListener("click", () => $("manual").classList.add("hidden"));
+$("manualForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  $("manual").classList.add("hidden");
+  lastCode = "";
+  check($("manualCode").value);
+});
+
+// Zonder opgeslagen PIN eerst instellen; anders vraagt iOS bij de eerste tik om geluid.
+openSetup();
+</script>
+</body>
+</html>

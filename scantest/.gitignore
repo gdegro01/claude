@@ -1,0 +1,5 @@
+.env
+tickets.db
+tickets.db-*
+tunnel.log
+__pycache__/

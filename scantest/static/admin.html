@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tickets beheren</title>
+<style>
+  :root {
+    --bg: #f6f6f4; --fg: #1b1b1b; --muted: #6b6b6b; --card: #fff; --line: #e2e2de;
+    --ok: #1f9d55; --ok-bg: #e3f4ea; --warn: #b7791f; --warn-bg: #fbf0dc; --bad: #c53030; --bad-bg: #fbe4e4;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  button, input, textarea { font: inherit; color: inherit; }
+  main { max-width: 1180px; margin: 0 auto; padding: 24px 16px 64px; }
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-bottom: 20px; }
+  h1 { font-size: 22px; margin: 0; }
+  .stats { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 14px; }
+  .chip b { font-variant-numeric: tabular-nums; }
+  .chip.ok { background: var(--ok-bg); border-color: transparent; color: var(--ok); }
+  .chip.warn { background: var(--warn-bg); border-color: transparent; color: var(--warn); }
+  .chip.bad { background: var(--bad-bg); border-color: transparent; color: var(--bad); }
+  .spacer { flex: 1; }
+  a.btn, button.btn { display: inline-block; text-decoration: none; background: var(--card); border: 1px solid var(--line);
+    border-radius: 8px; padding: 7px 12px; cursor: pointer; font-size: 14px; }
+  button.btn:hover, a.btn:hover { border-color: #bbb; }
+  .btn.dark { background: var(--fg); color: #fff; border-color: var(--fg); }
+  .btn.danger { color: var(--bad); }
+
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+  .panel h2 { font-size: 15px; margin: 0 0 10px; }
+  .add { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+  .add textarea { flex: 1 1 320px; min-height: 76px; border: 1px solid var(--line); border-radius: 8px; padding: 10px; resize: vertical; }
+  .note { color: var(--muted); font-size: 13px; margin-top: 8px; }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+  .toolbar input { flex: 1 1 220px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; background: var(--card); }
+  .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+  .tabs button { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 5px 12px; cursor: pointer; font-size: 14px; }
+  .tabs button[aria-pressed="true"] { background: var(--fg); color: #fff; border-color: var(--fg); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .card.off { opacity: .6; }
+  .qr { background: #fff; display: flex; justify-content: center; cursor: zoom-in; }
+  .qr svg { width: 150px; height: 150px; }
+  .card .naam { font-weight: 600; font-size: 16px; overflow-wrap: anywhere; cursor: text; }
+  .card .code { font-family: ui-monospace, Menlo, monospace; color: var(--muted); letter-spacing: .06em; }
+  .badge { display: inline-block; font-size: 13px; padding: 2px 9px; border-radius: 999px; font-weight: 600; }
+  .badge.in { background: var(--ok-bg); color: var(--ok); }
+  .badge.out { background: #eee; color: var(--muted); }
+  .badge.void { background: var(--bad-bg); color: var(--bad); }
+  .meta { font-size: 13px; color: var(--muted); }
+  .btn.small { padding: 4px 9px; font-size: 13px; }
+  .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; user-select: none; }
+  .switch input { width: 18px; height: 18px; accent-color: var(--ok); }
+  .sync { font-size: 12px; color: var(--muted); }
+  .empty { color: var(--muted); padding: 40px 0; text-align: center; }
+
+  #big { position: fixed; inset: 0; background: #fff; z-index: 10; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 16px; padding: 24px 16px; text-align: center; }
+  #big svg { width: min(78vmin, 520px); height: min(78vmin, 520px); }
+  #big .naam { font-size: 26px; font-weight: 700; }
+  #big .code { font-family: ui-monospace, Menlo, monospace; font-size: 20px; letter-spacing: .1em; color: var(--muted); }
+  #big .nav { display: flex; gap: 10px; }
+  .hidden { display: none !important; }
+
+  @media print {
+    header .spacer, header a, header button, .panel, .toolbar, .card .row, .meta, .sync { display: none !important; }
+    body { background: #fff; }
+    .grid { grid-template-columns: repeat(3, 1fr); }
+    .card { break-inside: avoid; border-color: #ccc; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Tickets</h1>
+    <div class="stats" id="stats"></div>
+    <span class="spacer"></span>
+    <button class="btn" id="syncBtn" type="button">Notion nu ophalen</button>
+    <button class="btn" type="button" onclick="window.print()">Afdrukken</button>
+    <a class="btn dark" href="/scan" target="_blank">Scanner openen</a>
+  </header>
+
+  <section class="panel">
+    <h2>Tickets toevoegen</h2>
+    <form class="add" id="addForm">
+      <textarea id="namen" placeholder="Eén naam per regel"></textarea>
+      <button class="btn dark" type="submit">Tickets maken</button>
+    </form>
+    <div class="note">Elke naam krijgt een eigen QR-code en verschijnt binnen een paar seconden ook in Notion.
+      Een regel die je in Notion toevoegt, verschijnt hier binnen 30 seconden en krijgt dan vanzelf een code.</div>
+  </section>
+
+  <div class="toolbar">
+    <input id="search" type="search" placeholder="Zoek op naam of code">
+    <div class="tabs" id="tabs">
+      <button type="button" data-f="alle" aria-pressed="true">Alle</button>
+      <button type="button" data-f="binnen" aria-pressed="false">Binnen</button>
+      <button type="button" data-f="buiten" aria-pressed="false">Nog niet binnen</button>
+      <button type="button" data-f="ongeldig" aria-pressed="false">Ongeldig</button>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</main>
+
+<section id="big" class="hidden">
+  <div id="bigQr"></div>
+  <div class="naam" id="bigNaam"></div>
+  <div class="code" id="bigCode"></div>
+  <div class="nav">
+    <button class="btn" type="button" id="bigPrev">Vorige</button>
+    <button class="btn dark" type="button" id="bigClose">Sluiten</button>
+    <button class="btn" type="button" id="bigNext">Volgende</button>
+  </div>
+</section>
+
+<script src="/static/qrcode.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+let tickets = [];
+let notion = {};
+let lastJson = "";
+let filter = "alle";
+let bigIndex = -1;
+const qrCache = new Map();
+
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function formatCode(code) { return code.length === 8 ? code.slice(0, 4) + "-" + code.slice(4) : code; }
+function formatTime(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  return d.toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+function qrSvg(code) {
+  if (!qrCache.has(code)) {
+    const qr = qrcode(0, "M");
+    qr.addData(code);
+    qr.make();
+    qrCache.set(code, qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true }));
+  }
+  return qrCache.get(code);
+}
+
+async function api(path, body) {
+  const res = await fetch(path, body === undefined ? {} : {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).fout || res.statusText);
+  return res.json();
+}
+
+async function load() {
+  try {
+    const data = await api("/api/admin/tickets");
+    const json = JSON.stringify(data);
+    if (json === lastJson) return;
+    lastJson = json;
+    tickets = data.tickets;
+    notion = data.notion || {};
+    render();
+  } catch (e) {
+    $("stats").innerHTML = `<span class="chip bad">Server niet bereikbaar</span>`;
+  }
+}
+
+function visible() {
+  const q = $("search").value.trim().toLowerCase().replace(/-/g, "");
+  return tickets.filter((t) => {
+    if (filter === "binnen" && !t.binnen) return false;
+    if (filter === "buiten" && (t.binnen || !t.geldig)) return false;
+    if (filter === "ongeldig" && t.geldig) return false;
+    if (!q) return true;
+    return t.naam.toLowerCase().includes(q) || t.code.toLowerCase().includes(q);
+  });
+}
+
+function notionChip() {
+  if (!notion.actief) return `<span class="chip">Notion niet gekoppeld</span>`;
+  if (notion.fout) return `<span class="chip bad" title="${esc(notion.fout)}">Notion: fout, zie server</span>`;
+  if (!notion.verbonden) return `<span class="chip warn">Notion: verbinden…</span>`;
+  if (notion.wachtrij) return `<span class="chip warn">Notion: ${notion.wachtrij} in wachtrij</span>`;
+  return `<span class="chip ok">Notion bijgewerkt</span>`;
+}
+
+function render() {
+  const geldig = tickets.filter((t) => t.geldig).length;
+  const binnen = tickets.filter((t) => t.binnen).length;
+  $("stats").innerHTML =
+    `<span class="chip"><b>${tickets.length}</b> tickets</span>` +
+    `<span class="chip"><b>${geldig}</b> geldig</span>` +
+    `<span class="chip ok"><b>${binnen}</b> binnen</span>` + notionChip();
+
+  const list = visible();
+  if (!list.length) {
+    $("grid").innerHTML = `<div class="empty">${tickets.length ? "Geen tickets in deze selectie." : "Nog geen tickets. Voeg hierboven namen toe."}</div>`;
+    return;
+  }
+  $("grid").innerHTML = list.map((t) => {
+    const badge = !t.geldig ? `<span class="badge void">Ongeldig</span>`
+      : t.binnen ? `<span class="badge in">Binnen</span>` : `<span class="badge out">Nog niet binnen</span>`;
+    const meta = t.binnen ? `${formatTime(t.gescand_op)}${t.gescand_door ? " · " + esc(t.gescand_door) : ""}` : "";
+    const tries = t.pogingen > 1 ? `${meta ? " · " : ""}${t.pogingen}× gescand` : "";
+    return `<article class="card${t.geldig ? "" : " off"}" data-id="${t.id}">
+      <div class="qr" data-act="big">${qrSvg(t.code)}</div>
+      <div>
+        <div class="naam" data-act="naam" title="Klik om de naam te wijzigen">${esc(t.naam) || "<i>Zonder naam</i>"}</div>
+        <div class="code">${formatCode(t.code)}</div>
+      </div>
+      <div class="row">${badge}<span class="meta">${meta}${tries}</span></div>
+      <div class="row">
+        <label class="switch"><input type="checkbox" data-act="geldig" ${t.geldig ? "checked" : ""}> Geldig</label>
+        <span class="spacer"></span>
+        ${t.binnen ? `<button class="btn small" type="button" data-act="reset">Reset</button>` : ""}
+        <button class="btn small danger" type="button" data-act="verwijder">Verwijder</button>
+      </div>
+      <div class="sync">${t.wacht_op_notion ? "Wacht op Notion…" : t.in_notion ? "In Notion" : ""}</div>
+    </article>`;
+  }).join("");
+}
+
+$("grid").addEventListener("click", async (e) => {
+  const el = e.target.closest("[data-act]");
+  if (!el) return;
+  const card = el.closest(".card");
+  const id = Number(card.dataset.id);
+  const t = tickets.find((x) => x.id === id);
+  const act = el.dataset.act;
+  try {
+    if (act === "big") return openBig(visible().findIndex((x) => x.id === id));
+    if (act === "geldig") await api(`/api/admin/tickets/${id}/geldig`, { geldig: el.checked });
+    if (act === "reset" && confirm(`Status van ${t.naam || t.code} terugzetten naar "nog niet binnen"?`))
+      await api(`/api/admin/tickets/${id}/reset`, {});
+    if (act === "verwijder" && confirm(`${t.naam || t.code} verwijderen? Het ticket gaat in Notion naar de prullenbak.`))
+      await api(`/api/admin/tickets/${id}/verwijder`, {});
+    if (act === "naam") {
+      const naam = prompt("Naam", t.naam);
+      if (naam !== null) await api(`/api/admin/tickets/${id}/naam`, { naam });
+    }
+  } catch (err) {
+    alert("Dat lukte niet: " + err.message);
+  }
+  load();
+});
+
+$("addForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const namen = $("namen").value.split("\n").map((s) => s.trim()).filter(Boolean);
+  if (!namen.length) return;
+  try {
+    await api("/api/admin/tickets", { namen });
+    $("namen").value = "";
+    load();
+  } catch (err) {
+    alert("Dat lukte niet: " + err.message);
+  }
+});
+
+$("syncBtn").addEventListener("click", async () => {
+  await api("/api/admin/sync", {}).catch(() => {});
+  setTimeout(load, 2500);
+});
+$("search").addEventListener("input", render);
+$("tabs").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  filter = b.dataset.f;
+  for (const x of $("tabs").children) x.setAttribute("aria-pressed", String(x === b));
+  render();
+});
+
+// groot weergeven, om vanaf het scherm te scannen
+function openBig(i) {
+  const list = visible();
+  if (i < 0 || i >= list.length) return;
+  bigIndex = i;
+  const t = list[i];
+  $("bigQr").innerHTML = qrSvg(t.code);
+  $("bigNaam").textContent = t.naam;
+  $("bigCode").textContent = formatCode(t.code);
+  $("big").classList.remove("hidden");
+}
+function closeBig() { $("big").classList.add("hidden"); bigIndex = -1; }
+$("bigClose").addEventListener("click", closeBig);
+$("bigPrev").addEventListener("click", () => openBig(bigIndex - 1));
+$("bigNext").addEventListener("click", () => openBig(bigIndex + 1));
+document.addEventListener("keydown", (e) => {
+  if (bigIndex < 0) return;
+  if (e.key === "Escape") closeBig();
+  if (e.key === "ArrowLeft") openBig(bigIndex - 1);
+  if (e.key === "ArrowRight") openBig(bigIndex + 1);
+});
+
+load();
+setInterval(() => { if (!document.hidden) load(); }, 3000);
+</script>
+</body>
+</html>
