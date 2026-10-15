@@ -6,8 +6,9 @@
 <title>Tickets beheren</title>
 <style>
   :root {
-    --bg: #f6f6f4; --fg: #1b1b1b; --muted: #6b6b6b; --card: #fff; --line: #e2e2de;
+    --bg: #f6f6f4; --fg: #1b1b1b; --muted: #6b6b6b; --card: #fff; --line: #e2e2de; --soft: #f1f1ee;
     --ok: #1f9d55; --ok-bg: #e3f4ea; --warn: #b7791f; --warn-bg: #fbf0dc; --bad: #c53030; --bad-bg: #fbe4e4;
+    --accent: #2f5bd3; --accent-bg: #e8eefc;
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--fg);
@@ -16,18 +17,23 @@
   main { max-width: 1180px; margin: 0 auto; padding: 24px 16px 64px; }
   header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-bottom: 20px; }
   h1 { font-size: 22px; margin: 0; }
-  .stats { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 14px; }
+  .stats, .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 14px; white-space: nowrap; }
   .chip b { font-variant-numeric: tabular-nums; }
   .chip.ok { background: var(--ok-bg); border-color: transparent; color: var(--ok); }
   .chip.warn { background: var(--warn-bg); border-color: transparent; color: var(--warn); }
   .chip.bad { background: var(--bad-bg); border-color: transparent; color: var(--bad); }
+  .chip.accent { background: var(--accent-bg); border-color: transparent; color: var(--accent); }
   .spacer { flex: 1; }
   a.btn, button.btn { display: inline-block; text-decoration: none; background: var(--card); border: 1px solid var(--line);
-    border-radius: 8px; padding: 7px 12px; cursor: pointer; font-size: 14px; }
+    border-radius: 8px; padding: 7px 12px; cursor: pointer; font-size: 14px; white-space: nowrap; }
+  a.btn { color: var(--fg); }
   button.btn:hover, a.btn:hover { border-color: #bbb; }
   .btn.dark { background: var(--fg); color: #fff; border-color: var(--fg); }
   .btn.danger { color: var(--bad); }
+  .btn.push { color: var(--accent); border-color: #c9d6f6; }
+  .btn.push.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn.small { padding: 4px 9px; font-size: 13px; }
 
   .panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
   .panel h2 { font-size: 15px; margin: 0 0 10px; }
@@ -41,38 +47,51 @@
   .tabs button { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 5px 12px; cursor: pointer; font-size: 14px; }
   .tabs button[aria-pressed="true"] { background: var(--fg); color: #fff; border-color: var(--fg); }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-  .card.off { opacity: .6; }
-  .qr { background: #fff; display: flex; justify-content: center; cursor: zoom-in; }
-  .qr svg { width: 150px; height: 150px; }
-  .card .naam { font-weight: 600; font-size: 16px; overflow-wrap: anywhere; cursor: text; }
-  .card .code { font-family: ui-monospace, Menlo, monospace; color: var(--muted); letter-spacing: .06em; }
-  .badge { display: inline-block; font-size: 13px; padding: 2px 9px; border-radius: 999px; font-weight: 600; }
+  .badge { display: inline-block; font-size: 13px; padding: 2px 9px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
   .badge.in { background: var(--ok-bg); color: var(--ok); }
   .badge.out { background: #eee; color: var(--muted); }
   .badge.void { background: var(--bad-bg); color: var(--bad); }
+  .badge.screen { background: var(--accent); color: #fff; }
   .meta { font-size: 13px; color: var(--muted); }
-  .btn.small { padding: 4px 9px; font-size: 13px; }
-  .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; user-select: none; }
   .switch input { width: 18px; height: 18px; accent-color: var(--ok); }
-  .sync { font-size: 12px; color: var(--muted); }
   .empty { color: var(--muted); padding: 40px 0; text-align: center; }
+  .naam { font-weight: 600; overflow-wrap: anywhere; cursor: text; }
+  .code { font-family: ui-monospace, Menlo, monospace; color: var(--muted); letter-spacing: .06em; white-space: nowrap; }
+
+  /* lijst */
+  .tablewrap { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  th { font-size: 13px; color: var(--muted); font-weight: 600; background: var(--soft); }
+  tr:last-child td { border-bottom: 0; }
+  tr.off td { color: var(--muted); }
+  tr.onscreen td { background: var(--accent-bg); }
+  td.acts { white-space: nowrap; text-align: right; }
+  td.acts .btn { margin-left: 4px; }
+
+  /* kaarten */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .card.off { opacity: .6; }
+  .card.onscreen { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+  .qr { background: #fff; display: flex; justify-content: center; cursor: zoom-in; }
+  .qr svg { width: 150px; height: 150px; }
+  .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
   #big { position: fixed; inset: 0; background: #fff; z-index: 10; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 16px; padding: 24px 16px; text-align: center; }
   #big svg { width: min(78vmin, 520px); height: min(78vmin, 520px); }
   #big .naam { font-size: 26px; font-weight: 700; }
-  #big .code { font-family: ui-monospace, Menlo, monospace; font-size: 20px; letter-spacing: .1em; color: var(--muted); }
+  #big .code { font-size: 20px; letter-spacing: .1em; }
   #big .nav { display: flex; gap: 10px; }
   .hidden { display: none !important; }
 
   @media print {
-    header .spacer, header a, header button, .panel, .toolbar, .card .row, .meta, .sync { display: none !important; }
+    header .spacer, header .actions, .panel, .toolbar, .card .row, .meta { display: none !important; }
     body { background: #fff; }
     .grid { grid-template-columns: repeat(3, 1fr); }
-    .card { break-inside: avoid; border-color: #ccc; }
+    .card { break-inside: avoid; border-color: #ccc; box-shadow: none; }
   }
 </style>
 </head>
@@ -82,9 +101,12 @@
     <h1>Tickets</h1>
     <div class="stats" id="stats"></div>
     <span class="spacer"></span>
-    <button class="btn" id="syncBtn" type="button">Notion nu ophalen</button>
-    <button class="btn" type="button" onclick="window.print()">Afdrukken</button>
-    <a class="btn dark" href="/scan" target="_blank">Scanner openen</a>
+    <div class="actions">
+      <button class="btn" id="syncBtn" type="button">Notion nu ophalen</button>
+      <button class="btn" type="button" id="printBtn">Afdrukken</button>
+      <a class="btn" href="/show" target="_blank">Scherm openen</a>
+      <a class="btn dark" href="/scan" target="_blank">Scanner openen</a>
+    </div>
   </header>
 
   <section class="panel">
@@ -105,9 +127,13 @@
       <button type="button" data-f="buiten" aria-pressed="false">Nog niet binnen</button>
       <button type="button" data-f="ongeldig" aria-pressed="false">Ongeldig</button>
     </div>
+    <div class="tabs" id="views">
+      <button type="button" data-v="lijst" aria-pressed="true">Lijst</button>
+      <button type="button" data-v="kaarten" aria-pressed="false">Met QR-codes</button>
+    </div>
   </div>
 
-  <div class="grid" id="grid"></div>
+  <div id="out"></div>
 </main>
 
 <section id="big" class="hidden">
@@ -124,10 +150,16 @@
 <script src="/static/qrcode.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+};
 let tickets = [];
 let notion = {};
+let scherm = {};
 let lastJson = "";
 let filter = "alle";
+let view = store.get("admin_view") === "kaarten" ? "kaarten" : "lijst";
 let bigIndex = -1;
 const qrCache = new Map();
 
@@ -152,7 +184,7 @@ function qrSvg(code) {
 }
 
 async function api(path, body) {
-  const res = await fetch(path, body === undefined ? {} : {
+  const res = await fetch(path, body === undefined ? { cache: "no-store" } : {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error((await res.json().catch(() => ({}))).fout || res.statusText);
@@ -165,8 +197,9 @@ async function load() {
     const json = JSON.stringify(data);
     if (json === lastJson) return;
     lastJson = json;
-    tickets = data.tickets;
+    tickets = data.tickets.sort((a, b) => a.naam.localeCompare(b.naam, "nl", { numeric: true }) || a.id - b.id);
     notion = data.notion || {};
+    scherm = data.scherm || {};
     render();
   } catch (e) {
     $("stats").innerHTML = `<span class="chip bad">Server niet bereikbaar</span>`;
@@ -191,6 +224,27 @@ function notionChip() {
   if (notion.wachtrij) return `<span class="chip warn">Notion: ${notion.wachtrij} in wachtrij</span>`;
   return `<span class="chip ok">Notion bijgewerkt</span>`;
 }
+function schermChip() {
+  if (!scherm.schermen) return `<span class="chip">Scherm niet open</span>`;
+  const t = tickets.find((x) => x.id === scherm.ticket_id);
+  return `<span class="chip accent">Scherm toont: ${t ? esc(t.naam || formatCode(t.code)) : "niets"}</span>`;
+}
+
+function statusBadge(t) {
+  return !t.geldig ? `<span class="badge void">Ongeldig</span>`
+    : t.binnen ? `<span class="badge in">Binnen</span>` : `<span class="badge out">Nog niet binnen</span>`;
+}
+function metaText(t) {
+  const parts = [];
+  if (t.binnen) parts.push(formatTime(t.gescand_op) + (t.gescand_door ? " · " + esc(t.gescand_door) : ""));
+  if (t.pogingen > 1) parts.push(`${t.pogingen}× gescand`);
+  if (t.wacht_op_notion) parts.push("wacht op Notion");
+  return parts.join(" · ");
+}
+function pushBtn(t) {
+  const on = scherm.ticket_id === t.id;
+  return `<button class="btn small push${on ? " on" : ""}" type="button" data-act="toon">${on ? "Op scherm" : "Naar scherm"}</button>`;
+}
 
 function render() {
   const geldig = tickets.filter((t) => t.geldig).length;
@@ -198,45 +252,57 @@ function render() {
   $("stats").innerHTML =
     `<span class="chip"><b>${tickets.length}</b> tickets</span>` +
     `<span class="chip"><b>${geldig}</b> geldig</span>` +
-    `<span class="chip ok"><b>${binnen}</b> binnen</span>` + notionChip();
+    `<span class="chip ok"><b>${binnen}</b> binnen</span>` + notionChip() + schermChip();
 
   const list = visible();
   if (!list.length) {
-    $("grid").innerHTML = `<div class="empty">${tickets.length ? "Geen tickets in deze selectie." : "Nog geen tickets. Voeg hierboven namen toe."}</div>`;
+    $("out").innerHTML = `<div class="empty">${tickets.length ? "Geen tickets in deze selectie." : "Nog geen tickets. Voeg hierboven namen toe."}</div>`;
     return;
   }
-  $("grid").innerHTML = list.map((t) => {
-    const badge = !t.geldig ? `<span class="badge void">Ongeldig</span>`
-      : t.binnen ? `<span class="badge in">Binnen</span>` : `<span class="badge out">Nog niet binnen</span>`;
-    const meta = t.binnen ? `${formatTime(t.gescand_op)}${t.gescand_door ? " · " + esc(t.gescand_door) : ""}` : "";
-    const tries = t.pogingen > 1 ? `${meta ? " · " : ""}${t.pogingen}× gescand` : "";
-    return `<article class="card${t.geldig ? "" : " off"}" data-id="${t.id}">
+  if (view === "lijst") {
+    $("out").innerHTML = `<div class="tablewrap"><table>
+      <thead><tr><th>Naam</th><th>Code</th><th>Status</th><th>Geldig</th><th></th></tr></thead>
+      <tbody>${list.map((t) => `<tr data-id="${t.id}" class="${t.geldig ? "" : "off"}${scherm.ticket_id === t.id ? " onscreen" : ""}">
+        <td><span class="naam" data-act="naam" title="Klik om de naam te wijzigen">${esc(t.naam) || "<i>Zonder naam</i>"}</span></td>
+        <td><span class="code" data-act="big" style="cursor:zoom-in" title="QR-code tonen">${formatCode(t.code)}</span></td>
+        <td>${statusBadge(t)} <span class="meta">${metaText(t)}</span></td>
+        <td><label class="switch"><input type="checkbox" data-act="geldig" ${t.geldig ? "checked" : ""}></label></td>
+        <td class="acts">${pushBtn(t)}${t.binnen ? `<button class="btn small" type="button" data-act="reset">Reset</button>` : ""}<button class="btn small danger" type="button" data-act="verwijder">Verwijder</button></td>
+      </tr>`).join("")}</tbody></table></div>`;
+  } else {
+    $("out").innerHTML = `<div class="grid">${list.map((t) => `<article class="card${t.geldig ? "" : " off"}${scherm.ticket_id === t.id ? " onscreen" : ""}" data-id="${t.id}">
       <div class="qr" data-act="big">${qrSvg(t.code)}</div>
       <div>
         <div class="naam" data-act="naam" title="Klik om de naam te wijzigen">${esc(t.naam) || "<i>Zonder naam</i>"}</div>
         <div class="code">${formatCode(t.code)}</div>
       </div>
-      <div class="row">${badge}<span class="meta">${meta}${tries}</span></div>
+      <div class="row">${statusBadge(t)}<span class="meta">${metaText(t)}</span></div>
       <div class="row">
         <label class="switch"><input type="checkbox" data-act="geldig" ${t.geldig ? "checked" : ""}> Geldig</label>
         <span class="spacer"></span>
+        ${pushBtn(t)}
+      </div>
+      <div class="row">
         ${t.binnen ? `<button class="btn small" type="button" data-act="reset">Reset</button>` : ""}
         <button class="btn small danger" type="button" data-act="verwijder">Verwijder</button>
       </div>
-      <div class="sync">${t.wacht_op_notion ? "Wacht op Notion…" : t.in_notion ? "In Notion" : ""}</div>
-    </article>`;
-  }).join("");
+    </article>`).join("")}</div>`;
+  }
 }
 
-$("grid").addEventListener("click", async (e) => {
+$("out").addEventListener("click", async (e) => {
   const el = e.target.closest("[data-act]");
   if (!el) return;
-  const card = el.closest(".card");
-  const id = Number(card.dataset.id);
+  const id = Number(el.closest("[data-id]").dataset.id);
   const t = tickets.find((x) => x.id === id);
   const act = el.dataset.act;
   try {
     if (act === "big") return openBig(visible().findIndex((x) => x.id === id));
+    if (act === "toon") {
+      scherm.ticket_id = id;
+      render();
+      await api("/api/admin/toon", { ticket_id: id });
+    }
     if (act === "geldig") await api(`/api/admin/tickets/${id}/geldig`, { geldig: el.checked });
     if (act === "reset" && confirm(`Status van ${t.naam || t.code} terugzetten naar "nog niet binnen"?`))
       await api(`/api/admin/tickets/${id}/reset`, {});
@@ -249,6 +315,7 @@ $("grid").addEventListener("click", async (e) => {
   } catch (err) {
     alert("Dat lukte niet: " + err.message);
   }
+  lastJson = "";
   load();
 });
 
@@ -269,6 +336,10 @@ $("syncBtn").addEventListener("click", async () => {
   await api("/api/admin/sync", {}).catch(() => {});
   setTimeout(load, 2500);
 });
+$("printBtn").addEventListener("click", () => {
+  if (view !== "kaarten") { setView("kaarten"); setTimeout(() => window.print(), 100); }
+  else window.print();
+});
 $("search").addEventListener("input", render);
 $("tabs").addEventListener("click", (e) => {
   const b = e.target.closest("button");
@@ -277,8 +348,19 @@ $("tabs").addEventListener("click", (e) => {
   for (const x of $("tabs").children) x.setAttribute("aria-pressed", String(x === b));
   render();
 });
+function setView(v) {
+  view = v;
+  store.set("admin_view", v);
+  for (const x of $("views").children) x.setAttribute("aria-pressed", String(x.dataset.v === v));
+  render();
+}
+$("views").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (b) setView(b.dataset.v);
+});
+setView(view);
 
-// groot weergeven, om vanaf het scherm te scannen
+// groot weergeven op dit scherm
 function openBig(i) {
   const list = visible();
   if (i < 0 || i >= list.length) return;
@@ -301,7 +383,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 load();
-setInterval(() => { if (!document.hidden) load(); }, 3000);
+setInterval(() => { if (!document.hidden) load(); }, 1500);
 </script>
 </body>
 </html>

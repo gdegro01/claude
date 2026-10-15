@@ -23,7 +23,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC = os.path.join(ROOT, "static")
@@ -582,6 +582,26 @@ SYNC = None
 pin_failures = {}
 pin_lock = threading.Lock()
 
+# Wat de iPad toont. Admin en iPad kunnen het allebei zetten; de iPad volgt elke nieuwe versie.
+show_lock = threading.Lock()
+SHOW = {"ticket_id": None, "versie": 0, "door": ""}
+show_seen = {}  # client-id -> laatste poll
+SHOW_ONLINE_SECONDS = 6
+
+
+def tickets_payload():
+    with db_lock:
+        rows = db.execute("SELECT * FROM tickets WHERE verwijderd = 0 ORDER BY id").fetchall()
+        versie = db.total_changes  # telt elke wijziging via deze verbinding: goedkope versie
+    return versie, [ticket_dict(r) for r in rows]
+
+
+def show_status():
+    now = time.time()
+    with show_lock:
+        online = sum(1 for t in show_seen.values() if now - t < SHOW_ONLINE_SECONDS)
+        return dict(SHOW, schermen=online)
+
 
 class Handler(BaseHTTPRequestHandler):
     server_version = "ScanTest/1.0"
@@ -683,13 +703,31 @@ class Handler(BaseHTTPRequestHandler):
             if self.pin_ok():
                 self.send_json(200, {"ok": True})
             return
+        if path == "/show":
+            if self.admin_ok():
+                self.serve_static("show.html")
+            return
         if path == "/api/admin/tickets":
             if not self.admin_ok():
                 return
-            with db_lock:
-                rows = db.execute("SELECT * FROM tickets WHERE verwijderd = 0 ORDER BY id").fetchall()
+            _, tickets = tickets_payload()
             sync = SYNC.status() if SYNC else {"actief": False}
-            return self.send_json(200, {"tickets": [ticket_dict(r) for r in rows], "notion": sync})
+            return self.send_json(200, {"tickets": tickets, "notion": sync, "scherm": show_status()})
+        if path == "/api/show/poll":
+            if not self.admin_ok():
+                return
+            query = parse_qs(urlparse(self.path).query)
+            client = (query.get("client") or [""])[0][:40]
+            since = (query.get("since") or [""])[0]
+            if client:
+                with show_lock:
+                    show_seen[client] = time.time()
+            versie, tickets = tickets_payload()
+            return self.send_json(200, {
+                "versie": versie,
+                "tickets": None if since == str(versie) else tickets,
+                "toon": show_status(),
+            })
         self.send_error(404)
 
     def do_POST(self):
@@ -716,6 +754,16 @@ class Handler(BaseHTTPRequestHandler):
             ids = create_tickets(namen)
             log("Admin: %d ticket(s) aangemaakt" % len(ids))
             return self.send_json(200, {"aangemaakt": len(ids)})
+        if path == "/api/admin/toon":
+            ticket_id = data.get("ticket_id")
+            if not isinstance(ticket_id, int):
+                return self.send_json(400, {"fout": "ticket_id ontbreekt"})
+            door = str(data.get("door") or "admin")[:40]
+            with show_lock:
+                SHOW.update(ticket_id=ticket_id, versie=SHOW["versie"] + 1, door=door)
+            if door == "admin":
+                log("Admin: ticket %d naar het scherm gestuurd" % ticket_id)
+            return self.send_json(200, show_status())
         if path == "/api/admin/sync":
             if SYNC:
                 SYNC.force_pull.set()
