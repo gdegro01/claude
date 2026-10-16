@@ -851,15 +851,39 @@ class Handler(BaseHTTPRequestHandler):
             return
         ext = os.path.splitext(path)[1]
         ctype = {".js": "application/javascript", ".woff2": "font/woff2", ".svg": "image/svg+xml",
-                 ".css": "text/css"}.get(ext) or mimetypes.guess_type(path)[0] or "application/octet-stream"
+                 ".css": "text/css", ".mp4": "video/mp4", ".webm": "video/webm", ".json": "application/json"}.get(ext) or mimetypes.guess_type(path)[0] or "application/octet-stream"
         with open(path, "rb") as f:
             body = f.read()
-        self.send_response(200)
+        # Safari speelt video alleen af met byte-ranges (206 Partial Content)
+        start, end, status = 0, len(body) - 1, 200
+        rng = self.headers.get("Range", "")
+        if rng.startswith("bytes=") and body:
+            a, _, b = rng[6:].split(",")[0].strip().partition("-")
+            try:
+                if a:
+                    start, end = int(a), (int(b) if b else len(body) - 1)
+                else:
+                    start, end = max(0, len(body) - int(b)), len(body) - 1
+                end = min(end, len(body) - 1)
+                if start > end:
+                    raise ValueError
+                status = 206
+            except ValueError:
+                self.send_response(416)
+                self.send_header("Content-Range", "bytes */%d" % len(body))
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return
+        part = body[start:end + 1]
+        self.send_response(status)
         self.send_header("Content-Type", ctype + ("; charset=utf-8" if ctype.startswith(("text/", "application/javascript")) else ""))
         self.send_header("Cache-Control", "no-cache")
-        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Accept-Ranges", "bytes")
+        if status == 206:
+            self.send_header("Content-Range", "bytes %d-%d/%d" % (start, end, len(body)))
+        self.send_header("Content-Length", str(len(part)))
         self.end_headers()
-        self.wfile.write(body)
+        self.wfile.write(part)
 
     def redirect(self, location):
         self.send_response(302)

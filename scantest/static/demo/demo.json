@@ -1,0 +1,10 @@
+{
+  "pauze_ms": 700,
+  "filmpjes": [
+    { "video": "1-isa-de-laat.mp4", "code": "Q5RQSN8S", "naam": "Isa de Laat" },
+    { "video": "2-angelique-spaninks.mp4", "code": "N9H4MFMC", "naam": "Angelique Spaninks" },
+    { "video": "3-fiore-visser.mp4", "code": "KKTXX3CG", "naam": "Fiore Visser" },
+    { "video": "4-olga-heijns.mp4", "code": "J9H5QZ3M", "naam": "Olga Heijns" },
+    { "video": "5-arnout-hulskamp.mp4", "code": "GX73CG8R", "naam": "Arnout Hulskamp" }
+  ]
+}

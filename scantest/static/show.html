@@ -95,6 +95,25 @@
     #qr svg{width:min(44vh,74vw)}
     #naam{font-size:clamp(34px,8vw,64px)}
   }
+
+  /* demostand: filmpjes schermvullend, scanmeldingen als badge */
+  #demo{position:fixed;inset:0;z-index:36;background:#000;overflow:hidden}
+  #demo video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0}
+  #demo video.on{opacity:1}
+  .demo-top{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:12px;z-index:2;
+    padding:max(16px,env(safe-area-inset-top)) 20px 30px;background:linear-gradient(rgba(10,11,14,.55),transparent)}
+  .demo-top .eyebrow{color:#fff;opacity:.85}
+  .demo-top .btn{background:rgba(20,22,28,.55);backdrop-filter:blur(6px)}
+  #demoBadges{position:absolute;left:0;right:0;bottom:max(28px,env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:10px;z-index:2;pointer-events:none}
+  .badge{display:inline-flex;align-items:center;gap:12px;padding:14px 24px;border-radius:999px;font-family:var(--display);font-weight:700;
+    font-size:24px;letter-spacing:-.01em;box-shadow:0 18px 40px rgba(0,0,0,.35);animation:badge-in .25s var(--ease)}
+  .badge small{font-family:var(--mono);font-weight:500;font-size:13px;letter-spacing:.16em;text-transform:uppercase;opacity:.75}
+  .badge.geldig{background:var(--green);color:var(--ink)}
+  .badge.al_gescand{background:var(--orange);color:var(--ink)}
+  .badge.ongeldig{background:var(--magenta);color:#fff}
+  .badge.uit{opacity:0;transform:translateY(8px);transition:opacity .4s,transform .4s}
+  @keyframes badge-in{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
+  #demoTap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;background:rgba(10,11,14,.5);cursor:pointer}
 </style>
 </head>
 <body>
@@ -142,6 +161,8 @@
     <button class="opt" type="button" data-after="blijf"><span>Blijf op dit ticket<span class="hint">Het scherm toont de nieuwe status</span></span></button>
     <button class="opt" type="button" data-after="door"><span>Ga door naar het volgende<span class="hint">Na de groene melding</span></span></button>
   </div>
+  <h2 class="eyebrow">Demo</h2>
+  <button class="opt" type="button" id="demoBtn"><span>Demo starten<span class="hint">Filmpjes na elkaar, demotickets eerst teruggezet</span></span></button>
   <h2 class="eyebrow">Zoeken</h2>
   <button class="opt" type="button" id="searchBtn">Gast zoeken…</button>
 </nav>
@@ -164,6 +185,14 @@
   <div class="f-detail" id="fDetail"></div>
 </section>
 <div id="toast" class="hidden"></div>
+
+<section id="demo" class="hidden">
+  <div class="demo-top"><span class="mark" aria-hidden="true"></span><span class="eyebrow" id="demoLabel">Demo</span><span class="spacer"></span>
+    <button class="btn sm" type="button" id="demoStop">Stop demo</button></div>
+  <div id="demoStage"></div>
+  <div id="demoBadges"></div>
+  <div id="demoTap" class="hidden"><span class="btn primary">Tik om te starten</span></div>
+</section>
 
 <script src="/static/qrcode.js"></script>
 <script src="/static/qrstyle.js"></script>
@@ -429,10 +458,12 @@ function toast(text) {
 // ---- gegevens ophalen
 
 function applyTickets(list) {
+  const prev = byId;
   const before = byId.get(currentId);
   tickets = list.slice().sort((a, b) => a.naam.localeCompare(b.naam, "nl", { numeric: true }) || a.id - b.id);
   byId = new Map(tickets.map((t) => [t.id, t]));
   orderOf = new Map(tickets.map((t, i) => [t.id, i]));
+  if (demo) return demoFeedback(prev);
   const now = byId.get(currentId);
   if (before && now) {
     if (!before.binnen && now.binnen) {
@@ -481,6 +512,94 @@ async function poll() {
   }
   setTimeout(poll, 1000);
 }
+
+// ---- demostand
+
+let demo = null;
+const demoCodes = () => new Set(demo ? demo.cfg.filmpjes.map((f) => f.code) : []);
+
+async function resetDemoTickets() {
+  const codes = demoCodes();
+  const todo = tickets.filter((t) => codes.has(t.code) && (t.binnen || t.pogingen));
+  await Promise.all(todo.map((t) => fetch(`/api/admin/tickets/${t.id}/reset`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {})));
+}
+
+async function startDemo() {
+  closeDrawer();
+  keepAwake();
+  let cfg;
+  try { cfg = await fetch("/static/demo/demo.json", { cache: "no-store" }).then((r) => r.json()); }
+  catch (e) { return toast("Geen demo gevonden"); }
+  const missing = cfg.filmpjes.filter((f) => !tickets.some((t) => t.code === f.code));
+  const stage = $("demoStage");
+  stage.innerHTML = "";
+  const videos = cfg.filmpjes.map((f) => {
+    const v = document.createElement("video");
+    v.src = "/static/demo/" + f.video;
+    v.muted = true; v.playsInline = true; v.preload = "auto";
+    v.setAttribute("playsinline", ""); v.setAttribute("muted", "");
+    stage.appendChild(v);
+    return v;
+  });
+  demo = { cfg, videos, i: -1, round: 0, timer: null };
+  $("demoBadges").innerHTML = "";
+  $("demo").classList.remove("hidden");
+  if (missing.length) toast(`Niet in de lijst: ${missing.map((m) => m.naam).join(", ")}`);
+  await resetDemoTickets();
+  nextDemo();
+}
+
+function nextDemo() {
+  if (!demo) return;
+  const prev = demo.videos[demo.i];
+  demo.i = (demo.i + 1) % demo.videos.length;
+  if (demo.i === 0 && demo.round++ > 0) resetDemoTickets();  // elke ronde opnieuw "echt"
+  const v = demo.videos[demo.i];
+  $("demoLabel").textContent = `Demo · ${demo.i + 1} / ${demo.videos.length}`;
+  v.currentTime = 0;
+  v.onended = () => { demo && (demo.timer = setTimeout(nextDemo, demo.cfg.pauze_ms || 0)); };
+  // pas wisselen als het nieuwe filmpje echt speelt, zodat er geen zwart beeld tussen zit
+  v.addEventListener("playing", () => {
+    v.classList.add("on");
+    if (prev && prev !== v) prev.classList.remove("on");
+  }, { once: true });
+  v.play().then(() => $("demoTap").classList.add("hidden")).catch(() => $("demoTap").classList.remove("hidden"));
+}
+
+function stopDemo() {
+  if (!demo) return;
+  clearTimeout(demo.timer);
+  demo.videos.forEach((v) => { v.pause(); v.removeAttribute("src"); v.load(); });
+  $("demoStage").innerHTML = "";
+  $("demo").classList.add("hidden");
+  demo = null;
+  render();
+}
+
+function demoFeedback(prev) {
+  const codes = demoCodes();
+  for (const t of tickets) {
+    if (!codes.has(t.code)) continue;
+    const b = prev.get(t.id);
+    if (!b) continue;
+    if (!b.binnen && t.binnen) badge("geldig", t, "binnen");
+    else if (t.pogingen > b.pogingen) badge(t.geldig ? "al_gescand" : "ongeldig", t, t.geldig ? "al gescand" : "ongeldig");
+  }
+}
+
+function badge(kind, t, label) {
+  const el = document.createElement("div");
+  el.className = "badge " + kind;
+  el.innerHTML = `${kind === "geldig" ? "✓" : kind === "ongeldig" ? "✕" : "!"} ${esc(t.naam)} <small>${label}</small>`;
+  $("demoBadges").appendChild(el);
+  setTimeout(() => el.classList.add("uit"), 2400);
+  setTimeout(() => el.remove(), 2900);
+}
+
+$("demoBtn").addEventListener("click", startDemo);
+$("demoStop").addEventListener("click", stopDemo);
+$("demoTap").addEventListener("click", () => { if (demo) demo.videos[demo.i].play().then(() => $("demoTap").classList.add("hidden")).catch(() => {}); });
 
 // scherm wakker houden (Safari 16.4+)
 let wakeLock = null;
