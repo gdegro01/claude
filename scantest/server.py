@@ -42,8 +42,11 @@ PUSH_GRACE = float(os.environ.get("SCANTEST_PUSH_GRACE", 90))
 CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"  # zonder 0/O, 1/I/L
 CODE_LENGTH = 8
 
-STATUS_BINNEN = "Binnen"
-STATUS_NIET_BINNEN = "Niet binnen"
+# Waarden in de Notion-kolom Binnen. Oude waarden blijven herkend en worden omgezet.
+STATUS_BINNEN = "✓"
+STATUS_NIET_BINNEN = "✗"
+OLD_STATUS = {"Binnen": True, "Niet binnen": False}
+STATUS_OPTIONS = [{"name": STATUS_BINNEN, "color": "green"}, {"name": STATUS_NIET_BINNEN, "color": "gray"}]
 
 # Kolommen in Notion: sleutel, standaardnaam, andere namen die we herkennen, type, schema.
 COLUMNS = [
@@ -51,10 +54,7 @@ COLUMNS = [
     ("code", "Code", ("Ticketcode",), "rich_text", {"rich_text": {}}),
     ("type", "Type", ("Soort", "Categorie"), "select", {"select": {}}),
     ("geldig", "Geldig", (), "checkbox", {"checkbox": {}}),
-    ("status", "Status", (), "select", {"select": {"options": [
-        {"name": STATUS_NIET_BINNEN, "color": "gray"},
-        {"name": STATUS_BINNEN, "color": "green"},
-    ]}}),
+    ("status", "Binnen", ("Status", "Aanwezig"), "select", {"select": {"options": STATUS_OPTIONS}}),
     ("gescand_op", "Gescand op", (), "date", {"date": {}}),
     ("gescand_door", "Gescand door", ("Scanner",), "rich_text", {"rich_text": {}}),
     ("pogingen", "Scanpogingen", ("Pogingen", "Aantal scans"), "number", {"number": {"format": "number"}}),
@@ -309,6 +309,7 @@ class Notion:
         self.database_id = database_id
         self.data_source_id = None
         self.cols = {}  # sleutel -> (property-id, huidige naam)
+        self.old_status_options = []
         self._last = 0.0
 
     def request(self, method, path, body=None):
@@ -417,9 +418,36 @@ class Notion:
         ]
         self.cols = cols
         self._save_columns()
+        self._migrate_status(props)
         title = "".join(t.get("plain_text", "") for t in db_info.get("title", []))
         log("Verbonden met Notion-database '%s'%s" % (
             title or self.database_id, " (%s)" % "; ".join(renamed) if renamed else ""))
+
+    def _migrate_status(self, props):
+        """Zet ✓ en ✗ als keuzes in de statuskolom. Regels met een oude waarde schrijft pull() opnieuw;
+        de oude keuzes verdwijnen zodra geen regel ze meer gebruikt."""
+        prop = props[self.cols["status"][1]]
+        options = [o["name"] for o in prop["select"].get("options", [])]
+        self.old_status_options = [o for o in options if o in OLD_STATUS]
+        if all(o["name"] in options for o in STATUS_OPTIONS):
+            return
+        keep = [{"name": o} for o in options if o not in (STATUS_BINNEN, STATUS_NIET_BINNEN)]
+        self.request("PATCH", "/data_sources/" + self.data_source_id, {"properties": {
+            self.cols["status"][0]: {"select": {"options": STATUS_OPTIONS + keep}}}})
+        log("Notion: keuzes ✓ en ✗ toegevoegd aan de statuskolom")
+
+    def drop_old_status_options(self, pages):
+        if not self.old_status_options:
+            return
+        pid = self.cols["status"][0]
+        for page in pages:
+            for v in page.get("properties", {}).values():
+                if v.get("id") == pid and (v.get("select") or {}).get("name") in OLD_STATUS:
+                    return  # nog in gebruik
+        self.request("PATCH", "/data_sources/" + self.data_source_id, {"properties": {
+            pid: {"select": {"options": STATUS_OPTIONS}}}})
+        self.old_status_options = []
+        log("Notion: oude statuskeuzes Binnen en Niet binnen opgeruimd")
 
     @staticmethod
     def create_database(token, parent_page_id, title="Tickets"):
@@ -471,7 +499,8 @@ class Notion:
             "code": normalize_code(plain("code", "rich_text")),
             "type": clean_type(ticket_type.get("name")),
             "geldig": bool(prop("geldig").get("checkbox")),
-            "binnen": status.get("name") == STATUS_BINNEN,
+            "binnen": status.get("name") == STATUS_BINNEN or OLD_STATUS.get(status.get("name")) is True,
+            "status_oud": status.get("name") in OLD_STATUS,
             "gescand_op": date.get("start"),
             "gescand_door": plain("gescand_door", "rich_text").strip(),
         }
@@ -499,6 +528,7 @@ class SyncWorker(threading.Thread):
         self.last_pull = None
         self.connected = False
         self.reconnect = False
+        self.wipe = False
         self.force_pull = threading.Event()
 
     def status(self):
@@ -522,6 +552,9 @@ class SyncWorker(threading.Thread):
                     with db_lock:  # na een herstel alles direct opnieuw proberen
                         db.execute("UPDATE tickets SET opnieuw_na = 0 WHERE dirty = 1")
                         db.commit()
+                if self.wipe:
+                    self.wipe_notion()
+                    continue
                 if self.push_one():
                     continue
                 if time.time() >= next_pull or self.force_pull.is_set():
@@ -596,7 +629,7 @@ class SyncWorker(threading.Thread):
                     db.execute("UPDATE tickets SET gepusht_op = ? WHERE id = ?", (time.time(), row["id"]))
                     db.execute("UPDATE tickets SET dirty = 0 WHERE id = ? AND versie = ?", (row["id"], row["versie"]))
                     db.commit()
-                log("Notion: %s bijgewerkt (%s)" % (row["code"], STATUS_BINNEN if row["binnen"] else STATUS_NIET_BINNEN))
+                log("Notion: %s bijgewerkt (%s)" % (row["code"], "binnen" if row["binnen"] else "niet binnen"))
             self.last_error = None
             return True
         except NotionError as e:
@@ -609,8 +642,27 @@ class SyncWorker(threading.Thread):
                 db.commit()
             raise e
 
+    def wipe_notion(self):
+        """Gooit alle Notion-regels weg die niet bij een levend ticket horen."""
+        with db_lock:
+            live = {r["notion_id"] for r in db.execute(
+                "SELECT notion_id FROM tickets WHERE verwijderd = 0 AND notion_id IS NOT NULL")}
+        pages = [p for p in self.notion.query_all() if p["id"] not in live]
+        for page in pages:
+            try:
+                self.notion.request("PATCH", "/pages/" + page["id"], {"in_trash": True})
+            except NotionError as e:
+                if e.status not in (400, 404):
+                    raise
+            with db_lock:
+                db.execute("DELETE FROM tickets WHERE notion_id = ? AND verwijderd = 1", (page["id"],))
+                db.commit()
+        log("Notion: %d regel(s) naar de prullenbak (alles wissen)" % len(pages))
+        self.wipe = False
+
     def pull(self):
         pages = self.notion.query_all()
+        self.notion.drop_old_status_options(pages)
         seen = set()
         changed = 0
         now = time.time()
@@ -642,8 +694,8 @@ class SyncWorker(threading.Thread):
                     db.execute("UPDATE tickets SET %s WHERE id = ?" % sets, list(updates.values()) + [row["id"]])
                     changed += 1
                     log("Uit Notion: %s %s" % (row["code"], ", ".join(updates)))
-                if p["code"] != row["code"]:
-                    # de code is van de server: zet hem in Notion terug
+                if p["code"] != row["code"] or p["status_oud"]:
+                    # de code is van de server, en een oude statuswaarde wordt ✓ of ✗: opnieuw schrijven
                     db.execute("UPDATE tickets SET dirty = 1, versie = versie + 1 WHERE id = ?", (row["id"],))
                 db.commit()
         with db_lock:
@@ -886,6 +938,23 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/admin/types/verwijder":
             n = delete_type(clean_type(data.get("naam")))
             return self.send_json(200, {"losgekoppeld": n, "types": types_list()})
+        if path == "/api/admin/wissen":
+            if data.get("bevestig") != "WISSEN":
+                return self.send_json(400, {"fout": "typ WISSEN om te bevestigen"})
+            with db_lock:
+                n = db.execute("UPDATE tickets SET verwijderd = 1, dirty = 1, versie = versie + 1, opnieuw_na = 0 "
+                               "WHERE verwijderd = 0").rowcount
+                db.execute("DELETE FROM tickets WHERE verwijderd = 1 AND notion_id IS NULL")
+                if data.get("typen"):
+                    db.execute("DELETE FROM types")
+                db.commit()
+            with show_lock:
+                SHOW.update(ticket_id=None, versie=SHOW["versie"] + 1, door="admin")
+            if SYNC:
+                SYNC.wipe = True
+                sync_wake.set()
+            log("Admin: alles gewist (%d tickets)%s" % (n, ", ook de typen" if data.get("typen") else ""))
+            return self.send_json(200, {"gewist": n})
         if path == "/api/admin/toon":
             ticket_id = data.get("ticket_id")
             if not isinstance(ticket_id, int):

@@ -166,6 +166,14 @@
   </div>
 
   <div id="out"></div>
+
+  <section class="panel" style="margin-top:28px">
+    <h2>Opnieuw beginnen</h2>
+    <div class="row">
+      <span class="meta" style="flex:1 1 320px">Verwijdert alle tickets, hier en in Notion (naar de prullenbak). De kolommen in Notion blijven staan.</span>
+      <button class="btn danger" type="button" id="wipeBtn">Alles wissen…</button>
+    </div>
+  </section>
 </main>
 
 <section id="big" class="hidden">
@@ -436,6 +444,20 @@ $("typeChips").addEventListener("click", async (e) => {
   const x = types.find((y) => y.naam === b.dataset.type);
   if (x.totaal && !confirm(`Type ${x.naam} verwijderen? ${x.totaal} ticket(s) raken hun type kwijt, ook in Notion.`)) return;
   await api("/api/admin/types/verwijder", { naam: x.naam }).catch((err) => alert("Dat lukte niet: " + err.message));
+  lastJson = "";
+  load();
+});
+$("wipeBtn").addEventListener("click", async () => {
+  const typed = prompt(`Alle ${tickets.length} tickets wissen, ook in Notion? Typ WISSEN om te bevestigen.`);
+  if (typed === null) return;
+  if (typed.trim().toUpperCase() !== "WISSEN") return alert("Niet gewist: je typte geen WISSEN.");
+  const typen = types.length ? confirm("Ook de typen verwijderen? Kies Annuleren om de typen te bewaren.") : false;
+  try {
+    const res = await api("/api/admin/wissen", { bevestig: "WISSEN", typen });
+    alert(`${res.gewist} tickets gewist. Notion wordt nu leeggemaakt; dat kan even duren.`);
+  } catch (err) {
+    alert("Dat lukte niet: " + err.message);
+  }
   lastJson = "";
   load();
 });

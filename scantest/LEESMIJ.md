@@ -20,6 +20,7 @@ QR-tickets tonen op een iPad, scannen met een telefoon, en de status volgen in N
 - **Naar scherm** stuurt een ticket naar de iPad.
 - Bovenaan zie je welk ticket de iPad op dat moment toont.
 - Weigert Notion een wijziging, dan verschijnt een rode balk met de melding van Notion en de knop **Opnieuw proberen**.
+- **Alles wissen** (onderaan) verwijdert alle tickets, hier en in Notion, na bevestiging met het woord WISSEN. Je kiest of de typen blijven. De kolommen in Notion blijven staan.
 
 ### `/show`
 
@@ -45,7 +46,9 @@ QR-tickets tonen op een iPad, scannen met een telefoon, en de status volgen in N
 
 ### Notion
 
-De database **Tickets** op de pagina Scan Test, met de kolommen Naam, Code, Type, Geldig, Status, Gescand op, Gescand door en Scanpogingen.
+De database **Tickets** op de pagina Scan Test, met de kolommen Naam, Code, Type, Geldig, Binnen, Gescand op, Gescand door en Scanpogingen.
+
+De kolom Binnen toont ✓ (groen) of ✗ (grijs). Een kolom met de oude waarden "Binnen" en "Niet binnen" zet de server vanzelf om.
 
 Je mag kolommen in Notion hernoemen. De server herkent ze aan hun vaste ID en bewaart die in `notion_kolommen.json`. Verwijder je een kolom die de server nodig heeft, dan maakt hij die opnieuw aan.
 
