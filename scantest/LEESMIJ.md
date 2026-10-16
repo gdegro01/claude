@@ -52,7 +52,8 @@ Bij elke gast die binnenkomt, lichten de kaarten op in de kleur van het type.
   - oranje bij een ticket dat al gescand was;
   - rood bij een ongeldig ticket.
 - Het scherm blijft aan zolang de pagina open staat.
-- **Demo** (in het menu) speelt de filmpjes uit `static/demo/` schermvullend één keer na elkaar af. Na het laatste filmpje blijft het lege eindbeeld staan, met bovenin "Demo · klaar". De demotickets gaan bij de start eerst terug op "nog niet binnen". Nog een keer afspelen: **Stop demo** en dan opnieuw **Demo**. Scan je een filmpje met de telefoon, dan verschijnt onderin een melding: groen, oranje of magenta. Welke filmpjes en codes meedoen, staat in `static/demo/demo.json`.
+- **Demo** (in het menu) laat alle tickets van het gekozen type één voor één zien, schermvullend op de concertachtergrond. Per gast komt een hand met een telefoon in beeld, met het echte ticket en de QR-code op het scherm. De hand houdt een paar seconden stil en gaat weer uit beeld. Na de laatste gast blijft de lege achtergrond staan, met bovenin "Demo · klaar". De tickets gaan bij de start eerst terug op "nog niet binnen". Scan je de telefoon in beeld, dan verschijnt onderin een melding: groen, oranje of magenta. Nog een keer: **Stop demo** en dan opnieuw **Demo**.
+  - De handen staan in `static/demo/hands/`, met per hand de schermhoeken in `hands.json`. De achtergrond is `static/demo/bg.jpg`.
 
 ### `/scan`
 

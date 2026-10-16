@@ -96,10 +96,29 @@
     #naam{font-size:clamp(34px,8vw,64px)}
   }
 
-  /* demostand: filmpjes schermvullend, scanmeldingen als badge */
+  /* demostand: een hand met telefoon komt in beeld, met het echte ticket op het scherm */
   #demo{position:fixed;inset:0;z-index:36;background:#000;overflow:hidden}
-  #demo video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0}
-  #demo video.on{opacity:1}
+  #demoStage{position:absolute;inset:0;background:#000 url(/static/demo/bg.jpg) center/cover no-repeat;overflow:hidden}
+  .hand{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+  .ps-mask{position:absolute;left:0;top:0;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
+  .hand img{position:absolute;left:0;top:0;display:block;filter:brightness(.93) drop-shadow(18px 30px 34px rgba(0,0,0,.5))}
+  .ps{position:absolute;left:0;top:0;transform-origin:0 0;background:var(--ink);color:#fff;overflow:hidden;
+    display:flex;flex-direction:column;padding:0 34px;font-family:var(--mono)}
+  .ps-sb{display:flex;justify-content:space-between;align-items:center;height:64px;flex:none;font-family:var(--display);font-weight:600;font-size:22px;padding:0 14px}
+  .ps-bat{width:34px;height:16px;border:2px solid rgba(255,255,255,.8);border-radius:5px;padding:2px}.ps-bat i{display:block;height:100%;width:72%;background:#fff;border-radius:2px}
+  .ps-brand{display:flex;align-items:center;gap:12px;margin-top:22px}
+  .ps-brand .mark{width:30px;height:25px}
+  .ps-brand .eyebrow{font-size:15px;letter-spacing:.2em}
+  .ps-lbl{font-size:15px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);margin-top:26px}
+  .ps-naam{font-family:var(--display);font-weight:800;letter-spacing:-.035em;line-height:.95;font-size:60px;margin-top:10px;overflow-wrap:anywhere}
+  .ps-meta{margin-top:14px;font-size:16px;color:var(--muted);letter-spacing:.08em}
+  .ps-qr{margin-top:26px;background:var(--cream);border-radius:28px;padding:10px;position:relative;line-height:0}
+  .ps-qr::after{content:"";position:absolute;left:30px;right:30px;bottom:-9px;height:9px;border-radius:0 0 10px 10px;background:var(--acc)}
+  .ps-qr svg{width:100%;height:auto;display:block}
+  .ps-code{margin-top:30px;text-align:center;font-size:22px;letter-spacing:.24em;color:var(--text)}
+  .ps-hint{margin-top:8px;text-align:center;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ps.kort .ps-brand{margin-top:8px}.ps.kort .ps-lbl{margin-top:14px}.ps.kort .ps-naam{font-size:48px}.ps.kort .ps-qr{margin-top:16px}
+  .ps.kort .ps-code{margin-top:22px}.ps.kort .ps-hint{display:none}
   .demo-top{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:12px;z-index:2;
     padding:max(16px,env(safe-area-inset-top)) 20px 30px;background:linear-gradient(rgba(10,11,14,.55),transparent)}
   .demo-top .eyebrow{color:#fff;opacity:.85}
@@ -113,7 +132,6 @@
   .badge.ongeldig{background:var(--magenta);color:#fff}
   .badge.uit{opacity:0;transform:translateY(8px);transition:opacity .4s,transform .4s}
   @keyframes badge-in{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
-  #demoTap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;background:rgba(10,11,14,.5);cursor:pointer}
 </style>
 </head>
 <body>
@@ -191,7 +209,6 @@
     <button class="btn sm" type="button" id="demoStop">Stop demo</button></div>
   <div id="demoStage"></div>
   <div id="demoBadges"></div>
-  <div id="demoTap" class="hidden"><span class="btn primary">Tik om te starten</span></div>
 </section>
 
 <script src="/static/qrcode.js"></script>
@@ -513,10 +530,14 @@ async function poll() {
   setTimeout(poll, 1000);
 }
 
-// ---- demostand
+// ---- demostand: handen met telefoon, het echte ticket op het scherm, live bewogen
 
 let demo = null;
-const demoCodes = () => new Set(demo ? demo.cfg.filmpjes.map((f) => f.code) : []);
+let hands = null;
+const demoCodes = () => new Set(demo ? demo.list.map((t) => t.code) : []);
+const DEMO_ACC = ["#CF1C7E", "#FD7C2C", "#7B4FF2", "#1BA8B9", "#0DC13C", "#EC2765", "#B8E22C"];
+const DEMO_EYE = ["#2A2D35", "#7B4FF2", "#2A2D35", "#CF1C7E"];  // alleen kleuren die goed scannen
+const DEMO_PAUZE = 600;  // ms leeg beeld tussen twee gasten
 
 async function resetDemoTickets() {
   const codes = demoCodes();
@@ -525,59 +546,180 @@ async function resetDemoTickets() {
     method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }).catch(() => {})));
 }
 
+function loadImg(src) {
+  return new Promise((ok, fail) => { const i = new Image(); i.onload = () => ok(i); i.onerror = fail; i.src = src; });
+}
+
+async function loadHands() {
+  if (hands) return hands;
+  const cfg = await fetch("/static/demo/hands/hands.json", { cache: "no-store" }).then((r) => r.json());
+  await Promise.all([loadImg("/static/demo/bg.jpg"), ...cfg.handen.flatMap((h) => [loadImg("/static/demo/hands/" + h.src), loadImg("/static/demo/hands/" + h.mask)])]);
+  const d = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+  for (const h of cfg.handen) {
+    const q = h.screen;
+    h.sw = (d(q[0], q[1]) + d(q[3], q[2])) / 2;
+    h.sh = (d(q[0], q[3]) + d(q[1], q[2])) / 2;
+    h.cx = q.reduce((s, p) => s + p[0], 0) / 4;
+    h.cy = q.reduce((s, p) => s + p[1], 0) / 4;
+  }
+  return (hands = cfg.handen);
+}
+
+// projectie van een rechthoek w×h op vier hoeken (linksboven, rechtsboven, rechtsonder, linksonder)
+function quadMatrix(w, h, q) {
+  const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = q;
+  const dx1 = x1 - x2, dx2 = x3 - x2, dy1 = y1 - y2, dy2 = y3 - y2;
+  const sx = x0 - x1 + x2 - x3, sy = y0 - y1 + y2 - y3;
+  const den = dx1 * dy2 - dx2 * dy1;
+  const g = (sx * dy2 - dx2 * sy) / den, k = (dx1 * sy - sx * dy1) / den;
+  const a = x1 - x0 + g * x1, b = x3 - x0 + k * x3, c = y1 - y0 + g * y1, e = y3 - y0 + k * y3;
+  return `matrix3d(${a / w},${c / w},0,${g / w},${b / h},${e / h},0,${k / h},0,0,1,0,${x0},${y0},0,1)`;
+}
+
+function phoneScreen(t, i, h) {
+  const W = 540, H = Math.round(W * h.sh / h.sw);
+  const acc = (t.type && typeColor(t.type)) || DEMO_ACC[i % DEMO_ACC.length];
+  const [voor, ...rest] = (t.naam || "Gast").split(" ");
+  const datum = new Date().toLocaleDateString("nl-NL", { day: "numeric", month: "short" });
+  const el = document.createElement("div");
+  el.className = "ps" + (H < 1050 ? " kort" : "");
+  el.style.cssText = `width:${W}px;height:${H}px;--acc:${acc};transform:${quadMatrix(W, H, h.screen)}`;
+  el.innerHTML = `<div class="ps-sb"><span>20:15</span><span class="ps-bat"><i></i></span></div>
+    <div class="ps-brand"><span class="mark"></span><span class="eyebrow">Making Waves</span></div>
+    <div class="ps-lbl">Ticket · ${esc(t.type || "Gast")}</div>
+    <div class="ps-naam">${esc(voor)}${rest.length ? "<br>" + esc(rest.join(" ")) : ""}</div>
+    <div class="ps-meta">${esc(datum)} · Scan Test</div>
+    <div class="ps-qr">${mwQR(t.code, { style: "blinds", logo: true, logoSize: 0.22, logoColor: acc, eye: DEMO_EYE[i % DEMO_EYE.length], bg: "#F4F1EA" })}</div>
+    <div class="ps-code">${esc(formatCode(t.code))}</div>
+    <div class="ps-hint">Laat scannen bij de ingang</div>`;
+  return el;
+}
+
+function seeded(n) { let x = (n * 7919) % 233280; return () => ((x = (x * 9301 + 49297) % 233280) / 233280); }
+const easeOut = (u) => 1 - Math.pow(1 - u, 3);
+const easeIn = (u) => u * u * u;
+const easeInOut = (u) => u * u * (3 - 2 * u);
+
+// plek en grootte: telefoon goed in beeld, de afgesneden arm altijd buiten beeld
+function placeHand(h, W, H, r) {
+  const m = 0.06 * Math.max(W, H);
+  let s = (Math.min(0.56 * H, 0.9 * W) / h.sh) * (0.92 + 0.14 * r());
+  const x = W * (0.34 + 0.32 * r()), y = H * (0.46 + 0.06 * r());
+  let best = null;
+  for (let k = 0; k < 12; k++, s *= 1.07) {
+    let tx = x - h.cx * s, ty = y - h.cy * s;
+    if (h.arm.includes("bottom")) ty = Math.max(ty, H + m - h.h * s);
+    if (h.arm.includes("top")) ty = Math.min(ty, -m);
+    if (h.arm.includes("right")) tx = Math.max(tx, W + m - h.w * s);
+    if (h.arm.includes("left")) tx = Math.min(tx, -m);
+    best = { s, tx, ty };
+    const px = tx + h.cx * s, py = ty + h.cy * s;
+    if (px > W * 0.18 && px < W * 0.82 && py > H * 0.3 && py < H * 0.66) break;
+  }
+  return best;
+}
+
+function handMatrix(h, p, ang, off, z) {
+  const s = p.s, c = Math.cos(ang), sn = Math.sin(ang);
+  const [qx, qy] = h.pivot;
+  let a = s * c, b = s * sn, cc = -s * sn, d = s * c;
+  let e = p.tx + qx * s - (a * qx + cc * qy) + off[0];
+  let f = p.ty + qy * s - (b * qx + d * qy) + off[1];
+  const pcx = p.tx + h.cx * s, pcy = p.ty + h.cy * s;  // zoom rond het midden van het scherm
+  a *= z; b *= z; cc *= z; d *= z;
+  e = pcx + z * (e - pcx); f = pcy + z * (f - pcy);
+  return `matrix(${a},${b},${cc},${d},${e},${f})`;
+}
+
+function handOrder(n, count) {
+  const order = [];
+  for (let i = 0; order.length < n; i++) {
+    const r = seeded(i + 11), perm = [...Array(count).keys()].sort(() => r() - 0.5);
+    if (order.length && perm[0] === order[order.length - 1]) perm.push(perm.shift());
+    order.push(...perm);
+  }
+  return order.slice(0, n);
+}
+
+// één gast: hand komt op vanaf de kant van de arm, houdt stil met een lichte beweging, gaat weer weg
+function playHand(t, i, h) {
+  return new Promise((done) => {
+    const stage = $("demoStage"), W = stage.clientWidth, H = stage.clientHeight, r = seeded(i + 1);
+    const el = document.createElement("div");
+    el.className = "hand";
+    el.style.width = h.w + "px"; el.style.height = h.h + "px";
+    const clip = document.createElement("div");  // ticket alleen binnen de vorm van het scherm
+    clip.className = "ps-mask";
+    clip.style.cssText = `width:${h.w}px;height:${h.h}px;-webkit-mask-image:url(/static/demo/hands/${h.mask});mask-image:url(/static/demo/hands/${h.mask})`;
+    clip.appendChild(phoneScreen(t, i, h));
+    el.appendChild(clip);
+    const img = new Image(); img.src = "/static/demo/hands/" + h.src; img.width = h.w; img.height = h.h; img.alt = "";
+    el.appendChild(img);
+    const p = placeHand(h, W, H, r);
+    const pc = [p.tx + h.cx * p.s, p.ty + h.cy * p.s], pv = [p.tx + h.pivot[0] * p.s, p.ty + h.pivot[1] * p.s];
+    const len = Math.hypot(pv[0] - pc[0], pv[1] - pc[1]) || 1, out = [(pv[0] - pc[0]) / len, (pv[1] - pc[1]) / len];
+    const dist = 1.15 * Math.max(W, H), unit = H / 820, deg = Math.PI / 180;
+    const tIn = 0.55 + 0.15 * r(), tHold = 2.1 + 0.8 * r(), tOut = 0.5 + 0.15 * r();
+    const ang0 = (r() < 0.5 ? -1 : 1) * (5 + 6 * r()) * deg, angOut = (r() < 0.5 ? -1 : 1) * (4 + 8 * r()) * deg;
+    const sway = (0.6 + 0.7 * r()) * deg, period = 2.3 + r(), bob = (3 + 5 * r()) * unit, zoom = r() < 0.5 ? 0.035 : 0;
+    const drop = h.arm.includes("bottom") && r() < 0.5;  // wegzakken in plaats van terug langs de arm
+    const hold = (th) => [sway * Math.sin((2 * Math.PI * th) / period), [0, bob * Math.sin((2 * Math.PI * th) / (period * 0.8))], 1 + zoom * easeInOut(Math.min(1, th / tHold))];
+    stage.appendChild(el);
+    let start = null;
+    const step = (now) => {
+      if (!demo) { el.remove(); return done(); }
+      if (start === null) start = now;
+      const tt = (now - start) / 1000;
+      let ang, off, z;
+      if (tt < tIn) {
+        const u = easeOut(tt / tIn);
+        ang = ang0 * (1 - u); off = [out[0] * dist * (1 - u), out[1] * dist * (1 - u)]; z = 1;
+      } else if (tt < tIn + tHold) {
+        [ang, off, z] = hold(tt - tIn);
+      } else if (tt < tIn + tHold + tOut) {
+        const u = easeIn((tt - tIn - tHold) / tOut), [a0, o0, z0] = hold(tHold);
+        const dir = drop ? [0, 1] : out;
+        ang = a0 + angOut * u; off = [o0[0] + dir[0] * dist * u, o0[1] + dir[1] * dist * u]; z = z0;
+      } else {
+        el.remove();
+        return done();
+      }
+      el.style.transform = handMatrix(h, p, ang, off, z);
+      demo.raf = requestAnimationFrame(step);
+    };
+    el.style.transform = handMatrix(h, p, ang0, [out[0] * dist, out[1] * dist], 1);
+    demo.raf = requestAnimationFrame(step);
+  });
+}
+
 async function startDemo() {
   closeDrawer();
   keepAwake();
-  let cfg;
-  try { cfg = await fetch("/static/demo/demo.json", { cache: "no-store" }).then((r) => r.json()); }
-  catch (e) { return toast("Geen demo gevonden"); }
-  const missing = cfg.filmpjes.filter((f) => !tickets.some((t) => t.code === f.code));
-  const stage = $("demoStage");
-  stage.innerHTML = "";
-  // alleen het huidige en het volgende filmpje laden; de rest pas als hij aan de beurt komt
-  const videos = cfg.filmpjes.map((f, k) => {
-    const v = document.createElement("video");
-    v.src = "/static/demo/" + f.video;
-    v.muted = true; v.playsInline = true; v.preload = k < 2 ? "auto" : "none";
-    v.setAttribute("playsinline", ""); v.setAttribute("muted", "");
-    stage.appendChild(v);
-    return v;
-  });
-  demo = { cfg, videos, i: -1, timer: null };
+  const list = tickets.filter(typeOk);
+  if (!list.length) return toast("Geen tickets voor de demo");
+  try { await loadHands(); } catch (e) { return toast("Demo-afbeeldingen niet gevonden"); }
+  $("demoStage").innerHTML = "";
   $("demoBadges").innerHTML = "";
   $("demo").classList.remove("hidden");
-  if (missing.length) toast(`Niet in de lijst: ${missing.map((m) => m.naam).join(", ")}`);
+  demo = { list, raf: null, timer: null };
+  const run = demo;
   await resetDemoTickets();
-  nextDemo();
-}
-
-function nextDemo() {
-  if (!demo) return;
-  const prev = demo.videos[demo.i];
-  demo.i += 1;
-  const v = demo.videos[demo.i];
-  $("demoLabel").textContent = `Demo · ${demo.i + 1} / ${demo.videos.length}`;
-  v.currentTime = 0;
-  // één ronde: na het laatste filmpje blijft het lege eindbeeld staan
-  v.onended = () => {
-    if (!demo) return;
-    if (demo.i === demo.videos.length - 1) $("demoLabel").textContent = `Demo · klaar · ${demo.videos.length} / ${demo.videos.length}`;
-    else demo.timer = setTimeout(nextDemo, demo.cfg.pauze_ms || 0);
-  };
-  // pas wisselen als het nieuwe filmpje echt speelt, zodat er geen zwart beeld tussen zit
-  v.addEventListener("playing", () => {
-    v.classList.add("on");
-    if (prev && prev !== v) prev.classList.remove("on");
-  }, { once: true });
-  v.play().then(() => $("demoTap").classList.add("hidden")).catch(() => $("demoTap").classList.remove("hidden"));
-  const next = demo.videos[demo.i + 1];
-  if (next && next.preload !== "auto") { next.preload = "auto"; next.load(); }
+  const order = handOrder(list.length, hands.length);
+  for (let i = 0; i < list.length; i++) {
+    if (demo !== run) return;
+    $("demoLabel").textContent = `Demo · ${i + 1} / ${list.length}`;
+    await new Promise((ok) => (run.timer = setTimeout(ok, i ? DEMO_PAUZE : 300)));
+    if (demo !== run) return;
+    await playHand(list[i], i, hands[order[i]]);
+  }
+  // één ronde: daarna blijft de lege achtergrond staan
+  if (demo === run) $("demoLabel").textContent = `Demo · klaar · ${list.length} / ${list.length}`;
 }
 
 function stopDemo() {
   if (!demo) return;
+  cancelAnimationFrame(demo.raf);
   clearTimeout(demo.timer);
-  demo.videos.forEach((v) => { v.pause(); v.removeAttribute("src"); v.load(); });
   $("demoStage").innerHTML = "";
   $("demo").classList.add("hidden");
   demo = null;
@@ -606,7 +748,6 @@ function badge(kind, t, label) {
 
 $("demoBtn").addEventListener("click", startDemo);
 $("demoStop").addEventListener("click", stopDemo);
-$("demoTap").addEventListener("click", () => { if (demo) demo.videos[demo.i].play().then(() => $("demoTap").classList.add("hidden")).catch(() => {}); });
 
 // scherm wakker houden (Safari 16.4+)
 let wakeLock = null;
