@@ -125,12 +125,6 @@
 <body>
 <div class="wash" id="wash"></div>
 <main>
-  <header class="top">
-    <div class="brand"><span class="mark"></span><span class="eyebrow">Making Waves · Scan Test</span></div>
-    <span class="live" id="live"><i></i>Live</span>
-    <span class="spacer"></span>
-    <a class="btn" href="/admin">Admin</a>
-  </header>
 
   <div class="grid">
     <section class="card hero span-7" id="cBinnen" style="--c:var(--green)">
@@ -153,12 +147,11 @@
     <section class="card ns span-4" id="cNoshow" style="--c:var(--orange)">
       <div class="l">No-show</div>
       <div class="v" id="nsV">0<small>%</small></div>
-      <div class="sub" id="nsSub"></div>
       <div class="stack" id="nsStack"></div>
       <div class="legend" id="nsLegend"></div>
     </section>
 
-    <section class="card span-4" id="cMini" style="--c:var(--cerise)">
+    <section class="card span-4" id="cMini" style="--c:var(--teal)">
       <div class="l">Aan de deur</div>
       <div class="mini">
         <div><b id="mRate">0</b><span>Per minuut, laatste 5 min</span></div>
@@ -200,7 +193,6 @@ async function load() {
     const res = await fetch("/api/admin/tickets", { cache: "no-store" });
     if (!res.ok) throw new Error(res.status);
     const data = await res.json();
-    $("live").classList.remove("off");
     const json = JSON.stringify([data.tickets, data.types, data.scans]);
     if (json === lastJson) return;
     lastJson = json;
@@ -209,7 +201,6 @@ async function load() {
     scans = data.scans || [];
     update();
   } catch (e) {
-    $("live").classList.add("off");
   }
 }
 
@@ -295,7 +286,6 @@ function renderNoshow(inside) {
   $("nsV").innerHTML = `${ns}<small>%</small>`;
   // hoe minder no-show, hoe groener; veel no-show kleurt rood
   $("cNoshow").style.setProperty("--c", !geldig.length ? "var(--ink-4)" : ns <= 10 ? "var(--green)" : ns <= 25 ? "var(--lime)" : ns <= 50 ? "var(--orange)" : "var(--cerise)");
-  $("nsSub").textContent = `${verwacht} van ${geldig.length} geldige tickets nog niet gescand`;
   const parts = [
     { n: inside.length, c: "var(--green)", l: "Binnen" },
     { n: verwacht, c: "var(--cerise)", l: "Nog niet gescand" },
