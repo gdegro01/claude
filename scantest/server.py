@@ -1023,6 +1023,17 @@ class Handler(BaseHTTPRequestHandler):
                 sync_wake.set()
             log("Admin: alles gewist (%d tickets)%s" % (n, ", ook de typen" if data.get("typen") else ""))
             return self.send_json(200, {"gewist": n})
+        if path == "/api/admin/opnieuw":
+            # nieuwe testronde: alle tickets terug naar niet gescand, scanlijst leeg; tickets en typen blijven
+            with db_lock:
+                n = db.execute("UPDATE tickets SET binnen = 0, gescand_op = NULL, gescand_door = '', pogingen = 0, "
+                               "dirty = 1, versie = versie + 1, opnieuw_na = 0 WHERE verwijderd = 0 "
+                               "AND (binnen = 1 OR pogingen > 0 OR gescand_op IS NOT NULL)").rowcount
+                db.execute("DELETE FROM scans")
+                db.commit()
+            sync_wake.set()
+            log("Admin: alle scans teruggezet (%d tickets)" % n)
+            return self.send_json(200, {"teruggezet": n})
         if path == "/api/admin/toon":
             ticket_id = data.get("ticket_id")
             if not isinstance(ticket_id, int):

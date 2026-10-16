@@ -91,6 +91,7 @@
     <span class="name" id="scannerName"></span>
     <span class="eyebrow count" id="count"></span>
     <span class="spacer"></span>
+    <button class="btn sm hidden" id="camBtn" type="button">Camera</button>
     <button class="btn sm" id="typeBtn" type="button">Typen</button>
     <button class="btn sm" id="settingsBtn" type="button">Instellen</button>
   </div>
@@ -289,11 +290,58 @@ async function startScanner() {
   try {
     await scanner.start();
     $("hint").textContent = "Richt de camera op de QR-code";
+    await pickCamera();
   } catch (e) {
     $("hint").classList.add("wrap");
     $("hint").textContent = "Geen toegang tot de camera. Sta cameratoegang toe voor deze site en herlaad de pagina.";
   }
 }
+
+// Camerakeuze. Op nieuwere iPhones stelt de gewone achtercamera op korte afstand slecht scherp;
+// de gecombineerde camera (dubbel of drievoudig) wisselt dan zelf naar de macrostand.
+const BACK = /back|rear|achter|environment/i;
+const MULTI = /triple|dual|drievoud|dubbel/i;
+let cameras = [];
+
+async function pickCamera() {
+  try { cameras = (await QrScanner.listCameras(true)).filter((c) => BACK.test(c.label)); } catch (e) { cameras = []; }
+  $("camBtn").classList.toggle("hidden", cameras.length < 2);
+  const saved = store.get("scan_camera");
+  const pick = cameras.find((c) => c.id === saved) || cameras.find((c) => MULTI.test(c.label));
+  if (pick) await useCamera(pick, false);
+  else focusContinuous();
+}
+
+async function useCamera(cam, announce) {
+  try {
+    await scanner.setCamera(cam.id);
+    store.set("scan_camera", cam.id);
+    if (announce) flashHint(cam.label);
+  } catch (e) {}
+  focusContinuous();
+}
+
+// waar de browser het toelaat: blijven scherpstellen
+function focusContinuous() {
+  try {
+    const track = $("video").srcObject && $("video").srcObject.getVideoTracks()[0];
+    const caps = track && track.getCapabilities ? track.getCapabilities() : {};
+    if (caps.focusMode && caps.focusMode.includes("continuous")) track.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
+  } catch (e) {}
+}
+
+let hintTimer = null;
+function flashHint(text) {
+  $("hint").textContent = text;
+  clearTimeout(hintTimer);
+  hintTimer = setTimeout(() => ($("hint").textContent = "Richt de camera op de QR-code"), 2500);
+}
+
+$("camBtn").addEventListener("click", () => {
+  if (cameras.length < 2) return;
+  const current = cameras.findIndex((c) => c.id === store.get("scan_camera"));
+  useCamera(cameras[(current + 1) % cameras.length], true);
+});
 
 function openSetup(message) {
   if (scanner) scanner.stop();

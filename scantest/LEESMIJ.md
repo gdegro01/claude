@@ -21,6 +21,7 @@ QR-tickets tonen op een iPad, scannen met een telefoon, en de status volgen in N
 - **Naar scherm** stuurt een ticket naar de iPad.
 - Bovenaan zie je welk ticket de iPad op dat moment toont.
 - Weigert Notion een wijziging, dan verschijnt een rode balk met de melding van Notion en de knop **Opnieuw proberen**.
+- **Scans terugzetten** (onderaan) zet alle tickets weer op niet gescand, ook in Notion, en maakt de scanlijst van het dashboard leeg. Tickets en typen blijven staan. Handig voor een nieuwe testronde.
 - **Alles wissen** (onderaan) verwijdert alle tickets, hier en in Notion, na bevestiging met het woord WISSEN. Je kiest of de typen blijven. De kolommen in Notion blijven staan.
 
 ### `/dashboard`
@@ -59,6 +60,7 @@ Bij elke gast die binnenkomt, lichten de kaarten op in de kleur van het type.
 - Bij elke scan krijg je groen, oranje of rood, met geluid en het type van het ticket.
 - Groen staat 0,9 seconde in beeld, oranje en rood 1,8 seconde. Daarna schuift de kleur in stroken omhoog weg. De camera leest dan alweer, dus de volgende gast kan direct. Een tik op het scherm sluit de melding meteen.
 - Met **Typen** voer je een code met de hand in.
+- Op iPhones kiest de scanner de gecombineerde achtercamera (dubbel of drievoudig) als die er is. Die wisselt op korte afstand zelf naar de macrostand, zodat de code scherp blijft. Met **Camera** wissel je tussen de achtercamera's; de scanner onthoudt je keuze.
 
 ### Notion
 

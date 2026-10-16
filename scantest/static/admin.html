@@ -182,7 +182,8 @@
   <div id="out"></div>
 
   <section class="dangerzone">
-    <span>Opnieuw beginnen verwijdert alle tickets, hier en in Notion (naar de prullenbak). De kolommen in Notion blijven staan.</span>
+    <span><b>Scans terugzetten</b> zet alle tickets weer op niet gescand en maakt de scanlijst leeg; tickets en typen blijven. <b>Alles wissen</b> verwijdert alle tickets, hier en in Notion (naar de prullenbak). De kolommen in Notion blijven staan.</span>
+    <button class="btn" type="button" id="resetAllBtn">Scans terugzetten…</button>
     <button class="btn danger" type="button" id="wipeBtn">Alles wissen…</button>
   </section>
 </main>
@@ -469,6 +470,18 @@ $("typeChips").addEventListener("click", async (e) => {
   const x = types.find((y) => y.naam === b.dataset.type);
   if (x.totaal && !confirm(`Type ${x.naam} verwijderen? ${x.totaal} ticket(s) raken hun type kwijt, ook in Notion.`)) return;
   await api("/api/admin/types/verwijder", { naam: x.naam }).catch((err) => alert("Dat lukte niet: " + err.message));
+  lastJson = "";
+  load();
+});
+$("resetAllBtn").addEventListener("click", async () => {
+  const n = tickets.filter((t) => t.binnen || t.pogingen).length;
+  if (!confirm(`Alle scans terugzetten? ${n} ticket(s) gaan terug naar niet gescand, ook in Notion. De scanlijst op het dashboard wordt leeg.`)) return;
+  try {
+    const res = await api("/api/admin/opnieuw", {});
+    alert(`${res.teruggezet} ticket(s) teruggezet. Notion volgt binnen een halve minuut.`);
+  } catch (err) {
+    alert("Dat lukte niet: " + err.message);
+  }
   lastJson = "";
   load();
 });
