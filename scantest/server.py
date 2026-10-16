@@ -30,9 +30,11 @@ from urllib.parse import parse_qs, urlparse
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC = os.path.join(ROOT, "static")
-ENV_PATH = os.path.join(ROOT, ".env")
-DB_PATH = os.path.join(ROOT, "tickets.db")
-COLUMNS_PATH = os.path.join(ROOT, "notion_kolommen.json")
+# .env, database en kolommen: standaard naast server.py, in Docker een eigen map
+DATA = os.environ.get("SCANTEST_DATA", ROOT)
+ENV_PATH = os.path.join(DATA, ".env")
+DB_PATH = os.path.join(DATA, "tickets.db")
+COLUMNS_PATH = os.path.join(DATA, "notion_kolommen.json")
 
 NOTION_VERSION = "2025-09-03"
 NOTION_MIN_INTERVAL = 0.4  # Notion staat gemiddeld 3 verzoeken per seconde toe
@@ -1114,7 +1116,7 @@ def main():
     else:
         log("Geen Notion-instellingen: draait zonder Notion")
     port = int(CONFIG.get("PORT") or 8787)
-    httpd = ThreadingHTTPServer(("127.0.0.1", port), Handler)
+    httpd = ThreadingHTTPServer((os.environ.get("SCANTEST_HOST", "127.0.0.1"), port), Handler)
     log("Scan Test draait op http://localhost:%d  (admin: /admin, scherm: /show, scanner: /scan)" % port)
     try:
         httpd.serve_forever()

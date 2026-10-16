@@ -1,0 +1,21 @@
+# Scan Test: QR-tickets op iPad, scannen met telefoon, Notion als spiegel.
+# Openbaar op scantest.gerkedegroot.nl (werk, Making Waves). Pagina's met eigen PIN of wachtwoord.
+# Code (alleen-lezen): /Volumes/Server/server/projecten/scantest/app
+# Data (.env, tickets.db, notion_kolommen.json): /Volumes/Server/server/data/scantest
+services:
+  app:
+    image: python:3.12-alpine
+    container_name: scantest
+    restart: unless-stopped
+    command: ["python", "-u", "/app/server.py"]
+    environment:
+      SCANTEST_DATA: /data
+      SCANTEST_HOST: 0.0.0.0
+      PORT: "8787"
+      # Alpine heeft geen tzdata: Nederlandse tijd als POSIX-regel
+      TZ: CET-1CEST,M3.5.0,M10.5.0/3
+    ports:
+      - "127.0.0.1:3016:8787"
+    volumes:
+      - /Volumes/Server/server/projecten/scantest/app:/app:ro
+      - /Volumes/Server/server/data/scantest:/data
