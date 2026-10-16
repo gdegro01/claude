@@ -543,7 +543,7 @@ async function startDemo() {
     stage.appendChild(v);
     return v;
   });
-  demo = { cfg, videos, i: -1, round: 0, timer: null };
+  demo = { cfg, videos, i: -1, timer: null };
   $("demoBadges").innerHTML = "";
   $("demo").classList.remove("hidden");
   if (missing.length) toast(`Niet in de lijst: ${missing.map((m) => m.naam).join(", ")}`);
@@ -554,20 +554,24 @@ async function startDemo() {
 function nextDemo() {
   if (!demo) return;
   const prev = demo.videos[demo.i];
-  demo.i = (demo.i + 1) % demo.videos.length;
-  if (demo.i === 0 && demo.round++ > 0) resetDemoTickets();  // elke ronde opnieuw "echt"
+  demo.i += 1;
   const v = demo.videos[demo.i];
   $("demoLabel").textContent = `Demo · ${demo.i + 1} / ${demo.videos.length}`;
   v.currentTime = 0;
-  v.onended = () => { demo && (demo.timer = setTimeout(nextDemo, demo.cfg.pauze_ms || 0)); };
+  // één ronde: na het laatste filmpje blijft het lege eindbeeld staan
+  v.onended = () => {
+    if (!demo) return;
+    if (demo.i === demo.videos.length - 1) $("demoLabel").textContent = `Demo · klaar · ${demo.videos.length} / ${demo.videos.length}`;
+    else demo.timer = setTimeout(nextDemo, demo.cfg.pauze_ms || 0);
+  };
   // pas wisselen als het nieuwe filmpje echt speelt, zodat er geen zwart beeld tussen zit
   v.addEventListener("playing", () => {
     v.classList.add("on");
     if (prev && prev !== v) prev.classList.remove("on");
   }, { once: true });
   v.play().then(() => $("demoTap").classList.add("hidden")).catch(() => $("demoTap").classList.remove("hidden"));
-  const next = demo.videos[(demo.i + 1) % demo.videos.length];
-  if (next !== v && next !== prev && next.preload !== "auto") { next.preload = "auto"; next.load(); }
+  const next = demo.videos[demo.i + 1];
+  if (next && next.preload !== "auto") { next.preload = "auto"; next.load(); }
 }
 
 function stopDemo() {
