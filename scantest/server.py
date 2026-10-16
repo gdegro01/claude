@@ -180,6 +180,17 @@ def init_db():
             volgorde INTEGER NOT NULL DEFAULT 0
         )"""
     )
+    db.execute(
+        """CREATE TABLE IF NOT EXISTS scans (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tijd TEXT NOT NULL,
+            code TEXT NOT NULL,
+            naam TEXT NOT NULL DEFAULT '',
+            type TEXT NOT NULL DEFAULT '',
+            resultaat TEXT NOT NULL,
+            scanner TEXT NOT NULL DEFAULT ''
+        )"""
+    )
     db.commit()
 
 
@@ -269,6 +280,28 @@ def create_tickets(namen, ticket_type=""):
 
 
 def scan(raw_code, door):
+    result = _scan(raw_code, door)
+    with db_lock:
+        db.execute(
+            "INSERT INTO scans (tijd, code, naam, type, resultaat, scanner) VALUES (?, ?, ?, ?, ?, ?)",
+            (now_iso(), result["code"], result.get("naam") or "", result.get("type") or "", result["resultaat"], door),
+        )
+        db.commit()
+    return result
+
+
+def recent_scans(limit=40):
+    with db_lock:
+        rows = db.execute("SELECT * FROM scans ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
+    colors = {t["naam"].lower(): t["kleur"] for t in types_list()}
+    return [
+        {"id": r["id"], "tijd": r["tijd"], "code": r["code"], "naam": r["naam"], "type": r["type"],
+         "kleur": colors.get(r["type"].lower(), ""), "resultaat": r["resultaat"], "scanner": r["scanner"]}
+        for r in rows
+    ]
+
+
+def _scan(raw_code, door):
     code = normalize_code(raw_code)
     with db_lock:
         row = db.execute(
@@ -916,6 +949,7 @@ class Handler(BaseHTTPRequestHandler):
             sync = SYNC.status() if SYNC else {"actief": False}
             return self.send_json(200, {
                 "tickets": tickets, "types": types_list(), "notion": sync, "scherm": show_status(),
+                "scans": recent_scans(),
             })
         if path == "/api/show/poll":
             if not self.admin_ok():
@@ -978,6 +1012,7 @@ class Handler(BaseHTTPRequestHandler):
                 n = db.execute("UPDATE tickets SET verwijderd = 1, dirty = 1, versie = versie + 1, opnieuw_na = 0 "
                                "WHERE verwijderd = 0").rowcount
                 db.execute("DELETE FROM tickets WHERE verwijderd = 1 AND notion_id IS NULL")
+                db.execute("DELETE FROM scans")
                 if data.get("typen"):
                     db.execute("DELETE FROM types")
                 db.commit()

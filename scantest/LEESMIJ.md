@@ -27,14 +27,14 @@ QR-tickets tonen op een iPad, scannen met een telefoon, en de status volgen in N
 
 Een live overzicht voor tijdens het event, elke seconde bijgewerkt:
 
-- **Binnen**: aantal en percentage van de geldige tickets.
-- **Laatste scan**: de naam van de laatst gescande gast, in de kleur van het type.
+- **Binnen**: hoeveel gasten binnen zijn, van alle geldige tickets.
+- **Laatste scan**: de naam van de laatst gescande gast, met type of uitslag. Bij elke scan schuiven er stroken door de kaart, met de naam en het type groot erop. Bij een akkoord is dat in de kleur van het type, bij een geweigerde scan in oranje of rood.
 - **Per type**: per type hoeveel gasten binnen zijn van het totaal.
-- **No-show**: het deel van de geldige tickets dat nog niet gescand is, met de verdeling binnen, nog niet gescand en ongeldig.
-- **Instroom**: scans per 5 minuten.
-- **Laatste scans** en **Aan de deur**: de recentste scans, het tempo per minuut, dubbele scans en geweigerde pogingen.
+- **No-show**: het deel van de geldige tickets dat nog niet gescand is. De kaart kleurt van groen (weinig no-show) via lime en oranje naar rood (veel no-show).
+- **Aan de deur**: het tempo per minuut, dubbele scans en geweigerde pogingen.
+- **Scans**: elke scan op een regel, met naam, uitslag en tijd. Ook geweigerde en onbekende codes staan erin. Alles wissen maakt deze lijst ook leeg.
 
-Bij elke nieuwe scan lichten de kaarten op in de kleur van het type.
+Bij elke gast die binnenkomt, lichten de kaarten op in de kleur van het type.
 
 ### `/show`
 

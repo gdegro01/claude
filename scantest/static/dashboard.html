@@ -15,7 +15,6 @@
   .live i{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(13,193,60,.6);animation:live 2s infinite}
   .live.off i{background:var(--ink-4);animation:none}
   @keyframes live{0%{box-shadow:0 0 0 0 rgba(13,193,60,.55)}70%{box-shadow:0 0 0 10px rgba(13,193,60,0)}100%{box-shadow:0 0 0 0 rgba(13,193,60,0)}}
-  #clock{font-family:var(--display);font-weight:700;font-size:24px;color:#fff;font-variant-numeric:tabular-nums}
   .spacer{flex:1}
 
   .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:28px}
@@ -24,7 +23,7 @@
     box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);display:flex;flex-direction:column;transition:box-shadow .6s var(--ease)}
   .card .l{font-size:17px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:color-mix(in srgb,var(--c) 78%,#fff);display:flex;align-items:center;gap:10px}
   .card .l span{color:var(--text);font-weight:400}
-  .span-7{grid-column:span 7}.span-5{grid-column:span 5}.span-4{grid-column:span 4}.span-8{grid-column:span 8}.span-6{grid-column:span 6}
+  .span-7{grid-column:span 7}.span-5{grid-column:span 5}.span-4{grid-column:span 4}.span-8{grid-column:span 8}.span-6{grid-column:span 6}.span-12{grid-column:span 12}
 
   /* oplichten bij een nieuwe scan */
   .card.lit{animation:lit 1.6s var(--ease)}
@@ -49,6 +48,28 @@
   #last .meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:18px;font-size:15px;color:var(--muted)}
   #last .lbl{font-size:15px}
   #last .empty{margin-top:auto;font-family:var(--display);font-size:30px;color:var(--muted)}
+  #last .res{font-size:13px}
+  #lastBody{position:relative;z-index:1;display:flex;flex-direction:column;flex:1}
+
+  /* oplichten van de laatste scan: stroken in de kleur van het type, met naam en type groot erop */
+  .fl{position:absolute;inset:0;z-index:2;pointer-events:none;display:none;color:var(--fx-ink)}
+  .fl.on{display:block}
+  .fl .st{position:absolute;inset:0;display:flex}
+  .fl .st i{flex:1;margin-right:-1px;background:var(--fx);transform:translateY(101%);
+    animation:flStrip 1.9s cubic-bezier(.65,0,.35,1) both;animation-delay:calc(var(--k) * 28ms)}
+  .fl .st i:nth-child(even){background-image:linear-gradient(rgba(255,255,255,.1),rgba(255,255,255,.1))}
+  .fl .tx{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:30px 32px;
+    animation:flText 1.9s cubic-bezier(.2,.8,.2,1) both}
+  .fl .tx b{font-family:var(--display);font-weight:800;font-size:84px;line-height:.92;letter-spacing:-.04em;overflow-wrap:anywhere}
+  .fl .tx span{margin-top:18px;font-family:var(--mono);font-weight:700;font-size:20px;letter-spacing:.18em;text-transform:uppercase;opacity:.85}
+  .fl .tx span:empty{display:none}
+  @keyframes flStrip{0%{transform:translateY(101%)}16%{transform:translateY(0)}72%{transform:translateY(0)}100%{transform:translateY(-101%)}}
+  @keyframes flText{0%,8%{opacity:0;transform:translateY(30px) scale(.97)}24%{opacity:1;transform:none}66%{opacity:1;transform:none}80%,100%{opacity:0;transform:translateY(-24px)}}
+  #last.flashing{animation:lastGlow 1.9s var(--ease)}
+  @keyframes lastGlow{0%{box-shadow:inset 0 0 0 1px rgba(255,255,255,.06),0 0 0 0 transparent}
+    30%{box-shadow:inset 0 0 0 2px var(--fx),0 0 90px 14px color-mix(in srgb,var(--fx) 55%,transparent)}
+    100%{box-shadow:inset 0 0 0 1px rgba(255,255,255,.06),0 0 0 0 transparent}}
+
   .pop{animation:pop .7s var(--ease)}
   @keyframes pop{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:none}}
 
@@ -74,26 +95,23 @@
   .legend b{font-family:var(--display);font-weight:700;font-size:20px;color:#fff;margin-left:2px;font-variant-numeric:tabular-nums}
   .legend i{width:14px;height:14px;border-radius:3px;display:block}
 
-  /* instroom */
-  .flow{display:flex;align-items:flex-end;gap:3px;height:200px;margin-top:auto;padding-top:24px}
-  .flow div{flex:1;position:relative;height:100%;display:flex;align-items:flex-end}
-  .flow i{display:block;width:100%;border-radius:4px 4px 0 0;background:var(--green);min-height:0;transition:height .6s var(--ease)}
-  .flow div:hover i{background:var(--lime-lt)}
-  .axis{display:flex;justify-content:space-between;font-size:15px;color:var(--text);margin-top:10px;border-top:1px solid rgba(255,255,255,.12);padding-top:10px}
-  .flowpeak{font-size:16px;color:var(--text);margin-top:8px}
+  /* log: elke scan op een regel */
+  .log{display:flex;flex-direction:column;margin-top:14px}
+  .lr{display:grid;grid-template-columns:minmax(0,1fr) 200px 90px;gap:20px;align-items:center;padding:12px 4px;border-top:1px solid rgba(255,255,255,.07)}
+  .lr:first-child{border-top:0}
+  .lr b{font-family:var(--display);font-weight:600;font-size:22px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:12px}
+  .lr b i{width:10px;height:10px;border-radius:3px;flex:none}
+  .lr b.code{font-family:var(--mono);font-weight:500;font-size:18px;color:var(--text);padding-left:22px}
+  .lr time{font-family:var(--mono);font-size:17px;color:var(--text);text-align:right;font-variant-numeric:tabular-nums}
+  .res{justify-self:start;font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;
+    padding:7px 12px;border-radius:8px;color:var(--r);background:color-mix(in srgb,var(--r) 18%,transparent)}
+  .res.geldig{--r:#3BE06A}.res.al_gescand{--r:var(--orange)}.res.ongeldig,.res.onbekend{--r:#FF5CA8}
+  .lr.new{animation:pop .7s var(--ease);background:linear-gradient(90deg,color-mix(in srgb,var(--rc,var(--green)) 16%,transparent),transparent)}
+  .leeg{font-size:16px;color:var(--text);padding:12px 4px}
 
-  /* feed */
-  .feed{display:flex;flex-direction:column;margin-top:18px}
-  .fi{display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:16px;align-items:center;padding:14px 0;border-top:1px solid rgba(255,255,255,.06)}
-  .fi:first-child{border-top:0}
-  .fi time{font-family:var(--mono);font-size:16px;color:var(--text);font-variant-numeric:tabular-nums}
-  .fi b{font-family:var(--display);font-weight:600;font-size:22px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .fi .lbl{font-size:12px}
-  .fi.new{animation:pop .7s var(--ease);background:linear-gradient(90deg,color-mix(in srgb,var(--green) 14%,transparent),transparent)}
-
-  .mini{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:24px}
-  .mini div{background:var(--ink-deep);border-radius:var(--r-card);padding:18px 20px}
-  .mini b{display:block;font-family:var(--display);font-weight:800;font-size:48px;letter-spacing:-.03em;color:#fff;font-variant-numeric:tabular-nums}
+  .mini{display:flex;flex-direction:column;gap:14px;margin-top:24px;flex:1}
+  .mini div{background:var(--ink-deep);border-radius:var(--r-card);padding:16px 20px;display:flex;align-items:center;gap:18px;flex:1}
+  .mini b{display:block;font-family:var(--display);font-weight:800;font-size:48px;letter-spacing:-.03em;color:#fff;font-variant-numeric:tabular-nums;min-width:96px;line-height:1}
   .mini span{font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--text)}
 
   #tip{position:fixed;z-index:40;pointer-events:none;background:#fff;color:var(--ink);font-size:14px;padding:8px 12px;border-radius:8px;
@@ -101,7 +119,7 @@
   #tip b{font-family:var(--display);font-size:16px}
 
   @media (max-width:1100px){.span-7,.span-5,.span-4,.span-8,.span-6{grid-column:span 12}.hero .v{font-size:130px}}
-  @media (max-width:640px){main{padding:20px 16px 40px}.grid{gap:16px}.hero .v{font-size:96px}#last .naam{font-size:50px}.mini{grid-template-columns:minmax(0,1fr)}}
+  @media (max-width:640px){main{padding:20px 16px 40px}.grid{gap:16px}.hero .v{font-size:96px}#last .naam{font-size:50px}}
 </style>
 </head>
 <body>
@@ -111,7 +129,6 @@
     <div class="brand"><span class="mark"></span><span class="eyebrow">Making Waves · Scan Test</span></div>
     <span class="live" id="live"><i></i>Live</span>
     <span class="spacer"></span>
-    <span id="clock"></span>
     <a class="btn" href="/admin">Admin</a>
   </header>
 
@@ -125,6 +142,7 @@
     <section class="card span-5" id="last" style="--c:var(--magenta)">
       <div class="l">Laatste scan</div>
       <div id="lastBody"><div class="empty">Nog niemand gescand</div></div>
+      <div class="fl" id="lastFlash"><div class="st"></div><div class="tx"><b></b><span></span></div></div>
     </section>
 
     <section class="card span-4" id="cTypes" style="--c:var(--purple)">
@@ -140,25 +158,18 @@
       <div class="legend" id="nsLegend"></div>
     </section>
 
-    <section class="card span-4" id="cFlow" style="--c:var(--teal)">
-      <div class="l">Instroom <span>per 5 minuten</span></div>
-      <div class="flowpeak" id="flowPeak"></div>
-      <div class="flow" id="flow"></div>
-      <div class="axis" id="flowAxis"></div>
-    </section>
-
-    <section class="card span-6" id="cFeed" style="--c:var(--lime)">
-      <div class="l">Laatste scans</div>
-      <div class="feed" id="feed"></div>
-    </section>
-
-    <section class="card span-6" id="cMini" style="--c:var(--cerise)">
+    <section class="card span-4" id="cMini" style="--c:var(--cerise)">
       <div class="l">Aan de deur</div>
       <div class="mini">
         <div><b id="mRate">0</b><span>Per minuut, laatste 5 min</span></div>
         <div><b id="mDouble">0</b><span>Dubbel gescand</span></div>
         <div><b id="mVoid">0</b><span>Ongeldig geprobeerd</span></div>
       </div>
+    </section>
+
+    <section class="card span-12" id="cLog" style="--c:var(--lime)">
+      <div class="l">Scans <span>nieuwste bovenaan</span></div>
+      <div class="log" id="log"></div>
     </section>
   </div>
 </main>
@@ -168,7 +179,8 @@
 const $ = (id) => document.getElementById(id);
 let tickets = [], types = [];
 let seen = null;            // id -> gescand_op van tickets die binnen zijn
-let feed = [];              // laatste scans, nieuwste eerst
+let scans = [];             // scanlog van de server, nieuwste eerst
+let lastScanId = null;      // hoogste scan-id dat al getoond is
 let lastJson = "";
 
 function esc(s) {
@@ -182,8 +194,6 @@ function typeColor(name) { const t = types.find((x) => x.naam === name); return 
 function typeLabel(name) { return name ? `<span class="lbl cat" style="--c:${typeColor(name)}">${esc(name)}</span>` : ""; }
 function pct(a, b) { return b ? Math.round((a / b) * 100) : 0; }
 
-function tick() { $("clock").textContent = new Date().toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit", second: "2-digit" }); }
-setInterval(tick, 1000); tick();
 
 async function load() {
   try {
@@ -191,11 +201,12 @@ async function load() {
     if (!res.ok) throw new Error(res.status);
     const data = await res.json();
     $("live").classList.remove("off");
-    const json = JSON.stringify([data.tickets, data.types]);
+    const json = JSON.stringify([data.tickets, data.types, data.scans]);
     if (json === lastJson) return;
     lastJson = json;
     tickets = data.tickets;
     types = data.types || [];
+    scans = data.scans || [];
     update();
   } catch (e) {
     $("live").classList.add("off");
@@ -204,25 +215,19 @@ async function load() {
 
 function update() {
   const inside = tickets.filter((t) => t.binnen);
-  const fresh = [];
-  if (seen === null) {
-    feed = inside.slice().sort((a, b) => new Date(b.gescand_op) - new Date(a.gescand_op)).slice(0, 8);
-  } else {
-    for (const t of inside) if (!seen.has(t.id)) fresh.push(t);
-    fresh.sort((a, b) => new Date(a.gescand_op) - new Date(b.gescand_op));
-    for (const t of fresh) feed.unshift(t);
-    // teruggezette tickets uit de lijst halen
-    const ids = new Set(inside.map((t) => t.id));
-    feed = feed.filter((t) => ids.has(t.id)).slice(0, 8);
-  }
+  const fresh = seen === null ? [] : inside.filter((t) => !seen.has(t.id));
+  fresh.sort((a, b) => new Date(a.gescand_op) - new Date(b.gescand_op));
   seen = new Set(inside.map((t) => t.id));
 
+  const prevScan = lastScanId;
+  const newScans = prevScan === null ? [] : scans.filter((x) => x.id > prevScan);
+  lastScanId = scans.length ? scans[0].id : prevScan === null ? 0 : prevScan;
+
   renderBinnen(inside);
-  renderLast(feed[0], fresh.length > 0);
+  renderLast(scans[0], newScans.length > 0);
   renderTypes();
   renderNoshow(inside);
-  renderFlow(inside);
-  renderFeed(fresh);
+  renderLog(prevScan);
   renderMini(inside);
   if (fresh.length) celebrate(fresh[fresh.length - 1]);
 }
@@ -235,14 +240,37 @@ function renderBinnen(inside) {
   $("binnenSub").textContent = "van de geldige tickets";
 }
 
-function renderLast(t, isNew) {
-  if (!t) { $("lastBody").innerHTML = `<div class="empty">Nog niemand gescand</div>`; return; }
-  $("last").style.setProperty("--c", t.type ? typeColor(t.type) : "var(--magenta)");
-  $("lastBody").innerHTML = `<div class="naam${isNew ? " pop" : ""}">${esc(t.naam || "Zonder naam")}</div>
-    <div class="meta">${typeLabel(t.type)}<span>${hhmm(t.gescand_op)}${t.gescand_door ? " · " + esc(t.gescand_door) : ""}</span></div>`;
-  $("lastBody").style.display = "flex";
-  $("lastBody").style.flexDirection = "column";
-  $("lastBody").style.flex = "1";
+const HEX = { geldig: "#0DC13C", al_gescand: "#FD7C2C", ongeldig: "#EC2765", onbekend: "#EC2765" };
+function inkOn(hex) {
+  const n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.55 ? "#2A2D35" : "#fff";
+}
+function codeText(c) { return c && c.length === 8 ? c.slice(0, 4) + "\u2011" + c.slice(4) : c || ""; }
+
+function renderLast(x, isNew) {
+  if (!x) { $("lastBody").innerHTML = `<div class="empty">Nog niemand gescand</div>`; return; }
+  const ok = x.resultaat === "geldig";
+  const color = ok ? (x.kleur || HEX.geldig) : HEX[x.resultaat] || HEX.onbekend;
+  const naam = x.resultaat === "onbekend" || !x.naam ? `Code ${codeText(x.code)}` : x.naam;
+  $("last").style.setProperty("--c", color);
+  $("lastBody").innerHTML = `<div class="naam${isNew ? " pop" : ""}">${esc(naam)}</div>
+    <div class="meta">${typeLabel(x.type)}${ok ? "" : `<span class="res ${x.resultaat}">${RESULT[x.resultaat]}</span>`}
+    <span>${hhmm(x.tijd)}${x.scanner ? " · " + esc(x.scanner) : ""}</span></div>`;
+  if (isNew) flashLast(naam, [x.type, ok ? "" : RESULT[x.resultaat]].filter(Boolean).join(" · "), color);
+}
+
+function flashLast(naam, sub, color) {
+  const fl = $("lastFlash"), card = $("last");
+  fl.style.setProperty("--fx", color);
+  fl.style.setProperty("--fx-ink", inkOn(color));
+  card.style.setProperty("--fx", color);
+  fl.querySelector(".st").innerHTML = Array.from({ length: 12 }, (_, k) => `<i style="--k:${k}"></i>`).join("");
+  fl.querySelector("b").textContent = naam;
+  fl.querySelector("span").textContent = sub;
+  fl.classList.remove("on"); card.classList.remove("flashing"); void fl.offsetWidth;
+  fl.classList.add("on"); card.classList.add("flashing");
+  clearTimeout(flashLast.t);
+  flashLast.t = setTimeout(() => { fl.classList.remove("on"); card.classList.remove("flashing"); }, 2300);
 }
 
 function renderTypes() {
@@ -256,48 +284,39 @@ function renderTypes() {
       <div class="n"><i style="background:${g.kleur}"></i><b>${esc(g.naam)}</b></div>
       <div class="track" style="width:${(n / max) * 100}%"><i style="width:${pct(b, n)}%;background:${g.kleur}"></i></div>
       <div class="c">${b}<span> / ${n}</span></div></div>`;
-  }).join("") : `<div class="flowpeak">Nog geen tickets</div>`;
+  }).join("") : `<div class="leeg">Nog geen tickets</div>`;
 }
 
 function renderNoshow(inside) {
   const geldig = tickets.filter((t) => t.geldig);
   const verwacht = geldig.length - inside.filter((t) => t.geldig).length;
   const ongeldig = tickets.length - geldig.length;
-  $("nsV").innerHTML = `${pct(verwacht, geldig.length)}<small>%</small>`;
+  const ns = pct(verwacht, geldig.length);
+  $("nsV").innerHTML = `${ns}<small>%</small>`;
+  // hoe minder no-show, hoe groener; veel no-show kleurt rood
+  $("cNoshow").style.setProperty("--c", !geldig.length ? "var(--ink-4)" : ns <= 10 ? "var(--green)" : ns <= 25 ? "var(--lime)" : ns <= 50 ? "var(--orange)" : "var(--cerise)");
   $("nsSub").textContent = `${verwacht} van ${geldig.length} geldige tickets nog niet gescand`;
   const parts = [
     { n: inside.length, c: "var(--green)", l: "Binnen" },
-    { n: verwacht, c: "var(--orange)", l: "Nog niet gescand" },
+    { n: verwacht, c: "var(--cerise)", l: "Nog niet gescand" },
     { n: ongeldig, c: "var(--ink-4)", l: "Ongeldig" },
   ].filter((p) => p.n > 0);
   $("nsStack").innerHTML = parts.map((p) => `<i style="flex-grow:${p.n};background:${p.c}" data-tip="${p.l}|${p.n} tickets"></i>`).join("");
   $("nsLegend").innerHTML = parts.map((p) => `<span><i style="background:${p.c}"></i>${p.l}<b>${p.n}</b></span>`).join("");
 }
 
-function renderFlow(inside) {
-  const BIN = 5 * 60 * 1000, N = 12;
-  const end = Math.ceil(Date.now() / BIN) * BIN;
-  const counts = new Array(N).fill(0);
-  for (const t of inside) {
-    const k = N - 1 - Math.floor((end - 1 - new Date(t.gescand_op).getTime()) / BIN);
-    if (k >= 0 && k < N) counts[k]++;
-  }
-  const max = Math.max(1, ...counts);
-  $("flow").innerHTML = counts.map((c, k) => {
-    const from = new Date(end - (N - k) * BIN), to = new Date(end - (N - k - 1) * BIN);
-    const label = `${hhmm(from)}–${hhmm(to)}`;
-    return `<div data-tip="${label}|${c} binnen"><i style="height:${(c / max) * 100}%"></i></div>`;
-  }).join("");
-  $("flowAxis").innerHTML = `<span>${hhmm(new Date(end - N * BIN))}</span><span>${hhmm(new Date(end - N * BIN / 2))}</span><span>nu</span>`;
-  const top = Math.max(...counts);
-  $("flowPeak").textContent = top ? `Drukste blok: ${top} binnen` : "Nog geen scans in het afgelopen uur";
-}
+const RESULT = { geldig: "✓ Akkoord", al_gescand: "Al gescand", ongeldig: "✕ Ongeldig", onbekend: "✕ Onbekend" };
+const LOG_ROWS = 10;
 
-function renderFeed(fresh) {
-  const freshIds = new Set(fresh.map((t) => t.id));
-  $("feed").innerHTML = feed.length ? feed.map((t) => `<div class="fi${freshIds.has(t.id) ? " new" : ""}">
-      <time>${hhmm(t.gescand_op)}</time><b>${esc(t.naam || "Zonder naam")}</b>${typeLabel(t.type)}</div>`).join("")
-    : `<div class="flowpeak">De eerste scans verschijnen hier.</div>`;
+function renderLog(prev) {
+  $("log").innerHTML = scans.length ? scans.slice(0, LOG_ROWS).map((x) => {
+    const isNew = prev !== null && x.id > prev;
+    const naam = x.resultaat === "onbekend" || !x.naam
+      ? `<b class="code">${esc(x.code.length === 8 ? x.code.slice(0, 4) + "-" + x.code.slice(4) : x.code)}</b>`
+      : `<b><i style="background:${x.kleur || "#8B8E9B"}"></i>${esc(x.naam)}</b>`;
+    return `<div class="lr${isNew ? " new" : ""}" style="--rc:var(--${x.resultaat === "geldig" ? "green" : x.resultaat === "al_gescand" ? "orange" : "magenta"})">
+      ${naam}<span class="res ${x.resultaat}">${RESULT[x.resultaat] || esc(x.resultaat)}</span><time>${hhmm(x.tijd)}</time></div>`;
+  }).join("") : `<div class="leeg">De eerste scans verschijnen hier.</div>`;
 }
 
 function renderMini(inside) {
@@ -310,7 +329,7 @@ function renderMini(inside) {
 
 function celebrate(t) {
   const c = t.type ? typeColor(t.type) : "#0DC13C";
-  for (const id of ["cBinnen", "last", "cTypes", "cNoshow", "cFlow", "cFeed"]) {
+  for (const id of ["cBinnen", "cTypes", "cNoshow", "cMini", "cLog"]) {
     const el = $(id);
     el.classList.remove("lit"); void el.offsetWidth; el.classList.add("lit");
   }
@@ -332,7 +351,7 @@ document.addEventListener("mousemove", (e) => {
 
 load();
 setInterval(() => { if (!document.hidden) load(); }, 1000);
-setInterval(() => { if (tickets.length) { renderFlow(tickets.filter((t) => t.binnen)); renderMini(tickets.filter((t) => t.binnen)); } }, 30000);
+setInterval(() => { if (tickets.length) renderMini(tickets.filter((t) => t.binnen)); }, 30000);
 </script>
 </body>
 </html>
