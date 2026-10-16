@@ -60,7 +60,6 @@ Bij elke gast die binnenkomt, lichten de kaarten op in de kleur van het type.
 - Bij elke scan krijg je groen, oranje of rood, met geluid en het type van het ticket.
 - Groen staat 0,9 seconde in beeld, oranje en rood 1,8 seconde. Daarna schuift de kleur in stroken omhoog weg. De camera leest dan alweer, dus de volgende gast kan direct. Een tik op het scherm sluit de melding meteen.
 - Met **Typen** voer je een code met de hand in.
-- Op iPhones kiest de scanner de gecombineerde achtercamera (dubbel of drievoudig) als die er is. Die wisselt op korte afstand zelf naar de macrostand, zodat de code scherp blijft. Met **Camera** wissel je tussen de achtercamera's; de scanner onthoudt je keuze.
 
 ### Notion
 

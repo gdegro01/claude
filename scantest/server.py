@@ -191,7 +191,32 @@ def init_db():
             scanner TEXT NOT NULL DEFAULT ''
         )"""
     )
+    db.execute("CREATE TABLE IF NOT EXISTS meta (sleutel TEXT PRIMARY KEY, waarde TEXT NOT NULL)")
     db.commit()
+
+
+# Verander deze waarde om bij de volgende start eenmalig alle scans terug te zetten.
+RESET_RONDE = "2026-10-16"
+
+
+def reset_scans():
+    """Alle tickets terug naar niet gescand (ook in Notion) en de scanlijst leeg. Roep aan binnen db_lock."""
+    n = db.execute("UPDATE tickets SET binnen = 0, gescand_op = NULL, gescand_door = '', pogingen = 0, "
+                   "dirty = 1, versie = versie + 1, opnieuw_na = 0 WHERE verwijderd = 0 "
+                   "AND (binnen = 1 OR pogingen > 0 OR gescand_op IS NOT NULL)").rowcount
+    db.execute("DELETE FROM scans")
+    return n
+
+
+def reset_ronde():
+    with db_lock:
+        row = db.execute("SELECT waarde FROM meta WHERE sleutel = 'reset_ronde'").fetchone()
+        if row and row["waarde"] == RESET_RONDE:
+            return
+        n = reset_scans()
+        db.execute("INSERT OR REPLACE INTO meta (sleutel, waarde) VALUES ('reset_ronde', ?)", (RESET_RONDE,))
+        db.commit()
+    log("Nieuwe ronde %s: alle scans teruggezet (%d tickets)" % (RESET_RONDE, n))
 
 
 def ticket_dict(row):
@@ -1026,10 +1051,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/admin/opnieuw":
             # nieuwe testronde: alle tickets terug naar niet gescand, scanlijst leeg; tickets en typen blijven
             with db_lock:
-                n = db.execute("UPDATE tickets SET binnen = 0, gescand_op = NULL, gescand_door = '', pogingen = 0, "
-                               "dirty = 1, versie = versie + 1, opnieuw_na = 0 WHERE verwijderd = 0 "
-                               "AND (binnen = 1 OR pogingen > 0 OR gescand_op IS NOT NULL)").rowcount
-                db.execute("DELETE FROM scans")
+                n = reset_scans()
                 db.commit()
             sync_wake.set()
             log("Admin: alle scans teruggezet (%d tickets)" % n)
@@ -1085,6 +1107,7 @@ def main():
         if not CONFIG.get(key):
             sys.exit("%s ontbreekt in .env. Draai eerst: python3 server.py --setup" % key)
     init_db()
+    reset_ronde()
     if CONFIG.get("NOTION_TOKEN") and CONFIG.get("NOTION_DATABASE_ID"):
         SYNC = SyncWorker(Notion(CONFIG["NOTION_TOKEN"], CONFIG["NOTION_DATABASE_ID"]))
         SYNC.start()
