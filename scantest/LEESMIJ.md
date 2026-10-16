@@ -51,7 +51,7 @@ Bij elke nieuwe scan lichten de kaarten op in de kleur van het type.
   - oranje bij een ticket dat al gescand was;
   - rood bij een ongeldig ticket.
 - Het scherm blijft aan zolang de pagina open staat.
-- **Demo** (in het menu) speelt de filmpjes uit `static/demo/` schermvullend na elkaar af, steeds opnieuw. De vijf demotickets gaan eerst terug op "nog niet binnen", en bij elke nieuwe ronde opnieuw. Scan je een filmpje met de telefoon, dan verschijnt onderin een melding: groen, oranje of magenta. Welke filmpjes en codes meedoen, staat in `static/demo/demo.json`.
+- **Demo** (in het menu) speelt de filmpjes uit `static/demo/` schermvullend na elkaar af, steeds opnieuw. De demotickets gaan eerst terug op "nog niet binnen", en bij elke nieuwe ronde opnieuw. Scan je een filmpje met de telefoon, dan verschijnt onderin een melding: groen, oranje of magenta. Welke filmpjes en codes meedoen, staat in `static/demo/demo.json`.
 
 ### `/scan`
 

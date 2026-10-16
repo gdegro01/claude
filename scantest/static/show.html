@@ -534,10 +534,11 @@ async function startDemo() {
   const missing = cfg.filmpjes.filter((f) => !tickets.some((t) => t.code === f.code));
   const stage = $("demoStage");
   stage.innerHTML = "";
-  const videos = cfg.filmpjes.map((f) => {
+  // alleen het huidige en het volgende filmpje laden; de rest pas als hij aan de beurt komt
+  const videos = cfg.filmpjes.map((f, k) => {
     const v = document.createElement("video");
     v.src = "/static/demo/" + f.video;
-    v.muted = true; v.playsInline = true; v.preload = "auto";
+    v.muted = true; v.playsInline = true; v.preload = k < 2 ? "auto" : "none";
     v.setAttribute("playsinline", ""); v.setAttribute("muted", "");
     stage.appendChild(v);
     return v;
@@ -565,6 +566,8 @@ function nextDemo() {
     if (prev && prev !== v) prev.classList.remove("on");
   }, { once: true });
   v.play().then(() => $("demoTap").classList.add("hidden")).catch(() => $("demoTap").classList.remove("hidden"));
+  const next = demo.videos[(demo.i + 1) % demo.videos.length];
+  if (next !== v && next !== prev && next.preload !== "auto") { next.preload = "auto"; next.load(); }
 }
 
 function stopDemo() {
