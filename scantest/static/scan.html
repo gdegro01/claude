@@ -54,6 +54,9 @@
   #result.fout { background: var(--idle); }
   #result .icon { font-size: 96px; line-height: 1; font-weight: 700; }
   #result .title { font-size: 34px; font-weight: 800; margin-top: 16px; letter-spacing: .02em; }
+  #result .type { margin-top: 16px; font-size: 18px; font-weight: 700; padding: 4px 16px; border-radius: 999px;
+    background: rgba(0,0,0,.18); }
+  #result .type:empty { display: none; }
   #result .naam { font-size: 26px; margin-top: 18px; font-weight: 600; overflow-wrap: anywhere; }
   #result .detail { font-size: 18px; margin-top: 10px; opacity: .9; }
   #result .tap { position: absolute; bottom: max(24px, env(safe-area-inset-bottom)); font-size: 14px; opacity: .75; }
@@ -111,6 +114,7 @@
 <section id="result" class="hidden" role="alert">
   <div class="icon" id="rIcon"></div>
   <div class="title" id="rTitle"></div>
+  <div class="type" id="rType"></div>
   <div class="naam" id="rNaam"></div>
   <div class="detail" id="rDetail"></div>
   <div class="tap">Tik om verder te scannen</div>
@@ -201,6 +205,7 @@ function showResult(kind, data) {
     fout: ["?", "GEEN ANTWOORD", "", data.bericht || "Controleer de verbinding en scan opnieuw"],
   }[kind];
   [$("rIcon").textContent, $("rTitle").textContent, $("rNaam").textContent, $("rDetail").textContent] = texts;
+  $("rType").textContent = kind === "onbekend" || kind === "fout" ? "" : (data.type || "");
   beep(SOUNDS[kind]);
   try { navigator.vibrate && navigator.vibrate(VIBRATE[kind]); } catch (e) {}
   clearTimeout(hideTimer);

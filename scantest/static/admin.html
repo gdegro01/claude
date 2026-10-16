@@ -35,6 +35,18 @@
   .btn.push.on { background: var(--accent); color: #fff; border-color: var(--accent); }
   .btn.small { padding: 4px 9px; font-size: 13px; }
 
+  .alert { background: var(--bad-bg); color: var(--bad); border: 1px solid #f1c4c4; border-radius: 12px; padding: 12px 16px;
+    margin-bottom: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .alert b { display: block; }
+  .alert span { flex: 1 1 300px; }
+  .typechips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .typechip { display: inline-flex; align-items: center; gap: 6px; background: var(--soft); border-radius: 999px; padding: 4px 6px 4px 12px; font-size: 14px; }
+  .typechip small { color: var(--muted); }
+  .typechip button { border: 0; background: transparent; cursor: pointer; color: var(--muted); font-size: 16px; line-height: 1; padding: 2px 6px; border-radius: 999px; }
+  .typechip button:hover { background: #e4e4df; color: var(--bad); }
+  .inline { display: inline-flex; gap: 6px; }
+  .inline input, select { border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; background: var(--card); font-size: 14px; }
+  .typetag { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 6px; background: var(--accent-bg); color: var(--accent); font-weight: 600; }
   .panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
   .panel h2 { font-size: 15px; margin: 0 0 10px; }
   .add { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
@@ -109,11 +121,30 @@
     </div>
   </header>
 
+  <div class="alert hidden" id="alert">
+    <span><b>Notion neemt wijzigingen niet over</b><span id="alertText"></span></span>
+    <button class="btn" type="button" id="retryBtn">Opnieuw proberen</button>
+  </div>
+
+  <section class="panel">
+    <h2>Typen</h2>
+    <div class="typechips">
+      <span id="typeChips"></span>
+      <form class="inline" id="typeForm">
+        <input id="typeNaam" placeholder="Nieuw type, bijv. VIP" maxlength="50">
+        <button class="btn" type="submit">Toevoegen</button>
+      </form>
+    </div>
+  </section>
+
   <section class="panel">
     <h2>Tickets toevoegen</h2>
     <form class="add" id="addForm">
       <textarea id="namen" placeholder="Eén naam per regel"></textarea>
-      <button class="btn dark" type="submit">Tickets maken</button>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <select id="addType" aria-label="Type voor deze tickets"></select>
+        <button class="btn dark" type="submit">Tickets maken</button>
+      </div>
     </form>
     <div class="note">Elke naam krijgt een eigen QR-code en verschijnt binnen een paar seconden ook in Notion.
       Een regel die je in Notion toevoegt, verschijnt hier binnen 30 seconden en krijgt dan vanzelf een code.</div>
@@ -127,6 +158,7 @@
       <button type="button" data-f="buiten" aria-pressed="false">Nog niet binnen</button>
       <button type="button" data-f="ongeldig" aria-pressed="false">Ongeldig</button>
     </div>
+    <select id="typeFilter" aria-label="Filter op type"></select>
     <div class="tabs" id="views">
       <button type="button" data-v="lijst" aria-pressed="true">Lijst</button>
       <button type="button" data-v="kaarten" aria-pressed="false">Met QR-codes</button>
@@ -155,6 +187,9 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
 };
 let tickets = [];
+let types = [];
+let typeFilter = "";
+let renderPending = false;
 let notion = {};
 let scherm = {};
 let lastJson = "";
@@ -197,10 +232,13 @@ async function load() {
     const json = JSON.stringify(data);
     if (json === lastJson) return;
     lastJson = json;
+    types = data.types || [];
     tickets = data.tickets.sort((a, b) => a.naam.localeCompare(b.naam, "nl", { numeric: true }) || a.id - b.id);
     notion = data.notion || {};
     scherm = data.scherm || {};
-    render();
+    renderTypes();
+    if (document.activeElement && document.activeElement.tagName === "SELECT" && $("out").contains(document.activeElement)) renderPending = true;
+    else render();
   } catch (e) {
     $("stats").innerHTML = `<span class="chip bad">Server niet bereikbaar</span>`;
   }
@@ -212,6 +250,7 @@ function visible() {
     if (filter === "binnen" && !t.binnen) return false;
     if (filter === "buiten" && (t.binnen || !t.geldig)) return false;
     if (filter === "ongeldig" && t.geldig) return false;
+    if (typeFilter && t.type !== typeFilter) return false;
     if (!q) return true;
     return t.naam.toLowerCase().includes(q) || t.code.toLowerCase().includes(q);
   });
@@ -228,6 +267,40 @@ function schermChip() {
   if (!scherm.schermen) return `<span class="chip">Scherm niet open</span>`;
   const t = tickets.find((x) => x.id === scherm.ticket_id);
   return `<span class="chip accent">Scherm toont: ${t ? esc(t.naam || formatCode(t.code)) : "niets"}</span>`;
+}
+
+function typeOptions(selected, { none = "Geen type", extra = true } = {}) {
+  const names = types.map((x) => x.naam);
+  if (selected && !names.includes(selected)) names.push(selected);
+  return `<option value="">${none}</option>` + names.map((n) =>
+    `<option value="${esc(n)}"${n === selected ? " selected" : ""}>${esc(n)}</option>`).join("") +
+    (extra ? `<option value="__nieuw">Nieuw type…</option>` : "");
+}
+
+function renderTypes() {
+  $("typeChips").innerHTML = types.length ? types.map((x) =>
+    `<span class="typechip">${esc(x.naam)} <small>${x.binnen}/${x.totaal}</small>
+      <button type="button" data-type="${esc(x.naam)}" title="Type verwijderen">×</button></span>`).join("")
+    : `<span class="meta">Nog geen typen.</span>`;
+  const keep = $("addType").value;
+  $("addType").innerHTML = typeOptions(keep);
+  const keepF = $("typeFilter").value;
+  $("typeFilter").innerHTML = typeOptions(keepF, { none: "Alle typen", extra: false });
+  typeFilter = $("typeFilter").value;
+  if (notion.fout) {
+    $("alertText").textContent = notion.fout;
+    $("alert").classList.remove("hidden");
+  } else {
+    $("alert").classList.add("hidden");
+  }
+}
+
+async function askNewType() {
+  const naam = (prompt("Naam van het nieuwe type") || "").trim();
+  if (!naam) return "";
+  const res = await api("/api/admin/types", { naam });
+  types = res.types;
+  return naam.replace(/,/g, " ").replace(/\s+/g, " ").trim().slice(0, 50);
 }
 
 function statusBadge(t) {
@@ -261,9 +334,10 @@ function render() {
   }
   if (view === "lijst") {
     $("out").innerHTML = `<div class="tablewrap"><table>
-      <thead><tr><th>Naam</th><th>Code</th><th>Status</th><th>Geldig</th><th></th></tr></thead>
+      <thead><tr><th>Naam</th><th>Type</th><th>Code</th><th>Status</th><th>Geldig</th><th></th></tr></thead>
       <tbody>${list.map((t) => `<tr data-id="${t.id}" class="${t.geldig ? "" : "off"}${scherm.ticket_id === t.id ? " onscreen" : ""}">
         <td><span class="naam" data-act="naam" title="Klik om de naam te wijzigen">${esc(t.naam) || "<i>Zonder naam</i>"}</span></td>
+        <td><select data-act="type" aria-label="Type">${typeOptions(t.type)}</select></td>
         <td><span class="code" data-act="big" style="cursor:zoom-in" title="QR-code tonen">${formatCode(t.code)}</span></td>
         <td>${statusBadge(t)} <span class="meta">${metaText(t)}</span></td>
         <td><label class="switch"><input type="checkbox" data-act="geldig" ${t.geldig ? "checked" : ""}></label></td>
@@ -276,6 +350,7 @@ function render() {
         <div class="naam" data-act="naam" title="Klik om de naam te wijzigen">${esc(t.naam) || "<i>Zonder naam</i>"}</div>
         <div class="code">${formatCode(t.code)}</div>
       </div>
+      <div class="row"><select data-act="type" aria-label="Type">${typeOptions(t.type)}</select></div>
       <div class="row">${statusBadge(t)}<span class="meta">${metaText(t)}</span></div>
       <div class="row">
         <label class="switch"><input type="checkbox" data-act="geldig" ${t.geldig ? "checked" : ""}> Geldig</label>
@@ -296,6 +371,7 @@ $("out").addEventListener("click", async (e) => {
   const id = Number(el.closest("[data-id]").dataset.id);
   const t = tickets.find((x) => x.id === id);
   const act = el.dataset.act;
+  if (act === "type") return;  // afgehandeld bij "change"
   try {
     if (act === "big") return openBig(visible().findIndex((x) => x.id === id));
     if (act === "toon") {
@@ -319,12 +395,61 @@ $("out").addEventListener("click", async (e) => {
   load();
 });
 
+$("out").addEventListener("change", async (e) => {
+  const el = e.target.closest("select[data-act=type]");
+  if (!el) return;
+  const id = Number(el.closest("[data-id]").dataset.id);
+  let type = el.value;
+  try {
+    if (type === "__nieuw") type = await askNewType();
+    await api(`/api/admin/tickets/${id}/type`, { type });
+  } catch (err) {
+    alert("Dat lukte niet: " + err.message);
+  }
+  el.blur();
+  renderPending = false;
+  lastJson = "";
+  load();
+});
+$("out").addEventListener("focusout", () => {
+  if (renderPending) { renderPending = false; setTimeout(render, 0); }
+});
+$("addType").addEventListener("change", async () => {
+  if ($("addType").value !== "__nieuw") return;
+  const naam = await askNewType().catch(() => "");
+  renderTypes();
+  $("addType").value = naam;
+});
+$("typeFilter").addEventListener("change", () => { typeFilter = $("typeFilter").value; render(); });
+$("typeForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const naam = $("typeNaam").value.trim();
+  if (!naam) return;
+  await api("/api/admin/types", { naam }).catch((err) => alert("Dat lukte niet: " + err.message));
+  $("typeNaam").value = "";
+  lastJson = "";
+  load();
+});
+$("typeChips").addEventListener("click", async (e) => {
+  const b = e.target.closest("button[data-type]");
+  if (!b) return;
+  const x = types.find((y) => y.naam === b.dataset.type);
+  if (x.totaal && !confirm(`Type ${x.naam} verwijderen? ${x.totaal} ticket(s) raken hun type kwijt, ook in Notion.`)) return;
+  await api("/api/admin/types/verwijder", { naam: x.naam }).catch((err) => alert("Dat lukte niet: " + err.message));
+  lastJson = "";
+  load();
+});
+$("retryBtn").addEventListener("click", async () => {
+  await api("/api/admin/sync", {}).catch(() => {});
+  setTimeout(load, 2500);
+});
+
 $("addForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const namen = $("namen").value.split("\n").map((s) => s.trim()).filter(Boolean);
   if (!namen.length) return;
   try {
-    await api("/api/admin/tickets", { namen });
+    await api("/api/admin/tickets", { namen, type: $("addType").value === "__nieuw" ? "" : $("addType").value });
     $("namen").value = "";
     load();
   } catch (err) {

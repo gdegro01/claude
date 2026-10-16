@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""Scan Test: QR-tickets scannen, met Notion als spiegel.
+"""Scan Test: QR-tickets tonen, scannen en bijhouden, met Notion als spiegel.
 
-De server is de bron van waarheid voor de scanner (SQLite, antwoord in
-milliseconden). Elke wijziging gaat via een wachtrij naar Notion. Wijzigingen
-die iemand in Notion zelf maakt (naam, geldig, status, nieuwe regels) haalt de
-server elke 30 seconden op.
+De server is de bron van waarheid voor scanner, iPad en admin (SQLite, antwoord
+in milliseconden). Elke wijziging gaat via een wachtrij naar Notion. Wijzigingen
+die iemand in Notion zelf maakt (naam, type, geldig, status, nieuwe regels)
+haalt de server elke 30 seconden op.
+
+Notion-kolommen worden herkend aan hun vaste ID, zodat hernoemen in Notion de
+koppeling niet breekt.
 
 Alleen de standaardbibliotheek van Python 3.9+, geen installatie nodig.
 """
@@ -29,16 +32,33 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC = os.path.join(ROOT, "static")
 ENV_PATH = os.path.join(ROOT, ".env")
 DB_PATH = os.path.join(ROOT, "tickets.db")
+COLUMNS_PATH = os.path.join(ROOT, "notion_kolommen.json")
 
 NOTION_VERSION = "2025-09-03"
 NOTION_MIN_INTERVAL = 0.4  # Notion staat gemiddeld 3 verzoeken per seconde toe
-PULL_INTERVAL = 30
-PUSH_GRACE = 90  # zo lang na een push vertrouwen we een afwijkende Notion-waarde niet
+PULL_INTERVAL = float(os.environ.get("SCANTEST_PULL_INTERVAL", 30))
+# zo lang na een push vertrouwen we een afwijkende Notion-waarde niet
+PUSH_GRACE = float(os.environ.get("SCANTEST_PUSH_GRACE", 90))
 CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"  # zonder 0/O, 1/I/L
 CODE_LENGTH = 8
 
 STATUS_BINNEN = "Binnen"
 STATUS_NIET_BINNEN = "Niet binnen"
+
+# Kolommen in Notion: sleutel, standaardnaam, andere namen die we herkennen, type, schema.
+COLUMNS = [
+    ("naam", "Naam", (), "title", {"title": {}}),
+    ("code", "Code", ("Ticketcode",), "rich_text", {"rich_text": {}}),
+    ("type", "Type", ("Soort", "Categorie"), "select", {"select": {}}),
+    ("geldig", "Geldig", (), "checkbox", {"checkbox": {}}),
+    ("status", "Status", (), "select", {"select": {"options": [
+        {"name": STATUS_NIET_BINNEN, "color": "gray"},
+        {"name": STATUS_BINNEN, "color": "green"},
+    ]}}),
+    ("gescand_op", "Gescand op", (), "date", {"date": {}}),
+    ("gescand_door", "Gescand door", ("Scanner",), "rich_text", {"rich_text": {}}),
+    ("pogingen", "Scanpogingen", ("Pogingen", "Aantal scans"), "number", {"number": {"format": "number"}}),
+]
 
 
 # ---------------------------------------------------------------------------
@@ -111,6 +131,11 @@ def normalize_code(raw):
     return "".join(c for c in code if c.isalnum())
 
 
+def clean_type(raw):
+    # Notion staat geen komma's toe in de naam van een keuze
+    return " ".join(str(raw or "").replace(",", " ").split())[:50]
+
+
 # ---------------------------------------------------------------------------
 # Database
 
@@ -143,6 +168,15 @@ def init_db():
             opnieuw_na REAL NOT NULL DEFAULT 0
         )"""
     )
+    columns = [r["name"] for r in db.execute("PRAGMA table_info(tickets)")]
+    if "type" not in columns:
+        db.execute("ALTER TABLE tickets ADD COLUMN type TEXT NOT NULL DEFAULT ''")
+    db.execute(
+        """CREATE TABLE IF NOT EXISTS types (
+            naam TEXT PRIMARY KEY COLLATE NOCASE,
+            volgorde INTEGER NOT NULL DEFAULT 0
+        )"""
+    )
     db.commit()
 
 
@@ -151,6 +185,7 @@ def ticket_dict(row):
         "id": row["id"],
         "code": row["code"],
         "naam": row["naam"],
+        "type": row["type"],
         "geldig": bool(row["geldig"]),
         "binnen": bool(row["binnen"]),
         "gescand_op": row["gescand_op"],
@@ -175,16 +210,46 @@ def touch(ticket_id, **fields):
     return cur.rowcount
 
 
-def create_tickets(namen):
+def ensure_type(naam):
+    """Zorgt dat een type in de lijst staat. Roep aan binnen db_lock."""
+    if naam and not db.execute("SELECT 1 FROM types WHERE naam = ?", (naam,)).fetchone():
+        volgorde = db.execute("SELECT COALESCE(MAX(volgorde), 0) + 1 FROM types").fetchone()[0]
+        db.execute("INSERT INTO types (naam, volgorde) VALUES (?, ?)", (naam, volgorde))
+
+
+def types_list():
+    with db_lock:
+        types = [r["naam"] for r in db.execute("SELECT naam FROM types ORDER BY volgorde, naam")]
+        counts = {
+            r["type"]: (r["totaal"], r["binnen"])
+            for r in db.execute(
+                "SELECT type, COUNT(*) AS totaal, SUM(binnen) AS binnen FROM tickets WHERE verwijderd = 0 GROUP BY type"
+            )
+        }
+    return [{"naam": t, "totaal": counts.get(t, (0, 0))[0], "binnen": counts.get(t, (0, 0))[1] or 0} for t in types]
+
+
+def delete_type(naam):
+    with db_lock:
+        ids = [r["id"] for r in db.execute("SELECT id FROM tickets WHERE type = ? AND verwijderd = 0", (naam,))]
+        db.execute("DELETE FROM types WHERE naam = ?", (naam,))
+        db.commit()
+    for ticket_id in ids:
+        touch(ticket_id, type="")
+    return len(ids)
+
+
+def create_tickets(namen, ticket_type=""):
     created = []
     with db_lock:
+        ensure_type(ticket_type)
         for naam in namen:
             for _ in range(5):
                 code = new_code()
                 try:
                     cur = db.execute(
-                        "INSERT INTO tickets (code, naam, aangemaakt) VALUES (?, ?, ?)",
-                        (code, naam, now_iso()),
+                        "INSERT INTO tickets (code, naam, type, aangemaakt) VALUES (?, ?, ?, ?)",
+                        (code, naam, ticket_type, now_iso()),
                     )
                     created.append(cur.lastrowid)
                     break
@@ -203,7 +268,7 @@ def scan(raw_code, door):
         ).fetchone()
         if row is None:
             return {"resultaat": "onbekend", "code": code}
-        base = {"code": code, "naam": row["naam"]}
+        base = {"code": code, "naam": row["naam"], "type": row["type"]}
         if not row["geldig"]:
             touch(row["id"], pogingen=row["pogingen"] + 1)
             return dict(base, resultaat="ongeldig")
@@ -231,10 +296,11 @@ def scan(raw_code, door):
 
 
 class NotionError(Exception):
-    def __init__(self, status, message):
+    def __init__(self, status, message, code=""):
         Exception.__init__(self, "Notion %s: %s" % (status, message))
         self.status = status
         self.message = message
+        self.code = code
 
 
 class Notion:
@@ -242,6 +308,7 @@ class Notion:
         self.token = token
         self.database_id = database_id
         self.data_source_id = None
+        self.cols = {}  # sleutel -> (property-id, huidige naam)
         self._last = 0.0
 
     def request(self, method, path, body=None):
@@ -274,29 +341,52 @@ class Notion:
                     log("Notion %s, opnieuw over %.0fs" % (e.code, delay))
                     time.sleep(delay)
                     continue
-                raise NotionError(e.code, payload.get("message", str(e)))
+                raise NotionError(e.code, payload.get("message", str(e)), payload.get("code", ""))
             except (urllib.error.URLError, OSError) as e:
                 delay = min(2 ** attempt, 30)
                 log("Notion onbereikbaar (%s), opnieuw over %ss" % (e, delay))
                 time.sleep(delay)
         raise NotionError(0, "geen antwoord na meerdere pogingen")
 
-    PROPERTIES = {
-        "Naam": {"title": {}},
-        "Code": {"rich_text": {}},
-        "Geldig": {"checkbox": {}},
-        "Status": {
-            "select": {
-                "options": [
-                    {"name": STATUS_NIET_BINNEN, "color": "gray"},
-                    {"name": STATUS_BINNEN, "color": "green"},
-                ]
-            }
-        },
-        "Gescand op": {"date": {}},
-        "Gescand door": {"rich_text": {}},
-        "Scanpogingen": {"number": {"format": "number"}},
-    }
+    # --- kolommen
+
+    def _load_saved_columns(self):
+        try:
+            with open(COLUMNS_PATH, encoding="utf-8") as f:
+                saved = json.load(f)
+            if saved.get("data_source_id") == self.data_source_id:
+                return saved.get("kolommen", {})
+        except (OSError, ValueError):
+            pass
+        return {}
+
+    def _save_columns(self):
+        with open(COLUMNS_PATH, "w", encoding="utf-8") as f:
+            json.dump({"data_source_id": self.data_source_id,
+                       "kolommen": {k: v[0] for k, v in self.cols.items()}}, f, indent=2)
+
+    def _match_columns(self, props, saved):
+        by_id = {v["id"]: name for name, v in props.items()}
+        cols, missing = {}, []
+        for key, default, aliases, kind, _ in COLUMNS:
+            found = None
+            if kind == "title":
+                found = next((n for n, v in props.items() if v["type"] == "title"), None)
+            elif saved.get(key) in by_id and props[by_id[saved[key]]]["type"] == kind:
+                found = by_id[saved[key]]
+            else:
+                wanted = [n.lower() for n in (default,) + aliases]
+                for want in wanted:
+                    found = next((n for n, v in props.items()
+                                  if n.lower() == want and v["type"] == kind
+                                  and v["id"] not in [c[0] for c in cols.values()]), None)
+                    if found:
+                        break
+            if found:
+                cols[key] = (props[found]["id"], found)
+            else:
+                missing.append(key)
+        return cols, missing
 
     def connect(self):
         db_info = self.request("GET", "/databases/" + self.database_id)
@@ -304,18 +394,32 @@ class Notion:
         if not sources:
             raise NotionError(0, "database heeft geen data source")
         self.data_source_id = sources[0]["id"]
-        ds = self.request("GET", "/data_sources/" + self.data_source_id)
-        existing = ds.get("properties", {})
-        missing = {k: v for k, v in self.PROPERTIES.items() if k not in existing and k != "Naam"}
-        title_name = next((k for k, v in existing.items() if v.get("type") == "title"), None)
-        update = dict(missing)
-        if title_name and title_name != "Naam":
-            update[title_name] = {"name": "Naam"}
-        if update:
-            self.request("PATCH", "/data_sources/" + self.data_source_id, {"properties": update})
-            log("Notion-kolommen aangevuld: %s" % ", ".join(update))
+        saved = self._load_saved_columns()
+        props = self.request("GET", "/data_sources/" + self.data_source_id).get("properties", {})
+        cols, missing = self._match_columns(props, saved)
+        if missing:
+            create = {}
+            for key, default, _, kind, schema in COLUMNS:
+                if key in missing:
+                    name = default
+                    if name in props:  # naam bezet door een kolom van een ander type
+                        name = "%s (scan)" % default
+                    create[name] = schema
+            self.request("PATCH", "/data_sources/" + self.data_source_id, {"properties": create})
+            log("Notion-kolommen aangemaakt: %s" % ", ".join(create))
+            props = self.request("GET", "/data_sources/" + self.data_source_id).get("properties", {})
+            cols, missing = self._match_columns(props, saved)
+            if missing:
+                raise NotionError(0, "kolommen ontbreken in Notion: %s" % ", ".join(missing))
+        renamed = [
+            "%s heet nu '%s'" % (key, cols[key][1])
+            for key, default, _, _, _ in COLUMNS if key != "naam" and cols[key][1] != default
+        ]
+        self.cols = cols
+        self._save_columns()
         title = "".join(t.get("plain_text", "") for t in db_info.get("title", []))
-        log("Verbonden met Notion-database '%s'" % (title or self.database_id))
+        log("Verbonden met Notion-database '%s'%s" % (
+            title or self.database_id, " (%s)" % "; ".join(renamed) if renamed else ""))
 
     @staticmethod
     def create_database(token, parent_page_id, title="Tickets"):
@@ -326,44 +430,50 @@ class Notion:
             {
                 "parent": {"type": "page_id", "page_id": parent_page_id},
                 "title": [{"type": "text", "text": {"content": title}}],
-                "initial_data_source": {"properties": Notion.PROPERTIES},
+                "initial_data_source": {"properties": {c[1]: c[4] for c in COLUMNS}},
             },
         )
         return res["id"]
 
-    @staticmethod
-    def properties(row):
+    # --- pagina's
+
+    def properties(self, row):
         def text(value):
             return [{"type": "text", "text": {"content": value}}] if value else []
 
+        c = {k: v[0] for k, v in self.cols.items()}
         return {
-            "Naam": {"title": text(row["naam"])},
-            "Code": {"rich_text": text(row["code"])},
-            "Geldig": {"checkbox": bool(row["geldig"])},
-            "Status": {"select": {"name": STATUS_BINNEN if row["binnen"] else STATUS_NIET_BINNEN}},
-            "Gescand op": {"date": {"start": row["gescand_op"]} if row["gescand_op"] else None},
-            "Gescand door": {"rich_text": text(row["gescand_door"])},
-            "Scanpogingen": {"number": row["pogingen"]},
+            c["naam"]: {"title": text(row["naam"])},
+            c["code"]: {"rich_text": text(row["code"])},
+            c["type"]: {"select": {"name": row["type"]} if row["type"] else None},
+            c["geldig"]: {"checkbox": bool(row["geldig"])},
+            c["status"]: {"select": {"name": STATUS_BINNEN if row["binnen"] else STATUS_NIET_BINNEN}},
+            c["gescand_op"]: {"date": {"start": row["gescand_op"]} if row["gescand_op"] else None},
+            c["gescand_door"]: {"rich_text": text(row["gescand_door"])},
+            c["pogingen"]: {"number": row["pogingen"]},
         }
 
-    @staticmethod
-    def parse(page):
-        props = page.get("properties", {})
+    def parse(self, page):
+        by_id = {v.get("id"): v for v in page.get("properties", {}).values()}
+
+        def prop(key):
+            return by_id.get(self.cols[key][0]) or {}
 
         def plain(key, kind):
-            return "".join(t.get("plain_text", "") for t in (props.get(key, {}).get(kind) or []))
+            return "".join(t.get("plain_text", "") for t in (prop(key).get(kind) or []))
 
-        title_key = next((k for k, v in props.items() if v.get("type") == "title"), "Naam")
-        select = (props.get("Status") or {}).get("select") or {}
-        date = (props.get("Gescand op") or {}).get("date") or {}
+        status = prop("status").get("select") or {}
+        ticket_type = prop("type").get("select") or {}
+        date = prop("gescand_op").get("date") or {}
         return {
             "notion_id": page["id"],
-            "naam": plain(title_key, "title").strip(),
-            "code": normalize_code(plain("Code", "rich_text")),
-            "geldig": bool((props.get("Geldig") or {}).get("checkbox")),
-            "binnen": select.get("name") == STATUS_BINNEN,
+            "naam": plain("naam", "title").strip(),
+            "code": normalize_code(plain("code", "rich_text")),
+            "type": clean_type(ticket_type.get("name")),
+            "geldig": bool(prop("geldig").get("checkbox")),
+            "binnen": status.get("name") == STATUS_BINNEN,
             "gescand_op": date.get("start"),
-            "gescand_door": plain("Gescand door", "rich_text").strip(),
+            "gescand_door": plain("gescand_door", "rich_text").strip(),
         }
 
     def query_all(self):
@@ -388,6 +498,7 @@ class SyncWorker(threading.Thread):
         self.last_error = None
         self.last_pull = None
         self.connected = False
+        self.reconnect = False
         self.force_pull = threading.Event()
 
     def status(self):
@@ -402,19 +513,16 @@ class SyncWorker(threading.Thread):
         }
 
     def run(self):
-        while not self.connected:
-            try:
-                self.notion.connect()
-                self.connected = True
-            except NotionError as e:
-                self.last_error = str(e)
-                log("Kan niet verbinden met Notion: %s (opnieuw over 30s)" % e)
-                time.sleep(30)
         next_pull = 0
         while True:
             try:
-                pushed = self.push_one()
-                if pushed:
+                if not self.connected or self.reconnect:
+                    self.notion.connect()
+                    self.connected, self.reconnect = True, False
+                    with db_lock:  # na een herstel alles direct opnieuw proberen
+                        db.execute("UPDATE tickets SET opnieuw_na = 0 WHERE dirty = 1")
+                        db.commit()
+                if self.push_one():
                     continue
                 if time.time() >= next_pull or self.force_pull.is_set():
                     self.force_pull.clear()
@@ -424,7 +532,7 @@ class SyncWorker(threading.Thread):
             except NotionError as e:
                 self.last_error = str(e)
                 log(str(e))
-                time.sleep(5)
+                time.sleep(5 if self.connected else 30)
             except Exception as e:  # de draad mag nooit stoppen
                 self.last_error = "interne fout: %s" % e
                 log("Interne fout in sync: %r" % e)
@@ -458,7 +566,7 @@ class SyncWorker(threading.Thread):
                     "/pages",
                     {
                         "parent": {"type": "data_source_id", "data_source_id": self.notion.data_source_id},
-                        "properties": Notion.properties(row),
+                        "properties": self.notion.properties(row),
                     },
                 )
                 with db_lock:
@@ -472,10 +580,10 @@ class SyncWorker(threading.Thread):
             else:
                 try:
                     self.notion.request(
-                        "PATCH", "/pages/" + row["notion_id"], {"properties": Notion.properties(row)}
+                        "PATCH", "/pages/" + row["notion_id"], {"properties": self.notion.properties(row)}
                     )
                 except NotionError as e:
-                    if e.status in (400, 404) and ("archived" in e.message or "trash" in e.message or e.status == 404):
+                    if e.status == 404 or (e.status == 400 and ("archived" in e.message or "trash" in e.message)):
                         # in Notion verwijderd: de volgende pull ruimt het lokaal op
                         log("Notion: %s staat niet meer in Notion" % row["code"])
                         with db_lock:
@@ -491,11 +599,15 @@ class SyncWorker(threading.Thread):
                 log("Notion: %s bijgewerkt (%s)" % (row["code"], STATUS_BINNEN if row["binnen"] else STATUS_NIET_BINNEN))
             self.last_error = None
             return True
-        except NotionError:
+        except NotionError as e:
+            if e.status == 400 and e.code == "validation_error":
+                # waarschijnlijk is er in Notion een kolom veranderd: opnieuw koppelen en dan opnieuw proberen
+                self.reconnect = True
+                e = NotionError(e.status, "Notion weigerde een wijziging (%s). De server koppelt de kolommen opnieuw." % e.message)
             with db_lock:
                 db.execute("UPDATE tickets SET opnieuw_na = ? WHERE id = ?", (time.time() + 30, row["id"]))
                 db.commit()
-            raise
+            raise e
 
     def pull(self):
         pages = self.notion.query_all()
@@ -503,18 +615,22 @@ class SyncWorker(threading.Thread):
         changed = 0
         now = time.time()
         for page in pages:
-            p = Notion.parse(page)
+            p = self.notion.parse(page)
             seen.add(p["notion_id"])
             with db_lock:
+                ensure_type(p["type"])
                 row = db.execute("SELECT * FROM tickets WHERE notion_id = ?", (p["notion_id"],)).fetchone()
                 if row is None:
                     changed += self._import(p)
+                    db.commit()
                     continue
                 if row["dirty"] or row["verwijderd"] or now - row["gepusht_op"] < PUSH_GRACE:
+                    db.commit()
                     continue
                 updates = {}
-                if p["naam"] != row["naam"]:
-                    updates["naam"] = p["naam"]
+                for key in ("naam", "type"):
+                    if p[key] != row[key]:
+                        updates[key] = p[key]
                 if p["geldig"] != bool(row["geldig"]):
                     updates["geldig"] = int(p["geldig"])
                 if p["binnen"] != bool(row["binnen"]):
@@ -542,6 +658,10 @@ class SyncWorker(threading.Thread):
                     log("Uit Notion: %s verwijderd" % row["code"])
             db.commit()
         self.last_pull = now_iso()
+        with db_lock:
+            stuck = db.execute("SELECT COUNT(*) FROM tickets WHERE dirty = 1 AND opnieuw_na > ?", (time.time(),)).fetchone()[0]
+        if not stuck:
+            self.last_error = None
         if changed:
             sync_wake.set()
 
@@ -553,11 +673,12 @@ class SyncWorker(threading.Thread):
             needs_push = True
         try:
             db.execute(
-                """INSERT INTO tickets (code, naam, geldig, binnen, gescand_op, gescand_door, aangemaakt,
-                   notion_id, dirty) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                """INSERT INTO tickets (code, naam, type, geldig, binnen, gescand_op, gescand_door, aangemaakt,
+                   notion_id, dirty) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     code,
                     p["naam"],
+                    p["type"],
                     int(p["geldig"]) if p["code"] else 1,  # nieuwe regel zonder code: standaard geldig
                     int(p["binnen"]),
                     p["gescand_op"] if p["binnen"] else None,
@@ -693,9 +814,9 @@ class Handler(BaseHTTPRequestHandler):
             return self.redirect("/scan")
         if path == "/scan":
             return self.serve_static("scan.html")
-        if path == "/admin":
+        if path in ("/admin", "/show"):
             if self.admin_ok():
-                self.serve_static("admin.html")
+                self.serve_static(path[1:] + ".html")
             return
         if path.startswith("/static/"):
             return self.serve_static(path[len("/static/"):])
@@ -703,16 +824,14 @@ class Handler(BaseHTTPRequestHandler):
             if self.pin_ok():
                 self.send_json(200, {"ok": True})
             return
-        if path == "/show":
-            if self.admin_ok():
-                self.serve_static("show.html")
-            return
         if path == "/api/admin/tickets":
             if not self.admin_ok():
                 return
             _, tickets = tickets_payload()
             sync = SYNC.status() if SYNC else {"actief": False}
-            return self.send_json(200, {"tickets": tickets, "notion": sync, "scherm": show_status()})
+            return self.send_json(200, {
+                "tickets": tickets, "types": types_list(), "notion": sync, "scherm": show_status(),
+            })
         if path == "/api/show/poll":
             if not self.admin_ok():
                 return
@@ -723,9 +842,11 @@ class Handler(BaseHTTPRequestHandler):
                 with show_lock:
                     show_seen[client] = time.time()
             versie, tickets = tickets_payload()
+            changed = since != str(versie)
             return self.send_json(200, {
                 "versie": versie,
-                "tickets": None if since == str(versie) else tickets,
+                "tickets": tickets if changed else None,
+                "types": types_list() if changed else None,
                 "toon": show_status(),
             })
         self.send_error(404)
@@ -751,9 +872,20 @@ class Handler(BaseHTTPRequestHandler):
             namen = [str(n).strip()[:120] for n in data.get("namen", []) if str(n).strip()]
             if not namen or len(namen) > 500:
                 return self.send_json(400, {"fout": "geef 1 tot 500 namen"})
-            ids = create_tickets(namen)
+            ids = create_tickets(namen, clean_type(data.get("type")))
             log("Admin: %d ticket(s) aangemaakt" % len(ids))
             return self.send_json(200, {"aangemaakt": len(ids)})
+        if path == "/api/admin/types":
+            naam = clean_type(data.get("naam"))
+            if not naam:
+                return self.send_json(400, {"fout": "geef een naam voor het type"})
+            with db_lock:
+                ensure_type(naam)
+                db.commit()
+            return self.send_json(200, {"types": types_list()})
+        if path == "/api/admin/types/verwijder":
+            n = delete_type(clean_type(data.get("naam")))
+            return self.send_json(200, {"losgekoppeld": n, "types": types_list()})
         if path == "/api/admin/toon":
             ticket_id = data.get("ticket_id")
             if not isinstance(ticket_id, int):
@@ -767,6 +899,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/admin/sync":
             if SYNC:
                 SYNC.force_pull.set()
+                SYNC.reconnect = True
                 sync_wake.set()
             return self.send_json(200, {"ok": True})
         parts = path.split("/")  # ['', 'api', 'admin', 'tickets', '<id>', '<actie>']
@@ -778,6 +911,12 @@ class Handler(BaseHTTPRequestHandler):
                 n = touch(ticket_id, binnen=0, gescand_op=None, gescand_door="", pogingen=0)
             elif action == "naam":
                 n = touch(ticket_id, naam=str(data.get("naam") or "").strip()[:120])
+            elif action == "type":
+                ticket_type = clean_type(data.get("type"))
+                with db_lock:
+                    ensure_type(ticket_type)
+                    db.commit()
+                n = touch(ticket_id, type=ticket_type)
             elif action == "verwijder":
                 n = touch(ticket_id, verwijderd=1)
             else:
@@ -805,7 +944,7 @@ def main():
         log("Geen Notion-instellingen: draait zonder Notion")
     port = int(CONFIG.get("PORT") or 8787)
     httpd = ThreadingHTTPServer(("127.0.0.1", port), Handler)
-    log("Scan Test draait op http://localhost:%d  (scanner: /scan, admin: /admin)" % port)
+    log("Scan Test draait op http://localhost:%d  (admin: /admin, scherm: /show, scanner: /scan)" % port)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

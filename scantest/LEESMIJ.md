@@ -12,34 +12,42 @@ QR-tickets tonen op een iPad, scannen met een telefoon, en de status volgen in N
 
 ### `/admin`
 
-- Tickets aanmaken: één naam per regel.
+- Typen beheren, zoals VIP, Pers of Crew. Elk type toont hoeveel gasten binnen zijn.
+- Tickets aanmaken: één naam per regel, met een type voor de hele reeks.
+- Het type van een ticket wijzigen via het keuzemenu in de lijst.
 - Tickets bekijken als lijst, of als kaarten met QR-code.
 - Tickets geldig of ongeldig maken, een scan terugzetten, en verwijderen.
 - **Naar scherm** stuurt een ticket naar de iPad.
 - Bovenaan zie je welk ticket de iPad op dat moment toont.
+- Weigert Notion een wijziging, dan verschijnt een rode balk met de melding van Notion en de knop **Opnieuw proberen**.
 
 ### `/show`
 
 - Eén ticket per scherm, met een grote QR-code.
 - Bladeren met Vorige en Volgende, of door te vegen.
 - Een tik op de teller (bijvoorbeeld "3 / 10") opent de lijst om direct naar een ticket te springen.
-- Filter: alle tickets, of alleen wie nog niet binnen is.
+- **Menu** (links) bepaalt wat je ziet:
+  - **Type**: alle typen of één type, met per type het aantal binnen.
+  - **Laat zien**: alle gasten, nog niet binnen, of al binnen.
+  - **Na een scan**: blijf op dit ticket (standaard) of ga door naar het volgende.
+- Bovenaan staat steeds welke selectie actief is.
 - Zodra de telefoon het getoonde ticket scant, verschijnt een melding:
   - groen bij een geldig ticket;
   - oranje bij een ticket dat al gescand was;
   - rood bij een ongeldig ticket.
-- Met **Door na scan** aan gaat het scherm na de groene melding vanzelf naar het volgende ticket.
 - Het scherm blijft aan zolang de pagina open staat.
 
 ### `/scan`
 
 - Na de PIN en een naam voor de scanner blijft de camera doorscannen.
-- Bij elke scan krijg je groen, oranje of rood, met geluid.
+- Bij elke scan krijg je groen, oranje of rood, met geluid en het type van het ticket.
 - Met **Typen** voer je een code met de hand in.
 
 ### Notion
 
-De database **Tickets** op de pagina Scan Test, met de kolommen Naam, Code, Geldig, Status, Gescand op, Gescand door en Scanpogingen.
+De database **Tickets** op de pagina Scan Test, met de kolommen Naam, Code, Type, Geldig, Status, Gescand op, Gescand door en Scanpogingen.
+
+Je mag kolommen in Notion hernoemen. De server herkent ze aan hun vaste ID en bewaart die in `notion_kolommen.json`. Verwijder je een kolom die de server nodig heeft, dan maakt hij die opnieuw aan.
 
 ## Starten
 
@@ -61,7 +69,7 @@ De server houdt de tickets bij in `tickets.db` (SQLite). Daardoor hebben scanner
 
 - **Van server naar Notion.** Elke wijziging gaat via een wachtrij naar Notion, meestal binnen een seconde. De wachtrij overleeft een herstart.
 - **Van Notion naar server.** Elke 30 seconden haalt de server Notion op. Daarbij komen mee:
-  - wijzigingen in Naam, Geldig en Status;
+  - wijzigingen in Naam, Type, Geldig en Status (een nieuw type uit Notion komt vanzelf in de typelijst);
   - nieuwe regels (een regel zonder code krijgt vanzelf een code);
   - regels die je in Notion verwijdert.
 - **Na een wijziging op de server.** Een ticket dat net op de server is gewijzigd, krijgt 90 seconden voorrang op Notion.

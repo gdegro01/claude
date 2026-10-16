@@ -3,3 +3,4 @@ tickets.db
 tickets.db-*
 tunnel.log
 __pycache__/
+notion_kolommen.json
