@@ -100,6 +100,17 @@ Daarna start de server op `127.0.0.1:8787`. Via `tailscale serve` is hij bereikb
 
 Wil je een openbaar adres, gebruik dan `./start.sh cloudflare`. Dat start een tijdelijke Cloudflare-tunnel, die bij elke start een nieuw adres krijgt.
 
+### Automatisch bijwerken
+
+Staat de map in een git-checkout, dan kijkt `start.sh` elke minuut of er een nieuwe versie op dezelfde branch staat (`scantest`). Is die er, dan haalt het script hem op:
+
+- **Pagina's en opmaak** zijn direct actief.
+- **Servercode**: de server herstart vanzelf.
+- **Een versie waarmee de server niet start**: het script wacht op de volgende versie en start de server dan opnieuw.
+- **`start.sh` zelf**: dan meldt het script dat je het opnieuw moet starten.
+
+Uitzetten kan met `AUTO_UPDATE=0` in `.env`. `.env`, `tickets.db` en `notion_kolommen.json` staan niet in git en blijven dus altijd staan.
+
 Draait er al iets op poort 8787, zet dan een andere poort in `.env` (`PORT=...`).
 
 ## Hoe de gegevens lopen
