@@ -3,191 +3,205 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tickets beheren</title>
+<title>Tickets · Making Waves</title>
+<link rel="stylesheet" href="/static/mw.css">
 <style>
-  :root {
-    --bg: #f6f6f4; --fg: #1b1b1b; --muted: #6b6b6b; --card: #fff; --line: #e2e2de; --soft: #f1f1ee;
-    --ok: #1f9d55; --ok-bg: #e3f4ea; --warn: #b7791f; --warn-bg: #fbf0dc; --bad: #c53030; --bad-bg: #fbe4e4;
-    --accent: #2f5bd3; --accent-bg: #e8eefc;
-  }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--fg);
-    font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-  button, input, textarea { font: inherit; color: inherit; }
-  main { max-width: 1180px; margin: 0 auto; padding: 24px 16px 64px; }
-  header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-bottom: 20px; }
-  h1 { font-size: 22px; margin: 0; }
-  .stats, .actions { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 14px; white-space: nowrap; }
-  .chip b { font-variant-numeric: tabular-nums; }
-  .chip.ok { background: var(--ok-bg); border-color: transparent; color: var(--ok); }
-  .chip.warn { background: var(--warn-bg); border-color: transparent; color: var(--warn); }
-  .chip.bad { background: var(--bad-bg); border-color: transparent; color: var(--bad); }
-  .chip.accent { background: var(--accent-bg); border-color: transparent; color: var(--accent); }
-  .spacer { flex: 1; }
-  a.btn, button.btn { display: inline-block; text-decoration: none; background: var(--card); border: 1px solid var(--line);
-    border-radius: 8px; padding: 7px 12px; cursor: pointer; font-size: 14px; white-space: nowrap; }
-  a.btn { color: var(--fg); }
-  button.btn:hover, a.btn:hover { border-color: #bbb; }
-  .btn.dark { background: var(--fg); color: #fff; border-color: var(--fg); }
-  .btn.danger { color: var(--bad); }
-  .btn.push { color: var(--accent); border-color: #c9d6f6; }
-  .btn.push.on { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .btn.small { padding: 4px 9px; font-size: 13px; }
+  body{min-height:100vh}
+  main{max-width:1240px;margin:0 auto;padding:28px 32px 80px}
+  .top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:44px}
+  .brand{display:flex;align-items:center;gap:14px}
+  .top .actions{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
 
-  .alert { background: var(--bad-bg); color: var(--bad); border: 1px solid #f1c4c4; border-radius: 12px; padding: 12px 16px;
-    margin-bottom: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  .alert b { display: block; }
-  .alert span { flex: 1 1 300px; }
-  .typechips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  .typechip { display: inline-flex; align-items: center; gap: 6px; background: var(--soft); border-radius: 999px; padding: 4px 6px 4px 12px; font-size: 14px; }
-  .typechip small { color: var(--muted); }
-  .typechip button { border: 0; background: transparent; cursor: pointer; color: var(--muted); font-size: 16px; line-height: 1; padding: 2px 6px; border-radius: 999px; }
-  .typechip button:hover { background: #e4e4df; color: var(--bad); }
-  .inline { display: inline-flex; gap: 6px; }
-  .inline input, select { border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; background: var(--card); font-size: 14px; }
-  .typetag { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 6px; background: var(--accent-bg); color: var(--accent); font-weight: 600; }
-  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
-  .panel h2 { font-size: 15px; margin: 0 0 10px; }
-  .add { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
-  .add textarea { flex: 1 1 320px; min-height: 76px; border: 1px solid var(--line); border-radius: 8px; padding: 10px; resize: vertical; }
-  .note { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:end;margin-bottom:28px}
+  .hero h1{font-size:72px;margin-top:10px}
+  .hero .strip{height:96px;width:12px}
 
-  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
-  .toolbar input { flex: 1 1 220px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; background: var(--card); }
-  .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
-  .tabs button { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 5px 12px; cursor: pointer; font-size: 14px; }
-  .tabs button[aria-pressed="true"] { background: var(--fg); color: #fff; border-color: var(--fg); }
+  #stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:24px}
+  .stat{border-radius:var(--r-card);padding:20px 22px 22px;min-height:132px;display:flex;flex-direction:column;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+  .stat .l{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--c)}
+  .stat .v{font-family:var(--display);font-weight:800;font-size:56px;line-height:1;letter-spacing:-.04em;color:#fff;margin-top:auto;padding-top:14px}
+  .stat .v small{font-size:24px;font-weight:700;color:var(--muted);letter-spacing:-.01em}
+  .stat .t{margin-top:auto;padding-top:14px;font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:-.02em;color:#fff;line-height:1.15}
+  .stat .s{font-size:12px;color:var(--muted);margin-top:6px}
 
-  .badge { display: inline-block; font-size: 13px; padding: 2px 9px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
-  .badge.in { background: var(--ok-bg); color: var(--ok); }
-  .badge.out { background: #eee; color: var(--muted); }
-  .badge.void { background: var(--bad-bg); color: var(--bad); }
-  .badge.screen { background: var(--accent); color: #fff; }
-  .meta { font-size: 13px; color: var(--muted); }
-  .switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; user-select: none; }
-  .switch input { width: 18px; height: 18px; accent-color: var(--ok); }
-  .empty { color: var(--muted); padding: 40px 0; text-align: center; }
-  .naam { font-weight: 600; overflow-wrap: anywhere; cursor: text; }
-  .code { font-family: ui-monospace, Menlo, monospace; color: var(--muted); letter-spacing: .06em; white-space: nowrap; }
+  .alert{display:flex;gap:16px;align-items:center;flex-wrap:wrap;border-radius:var(--r-card);padding:16px 20px;margin-bottom:24px;
+    background:color-mix(in srgb,var(--magenta) 18%,var(--ink-2));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--magenta) 55%,transparent)}
+  .alert span{flex:1 1 320px;font-size:13px;color:#ffd1e8}
+  .alert b{display:block;font-family:var(--display);font-size:18px;color:#fff;letter-spacing:-.01em;margin-bottom:2px}
 
-  /* lijst */
-  .tablewrap { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; }
-  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: middle; }
-  th { font-size: 13px; color: var(--muted); font-weight: 600; background: var(--soft); }
-  tr:last-child td { border-bottom: 0; }
-  tr.off td { color: var(--muted); }
-  tr.onscreen td { background: var(--accent-bg); }
-  td.acts { white-space: nowrap; text-align: right; }
-  td.acts .btn { margin-left: 4px; }
+  .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:14px;margin-bottom:36px}
+  .panel h2{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:-.02em;color:#fff;margin:6px 0 16px}
+  .typechips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;min-height:34px;align-items:center}
+  .typechip{display:inline-flex;align-items:center;gap:4px}
+  .typechip .lbl{padding-right:.6em}
+  .typechip small{font-weight:500;letter-spacing:.04em;opacity:.8;margin-left:.3em}
+  .typechip button{border:0;background:none;color:inherit;opacity:.6;cursor:pointer;font-size:15px;padding:0 0 0 4px;line-height:1}
+  .typechip button:hover{opacity:1}
+  .inline{display:flex;gap:8px}
+  .inline .field{flex:1;min-width:0}
+  .add{display:grid;grid-template-columns:minmax(0,1fr) 200px;gap:10px}
+  .add textarea{min-height:96px;resize:vertical}
+  .add .side{display:flex;flex-direction:column;gap:10px}
+  .add .side .btn{flex:1}
+  .note{font-size:12px;color:var(--faint);margin-top:12px;line-height:1.6}
+  .empty-note{font-size:12px;color:var(--faint)}
 
-  /* kaarten */
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-  .card.off { opacity: .6; }
-  .card.onscreen { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
-  .qr { background: #fff; display: flex; justify-content: center; cursor: zoom-in; }
-  .qr svg { width: 150px; height: 150px; }
-  .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .listhead{display:flex;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+  .listhead h2{font-family:var(--display);font-weight:800;font-size:40px;letter-spacing:-.03em;color:#fff;margin:4px 0 0}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  .toolbar #search{flex:1 1 240px}
 
-  #big { position: fixed; inset: 0; background: #fff; z-index: 10; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 16px; padding: 24px 16px; text-align: center; }
-  #big svg { width: min(78vmin, 520px); height: min(78vmin, 520px); }
-  #big .naam { font-size: 26px; font-weight: 700; }
-  #big .code { font-size: 20px; letter-spacing: .1em; }
-  #big .nav { display: flex; gap: 10px; }
-  .hidden { display: none !important; }
+  /* lijst als omlijnde rijen */
+  table{width:100%;border-collapse:separate;border-spacing:0 8px;margin-top:-8px}
+  th{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);font-weight:400;text-align:left;padding:4px 14px}
+  td{background:var(--ink-2);padding:12px 14px;vertical-align:middle;border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04)}
+  td:first-child{border-radius:var(--r-row) 0 0 var(--r-row);border-left:1px solid rgba(255,255,255,.04)}
+  td:last-child{border-radius:0 var(--r-row) var(--r-row) 0;border-right:1px solid rgba(255,255,255,.04)}
+  tr.onscreen td{background:color-mix(in srgb,var(--lime-lt) 9%,var(--ink-2));border-color:color-mix(in srgb,var(--lime-lt) 45%,transparent)}
+  tr.off td{opacity:.55}
+  .naam{font-family:var(--display);font-weight:600;font-size:17px;color:#fff;cursor:text;letter-spacing:-.01em}
+  .code{font-size:13px;letter-spacing:.12em;color:var(--muted);cursor:zoom-in;white-space:nowrap}
+  .meta{font-size:11px;color:var(--faint);margin-top:6px}
+  td select.field{padding:7px 30px 7px 11px;font-size:12px;border-radius:8px;--c:var(--ink-4);
+    box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 60%,transparent);background-color:color-mix(in srgb,var(--c) 16%,var(--ink-deep))}
+  td.acts{text-align:right;white-space:nowrap}
+  td.acts .btn{margin-left:4px}
+  .btn.push.on{background:var(--lime-lt);color:var(--ink);box-shadow:none}
 
-  @media print {
-    header .spacer, header .actions, .panel, .toolbar, .card .row, .meta { display: none !important; }
-    body { background: #fff; }
-    .grid { grid-template-columns: repeat(3, 1fr); }
-    .card { break-inside: avoid; border-color: #ccc; box-shadow: none; }
+  /* kaarten met QR */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+  .card{background:var(--ink-2);border-radius:var(--r-card);padding:14px;display:flex;flex-direction:column;gap:12px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+  .card.onscreen{box-shadow:inset 0 0 0 2px var(--lime-lt)}
+  .card.off{opacity:.55}
+  .qrtile{background:var(--cream);border-radius:10px;padding:6px;cursor:zoom-in;line-height:0}
+  .qrtile svg{width:100%;height:auto}
+  .card .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .card select.field{padding:7px 30px 7px 11px;font-size:12px;width:100%}
+  .spacer{flex:1}
+
+  .empty{padding:56px 0;text-align:center;color:var(--faint)}
+  .dangerzone{margin-top:56px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.08);padding-top:24px}
+  .dangerzone span{flex:1 1 320px;font-size:12px;color:var(--faint)}
+
+  /* groot tonen */
+  #big{position:fixed;inset:0;z-index:40;background:rgba(18,20,26,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px}
+  #big .ticket{background:var(--cream);color:var(--ink);border-radius:var(--r-panel);padding:28px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;max-height:100%}
+  #big .ticket svg{width:min(60vmin,480px);height:auto}
+  #big .naam{color:var(--ink);font-size:30px;font-weight:800;cursor:default}
+  #big .code{color:#6A7282;cursor:default}
+  #big .nav{display:flex;gap:8px;margin-top:6px}
+  #big .btn{color:var(--ink);box-shadow:inset 0 0 0 1px rgba(42,45,53,.2)}
+  #big .btn.dark{background:var(--ink);color:#fff;box-shadow:none}
+
+  @media (max-width:980px){#stats{grid-template-columns:repeat(2,minmax(0,1fr))}.two{grid-template-columns:minmax(0,1fr)}.hero h1{font-size:52px}}
+  @media (max-width:640px){main{padding:20px 16px 64px}.add{grid-template-columns:minmax(0,1fr)}.hero .strip{display:none}}
+
+  @media print{
+    @page{margin:12mm}
+    html,body{background:#fff;color:#000}
+    .top,.hero,#stats,.alert,.two,.listhead .seg,.toolbar,.dangerzone,.card .row,.card select{display:none!important}
+    .grid{grid-template-columns:repeat(3,1fr)}
+    .card{background:#fff;box-shadow:inset 0 0 0 1px #ccc;break-inside:avoid;opacity:1}
+    .card .naam{color:#000}
   }
 </style>
 </head>
 <body>
 <main>
-  <header>
-    <h1>Tickets</h1>
-    <div class="stats" id="stats"></div>
-    <span class="spacer"></span>
+  <header class="top">
+    <div class="brand"><span class="mark"></span><span class="eyebrow">Making Waves · Scan Test</span></div>
     <div class="actions">
-      <button class="btn" id="syncBtn" type="button">Notion nu ophalen</button>
-      <button class="btn" type="button" id="printBtn">Afdrukken</button>
+      <button class="btn" id="syncBtn" type="button">Notion ophalen</button>
+      <button class="btn" id="printBtn" type="button">Afdrukken</button>
       <a class="btn" href="/show" target="_blank">Scherm openen</a>
-      <a class="btn dark" href="/scan" target="_blank">Scanner openen</a>
+      <a class="btn primary" href="/scan" target="_blank">Scanner openen</a>
     </div>
   </header>
 
+  <section class="hero">
+    <div>
+      <div class="eyebrow">Gastenlijst</div>
+      <h1 class="title">Tickets</h1>
+    </div>
+    <div class="strip" aria-hidden="true"><i style="background:#D1FF90"></i><i style="background:#B8E22C"></i><i style="background:#0DC13C"></i><i style="background:#1BA8B9"></i><i style="background:#7B4FF2"></i><i style="background:#FD7C2C"></i><i style="background:#EC2765"></i><i style="background:#CF1C7E"></i></div>
+  </section>
+
+  <section id="stats" aria-live="polite"></section>
+
   <div class="alert hidden" id="alert">
     <span><b>Notion neemt wijzigingen niet over</b><span id="alertText"></span></span>
-    <button class="btn" type="button" id="retryBtn">Opnieuw proberen</button>
+    <button class="btn white" type="button" id="retryBtn">Opnieuw proberen</button>
   </div>
 
-  <section class="panel">
-    <h2>Typen</h2>
-    <div class="typechips">
-      <span id="typeChips"></span>
+  <div class="two">
+    <section class="panel">
+      <div class="eyebrow">Typen</div>
+      <h2>Soorten gasten</h2>
+      <div class="typechips" id="typeChips"></div>
       <form class="inline" id="typeForm">
-        <input id="typeNaam" placeholder="Nieuw type, bijv. VIP" maxlength="50">
+        <input class="field" id="typeNaam" placeholder="Nieuw type, bijv. VIP" maxlength="50">
         <button class="btn" type="submit">Toevoegen</button>
       </form>
-    </div>
-  </section>
+    </section>
 
-  <section class="panel">
-    <h2>Tickets toevoegen</h2>
-    <form class="add" id="addForm">
-      <textarea id="namen" placeholder="Eén naam per regel"></textarea>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <select id="addType" aria-label="Type voor deze tickets"></select>
-        <button class="btn dark" type="submit">Tickets maken</button>
-      </div>
-    </form>
-    <div class="note">Elke naam krijgt een eigen QR-code en verschijnt binnen een paar seconden ook in Notion.
-      Een regel die je in Notion toevoegt, verschijnt hier binnen 30 seconden en krijgt dan vanzelf een code.</div>
-  </section>
+    <section class="panel">
+      <div class="eyebrow">Toevoegen</div>
+      <h2>Nieuwe tickets</h2>
+      <form class="add" id="addForm">
+        <textarea class="field" id="namen" placeholder="Eén naam per regel"></textarea>
+        <div class="side">
+          <select class="field" id="addType" aria-label="Type voor deze tickets"></select>
+          <button class="btn primary" type="submit">Tickets maken</button>
+        </div>
+      </form>
+      <div class="note">Elke naam krijgt een eigen QR-code en staat binnen een paar seconden in Notion. Een regel die je in Notion toevoegt, staat hier binnen 30 seconden.</div>
+    </section>
+  </div>
 
-  <div class="toolbar">
-    <input id="search" type="search" placeholder="Zoek op naam of code">
-    <div class="tabs" id="tabs">
-      <button type="button" data-f="alle" aria-pressed="true">Alle</button>
-      <button type="button" data-f="binnen" aria-pressed="false">Binnen</button>
-      <button type="button" data-f="buiten" aria-pressed="false">Nog niet binnen</button>
-      <button type="button" data-f="ongeldig" aria-pressed="false">Ongeldig</button>
-    </div>
-    <select id="typeFilter" aria-label="Filter op type"></select>
-    <div class="tabs" id="views">
+  <div class="listhead">
+    <div><div class="eyebrow">Overzicht</div><h2>Alle tickets</h2></div>
+    <span class="spacer"></span>
+    <div class="seg" id="views">
       <button type="button" data-v="lijst" aria-pressed="true">Lijst</button>
       <button type="button" data-v="kaarten" aria-pressed="false">Met QR-codes</button>
     </div>
   </div>
+  <div class="toolbar">
+    <input class="field" id="search" type="search" placeholder="Zoek op naam of code">
+    <div class="seg" id="tabs">
+      <button type="button" data-f="alle" aria-pressed="true">Alle</button>
+      <button type="button" data-f="binnen" aria-pressed="false">Binnen</button>
+      <button type="button" data-f="buiten" aria-pressed="false">Nog niet</button>
+      <button type="button" data-f="ongeldig" aria-pressed="false">Ongeldig</button>
+    </div>
+    <select class="field" id="typeFilter" aria-label="Filter op type"></select>
+  </div>
 
   <div id="out"></div>
 
-  <section class="panel" style="margin-top:28px">
-    <h2>Opnieuw beginnen</h2>
-    <div class="row">
-      <span class="meta" style="flex:1 1 320px">Verwijdert alle tickets, hier en in Notion (naar de prullenbak). De kolommen in Notion blijven staan.</span>
-      <button class="btn danger" type="button" id="wipeBtn">Alles wissen…</button>
-    </div>
+  <section class="dangerzone">
+    <span>Opnieuw beginnen verwijdert alle tickets, hier en in Notion (naar de prullenbak). De kolommen in Notion blijven staan.</span>
+    <button class="btn danger" type="button" id="wipeBtn">Alles wissen…</button>
   </section>
 </main>
 
 <section id="big" class="hidden">
-  <div id="bigQr"></div>
-  <div class="naam" id="bigNaam"></div>
-  <div class="code" id="bigCode"></div>
-  <div class="nav">
-    <button class="btn" type="button" id="bigPrev">Vorige</button>
-    <button class="btn dark" type="button" id="bigClose">Sluiten</button>
-    <button class="btn" type="button" id="bigNext">Volgende</button>
+  <div class="ticket">
+    <div id="bigQr"></div>
+    <div class="naam" id="bigNaam"></div>
+    <div id="bigType"></div>
+    <div class="code" id="bigCode"></div>
+    <div class="nav">
+      <button class="btn" type="button" id="bigPrev">Vorige</button>
+      <button class="btn dark" type="button" id="bigClose">Sluiten</button>
+      <button class="btn" type="button" id="bigNext">Volgende</button>
+    </div>
   </div>
 </section>
 
 <script src="/static/qrcode.js"></script>
+<script src="/static/qrstyle.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const store = {
@@ -205,6 +219,7 @@ let filter = "alle";
 let view = store.get("admin_view") === "kaarten" ? "kaarten" : "lijst";
 let bigIndex = -1;
 const qrCache = new Map();
+const DEFAULT_COLOR = "#CF1C7E";
 
 function esc(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -216,14 +231,15 @@ function formatTime(iso) {
   if (isNaN(d)) return iso;
   return d.toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
-function qrSvg(code) {
-  if (!qrCache.has(code)) {
-    const qr = qrcode(0, "M");
-    qr.addData(code);
-    qr.make();
-    qrCache.set(code, qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true }));
-  }
-  return qrCache.get(code);
+function typeColor(name) { const t = types.find((x) => x.naam === name); return t ? t.kleur : null; }
+function typeLabel(name) {
+  return name ? `<span class="lbl cat" style="--c:${typeColor(name) || "#8B8E9B"}">${esc(name)}</span>` : "";
+}
+function qrSvg(code, type) {
+  const color = typeColor(type) || DEFAULT_COLOR;
+  const key = code + color;
+  if (!qrCache.has(key)) qrCache.set(key, mwQR(code, { style: "blinds", logo: true, logoSize: 0.22, logoColor: color, bg: "#F4F1EA" }));
+  return qrCache.get(key);
 }
 
 async function api(path, body) {
@@ -248,7 +264,7 @@ async function load() {
     if (document.activeElement && document.activeElement.tagName === "SELECT" && $("out").contains(document.activeElement)) renderPending = true;
     else render();
   } catch (e) {
-    $("stats").innerHTML = `<span class="chip bad">Server niet bereikbaar</span>`;
+    $("stats").innerHTML = `<div class="stat glow" style="--c:var(--magenta)"><div class="l">Server</div><div class="t">Niet bereikbaar</div></div>`;
   }
 }
 
@@ -264,17 +280,19 @@ function visible() {
   });
 }
 
-function notionChip() {
-  if (!notion.actief) return `<span class="chip">Notion niet gekoppeld</span>`;
-  if (notion.fout) return `<span class="chip bad" title="${esc(notion.fout)}">Notion: fout, zie server</span>`;
-  if (!notion.verbonden) return `<span class="chip warn">Notion: verbinden…</span>`;
-  if (notion.wachtrij) return `<span class="chip warn">Notion: ${notion.wachtrij} in wachtrij</span>`;
-  return `<span class="chip ok">Notion bijgewerkt</span>`;
+function notionCard() {
+  let c = "var(--teal)", t = "Notion bijgewerkt", s = notion.laatst_opgehaald ? "Laatst opgehaald " + formatTime(notion.laatst_opgehaald) : "";
+  if (!notion.actief) { c = "var(--ink-4)"; t = "Notion niet gekoppeld"; s = ""; }
+  else if (notion.fout) { c = "var(--magenta)"; t = "Notion: fout"; s = "Zie de melding hieronder"; }
+  else if (!notion.verbonden) { c = "var(--orange)"; t = "Notion: verbinden…"; }
+  else if (notion.wachtrij) { c = "var(--orange)"; t = `Notion: ${notion.wachtrij} in wachtrij`; }
+  return `<div class="stat glow" style="--c:${c}"><div class="l">Notion</div><div class="t">${t}</div><div class="s">${esc(s)}</div></div>`;
 }
-function schermChip() {
-  if (!scherm.schermen) return `<span class="chip">Scherm niet open</span>`;
+function schermCard() {
   const t = tickets.find((x) => x.id === scherm.ticket_id);
-  return `<span class="chip accent">Scherm toont: ${t ? esc(t.naam || formatCode(t.code)) : "niets"}</span>`;
+  const text = !scherm.schermen ? "Scherm niet open" : `Scherm toont: ${t ? esc(t.naam || formatCode(t.code)) : "niets"}`;
+  return `<div class="stat glow" style="--c:var(--purple)"><div class="l">iPad</div><div class="t">${text}</div>
+    <div class="s">${scherm.schermen ? (scherm.schermen === 1 ? "1 scherm verbonden" : scherm.schermen + " schermen verbonden") : "Open /show op de iPad"}</div></div>`;
 }
 
 function typeOptions(selected, { none = "Geen type", extra = true } = {}) {
@@ -287,9 +305,9 @@ function typeOptions(selected, { none = "Geen type", extra = true } = {}) {
 
 function renderTypes() {
   $("typeChips").innerHTML = types.length ? types.map((x) =>
-    `<span class="typechip">${esc(x.naam)} <small>${x.binnen}/${x.totaal}</small>
-      <button type="button" data-type="${esc(x.naam)}" title="Type verwijderen">×</button></span>`).join("")
-    : `<span class="meta">Nog geen typen.</span>`;
+    `<span class="typechip"><span class="lbl cat" style="--c:${x.kleur}">${esc(x.naam)}<small>${x.binnen}/${x.totaal}</small>
+      <button type="button" data-type="${esc(x.naam)}" title="Type verwijderen" aria-label="Type ${esc(x.naam)} verwijderen">×</button></span></span>`).join("")
+    : `<span class="empty-note">Nog geen typen. Elk type krijgt een eigen accentkleur.</span>`;
   const keep = $("addType").value;
   $("addType").innerHTML = typeOptions(keep);
   const keepF = $("typeFilter").value;
@@ -311,9 +329,10 @@ async function askNewType() {
   return naam.replace(/,/g, " ").replace(/\s+/g, " ").trim().slice(0, 50);
 }
 
-function statusBadge(t) {
-  return !t.geldig ? `<span class="badge void">Ongeldig</span>`
-    : t.binnen ? `<span class="badge in">Binnen</span>` : `<span class="badge out">Nog niet binnen</span>`;
+function statusLabel(t) {
+  return !t.geldig ? `<span class="lbl status" style="--c:var(--magenta)">Ongeldig</span>`
+    : t.binnen ? `<span class="lbl status on" style="--c:var(--green)">Binnen</span>`
+    : `<span class="lbl status" style="--c:#6A7282">Nog niet binnen</span>`;
 }
 function metaText(t) {
   const parts = [];
@@ -324,16 +343,20 @@ function metaText(t) {
 }
 function pushBtn(t) {
   const on = scherm.ticket_id === t.id;
-  return `<button class="btn small push${on ? " on" : ""}" type="button" data-act="toon">${on ? "Op scherm" : "Naar scherm"}</button>`;
+  return `<button class="btn sm push${on ? " on" : ""}" type="button" data-act="toon">${on ? "Op scherm" : "Naar scherm"}</button>`;
+}
+function typeSelect(t) {
+  const c = typeColor(t.type) || "#484B56";
+  return `<select class="field" data-act="type" aria-label="Type" style="--c:${c}">${typeOptions(t.type)}</select>`;
 }
 
 function render() {
   const geldig = tickets.filter((t) => t.geldig).length;
   const binnen = tickets.filter((t) => t.binnen).length;
   $("stats").innerHTML =
-    `<span class="chip"><b>${tickets.length}</b> tickets</span>` +
-    `<span class="chip"><b>${geldig}</b> geldig</span>` +
-    `<span class="chip ok"><b>${binnen}</b> binnen</span>` + notionChip() + schermChip();
+    `<div class="stat glow" style="--c:var(--green)"><div class="l">Binnen</div><div class="v">${binnen}<small> / ${tickets.length}</small></div></div>` +
+    `<div class="stat glow" style="--c:var(--lime)"><div class="l">Geldig</div><div class="v">${geldig}<small> / ${tickets.length}</small></div></div>` +
+    notionCard() + schermCard();
 
   const list = visible();
   if (!list.length) {
@@ -341,33 +364,34 @@ function render() {
     return;
   }
   if (view === "lijst") {
-    $("out").innerHTML = `<div class="tablewrap"><table>
+    $("out").innerHTML = `<table>
       <thead><tr><th>Naam</th><th>Type</th><th>Code</th><th>Status</th><th>Geldig</th><th></th></tr></thead>
       <tbody>${list.map((t) => `<tr data-id="${t.id}" class="${t.geldig ? "" : "off"}${scherm.ticket_id === t.id ? " onscreen" : ""}">
         <td><span class="naam" data-act="naam" title="Klik om de naam te wijzigen">${esc(t.naam) || "<i>Zonder naam</i>"}</span></td>
-        <td><select data-act="type" aria-label="Type">${typeOptions(t.type)}</select></td>
-        <td><span class="code" data-act="big" style="cursor:zoom-in" title="QR-code tonen">${formatCode(t.code)}</span></td>
-        <td>${statusBadge(t)} <span class="meta">${metaText(t)}</span></td>
-        <td><label class="switch"><input type="checkbox" data-act="geldig" ${t.geldig ? "checked" : ""}></label></td>
-        <td class="acts">${pushBtn(t)}${t.binnen ? `<button class="btn small" type="button" data-act="reset">Reset</button>` : ""}<button class="btn small danger" type="button" data-act="verwijder">Verwijder</button></td>
-      </tr>`).join("")}</tbody></table></div>`;
+        <td>${typeSelect(t)}</td>
+        <td><span class="code" data-act="big" title="QR-code tonen">${formatCode(t.code)}</span></td>
+        <td>${statusLabel(t)}${metaText(t) ? `<div class="meta">${metaText(t)}</div>` : ""}</td>
+        <td><label class="switch" title="Geldig"><input type="checkbox" data-act="geldig" ${t.geldig ? "checked" : ""}><span></span></label></td>
+        <td class="acts">${pushBtn(t)}${t.binnen ? `<button class="btn sm" type="button" data-act="reset">Reset</button>` : ""}<button class="btn sm danger" type="button" data-act="verwijder">Verwijder</button></td>
+      </tr>`).join("")}</tbody></table>`;
   } else {
     $("out").innerHTML = `<div class="grid">${list.map((t) => `<article class="card${t.geldig ? "" : " off"}${scherm.ticket_id === t.id ? " onscreen" : ""}" data-id="${t.id}">
-      <div class="qr" data-act="big">${qrSvg(t.code)}</div>
+      <div class="qrtile" data-act="big">${qrSvg(t.code, t.type)}</div>
       <div>
         <div class="naam" data-act="naam" title="Klik om de naam te wijzigen">${esc(t.naam) || "<i>Zonder naam</i>"}</div>
-        <div class="code">${formatCode(t.code)}</div>
+        <div class="code" style="margin-top:4px">${formatCode(t.code)}</div>
       </div>
-      <div class="row"><select data-act="type" aria-label="Type">${typeOptions(t.type)}</select></div>
-      <div class="row">${statusBadge(t)}<span class="meta">${metaText(t)}</span></div>
+      <div class="row">${typeSelect(t)}</div>
+      <div class="row">${statusLabel(t)}${metaText(t) ? `<span class="meta" style="margin:0">${metaText(t)}</span>` : ""}</div>
       <div class="row">
-        <label class="switch"><input type="checkbox" data-act="geldig" ${t.geldig ? "checked" : ""}> Geldig</label>
+        <label class="switch" title="Geldig"><input type="checkbox" data-act="geldig" ${t.geldig ? "checked" : ""}><span></span></label>
+        <span class="meta" style="margin:0">Geldig</span>
         <span class="spacer"></span>
         ${pushBtn(t)}
       </div>
       <div class="row">
-        ${t.binnen ? `<button class="btn small" type="button" data-act="reset">Reset</button>` : ""}
-        <button class="btn small danger" type="button" data-act="verwijder">Verwijder</button>
+        ${t.binnen ? `<button class="btn sm" type="button" data-act="reset">Reset</button>` : ""}
+        <button class="btn sm danger" type="button" data-act="verwijder">Verwijder</button>
       </div>
     </article>`).join("")}</div>`;
   }
@@ -513,13 +537,15 @@ function openBig(i) {
   if (i < 0 || i >= list.length) return;
   bigIndex = i;
   const t = list[i];
-  $("bigQr").innerHTML = qrSvg(t.code);
+  $("bigQr").innerHTML = qrSvg(t.code, t.type);
   $("bigNaam").textContent = t.naam;
+  $("bigType").innerHTML = typeLabel(t.type);
   $("bigCode").textContent = formatCode(t.code);
   $("big").classList.remove("hidden");
 }
 function closeBig() { $("big").classList.add("hidden"); bigIndex = -1; }
 $("bigClose").addEventListener("click", closeBig);
+$("big").addEventListener("click", (e) => { if (e.target === $("big")) closeBig(); });
 $("bigPrev").addEventListener("click", () => openBig(bigIndex - 1));
 $("bigNext").addEventListener("click", () => openBig(bigIndex + 1));
 document.addEventListener("keydown", (e) => {

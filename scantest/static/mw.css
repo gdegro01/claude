@@ -1,0 +1,105 @@
+/* Making Waves · basis voor Scan Test.
+   Tokens volgen thisismakingwaves.com/ui-design: ink en cream als grond, zeven accenten,
+   Outfit voor titels en getallen, Geist Mono voor labels en tekst, 4px-raster. */
+
+@font-face{font-family:'Outfit';font-style:normal;font-weight:300 900;font-display:swap;src:url('fonts/outfit-latin-ext.woff2') format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Outfit';font-style:normal;font-weight:300 900;font-display:swap;src:url('fonts/outfit-latin.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Geist Mono';font-style:normal;font-weight:400 700;font-display:swap;src:url('fonts/geist-mono-latin-ext.woff2') format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Geist Mono';font-style:normal;font-weight:400 700;font-display:swap;src:url('fonts/geist-mono-latin.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+
+:root{
+  --ink:#2A2D35; --ink-2:#2F323A; --ink-3:#3A3C44; --ink-4:#484B56; --ink-deep:#23262E;
+  --cream:#F4F1EA; --cream-2:#FAF8F5; --cream-3:#E2E0D8;
+  --text:#E5E6EA; --muted:#9B9DA8; --faint:#6A7282;
+  --magenta:#CF1C7E; --cerise:#EC2765; --orange:#FD7C2C; --purple:#7B4FF2;
+  --teal:#1BA8B9; --green:#0DC13C; --lime:#B8E22C; --lime-lt:#D1FF90;
+  --display:'Outfit',-apple-system,'Segoe UI',system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --r-chip:4px; --r-frame:6px; --r-row:10px; --r-card:14px; --r-panel:20px;
+  --ease:cubic-bezier(.2,.7,.3,1); --fast:.12s; --base:.2s;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--ink);color:var(--text);font:15px/1.5 var(--mono)}
+button,input,select,textarea{font:inherit;color:inherit}
+.hidden{display:none!important}
+:focus-visible{outline:2px solid var(--lime-lt);outline-offset:2px}
+
+/* Typografie */
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.title{font-family:var(--display);font-weight:800;letter-spacing:-.03em;line-height:1;color:#fff;margin:0}
+.mark{display:inline-block;width:28px;height:23px;background:var(--mark-c,#fff);
+  -webkit-mask:url('img/mw-mark.svg') center/contain no-repeat;mask:url('img/mw-mark.svg') center/contain no-repeat}
+
+/* Knoppen */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:9px 16px;
+  font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;
+  background:transparent;color:var(--text);border:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);
+  cursor:pointer;text-decoration:none;white-space:nowrap;transition:box-shadow var(--fast),background var(--fast),color var(--fast)}
+.btn:hover{box-shadow:inset 0 0 0 1px rgba(255,255,255,.4)}
+.btn.primary{background:var(--lime-lt);color:var(--ink);box-shadow:none;font-weight:700}
+.btn.primary:hover{background:#e2ffb8}
+.btn.white{background:#fff;color:var(--ink);box-shadow:none}
+.btn.danger{color:#ff8fc4;box-shadow:inset 0 0 0 1px rgba(207,28,126,.5)}
+.btn.danger:hover{background:rgba(207,28,126,.14)}
+.btn.sm{padding:6px 11px;font-size:11px;letter-spacing:.1em}
+
+/* Segmenten (zoals de stijlwisselaar in de richtlijnen) */
+.seg{display:inline-flex;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);padding:3px;gap:2px}
+.seg button{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  background:none;border:0;border-radius:999px;padding:7px 14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--ink)}
+
+/* Labels */
+.lbl{--c:var(--magenta);display:inline-flex;align-items:center;gap:.6em;line-height:1;white-space:nowrap;font-family:var(--mono);font-size:11px}
+.lbl.cat{text-transform:uppercase;font-weight:700;letter-spacing:.16em;padding:.7em 1.1em;border-radius:.62em;color:color-mix(in srgb,var(--c) 55%,#fff);
+  background:color-mix(in srgb,var(--c) 22%,var(--ink))}
+.lbl.status{font-weight:500;padding:.62em 1.08em .62em .92em;border-radius:999px;background:var(--ink-deep);color:#C7C9D1;font-size:12px}
+.lbl.status::before{content:"";width:.7em;height:.7em;border-radius:50%;background:var(--c);flex:none}
+.lbl.status.on{background:color-mix(in srgb,var(--green) 16%,var(--ink-deep));color:#bff5cf}
+
+/* Velden */
+.field{background:var(--ink-deep);border:0;border-radius:var(--r-row);padding:11px 14px;color:var(--text);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);outline:none;transition:box-shadow var(--fast)}
+.field:focus{box-shadow:inset 0 0 0 1.5px var(--lime-lt)}
+.field::placeholder{color:var(--faint)}
+select.field{appearance:none;-webkit-appearance:none;padding-right:34px;cursor:pointer;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 52%,calc(100% - 13px) 52%;background-size:5px 5px;background-repeat:no-repeat}
+
+/* Kaders */
+.panel{background:var(--ink-2);border-radius:var(--r-panel);padding:24px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+.glow{position:relative;overflow:hidden;--c:var(--teal);
+  background:radial-gradient(260px 160px at 100% 0%,color-mix(in srgb,var(--c) 28%,transparent),transparent 70%),var(--ink-2)}
+
+/* Schakelaar */
+.switch{position:relative;display:inline-block;width:40px;height:24px;flex:none;cursor:pointer}
+.switch input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.switch span{position:absolute;inset:0;border-radius:999px;background:var(--ink-4);transition:background var(--base)}
+.switch span::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform var(--base) var(--ease)}
+.switch input:checked+span{background:var(--green)}
+.switch input:checked+span::after{transform:translateX(16px)}
+.switch input:focus-visible+span{outline:2px solid var(--lime-lt);outline-offset:2px}
+
+/* Merkstrook: de zeven accenten, zoals op de omslag van de richtlijnen */
+.strip{display:flex;flex-direction:column;width:10px;border-radius:3px;overflow:hidden}
+.strip i{flex:1;display:block}
+.strip.h{flex-direction:row;width:auto;height:6px}
+
+/* Meldingen in volle kleur, met blinds-stroken */
+.flash{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  padding:24px 16px;background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 18px,transparent 18px 36px)}
+.flash.geldig{background-color:var(--green);color:var(--ink)}
+.flash.al_gescand{background-color:var(--orange);color:var(--ink)}
+.flash.ongeldig,.flash.onbekend{background-color:var(--magenta);color:#fff}
+.flash.fout{background-color:var(--ink-3);color:#fff}
+.flash .f-eyebrow{font-family:var(--mono);font-size:14px;letter-spacing:.2em;text-transform:uppercase;opacity:.75}
+.flash .f-title{font-family:var(--display);font-weight:800;letter-spacing:-.03em;line-height:.95;margin-top:10px;font-size:clamp(48px,11vw,112px)}
+.flash .f-type{margin-top:22px;font-family:var(--mono);font-weight:700;font-size:15px;letter-spacing:.16em;text-transform:uppercase;
+  padding:8px 16px;border-radius:8px;background:rgba(0,0,0,.16)}
+.flash .f-type:empty{display:none}
+.flash .f-naam{font-family:var(--display);font-weight:700;letter-spacing:-.02em;font-size:clamp(26px,5vw,44px);margin-top:16px;overflow-wrap:anywhere}
+.flash .f-detail{font-family:var(--mono);font-size:15px;margin-top:10px;opacity:.85}
+.flash .f-tap{position:absolute;bottom:max(24px,env(safe-area-inset-bottom));font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;opacity:.6}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

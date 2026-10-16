@@ -48,6 +48,9 @@ STATUS_NIET_BINNEN = "✗"
 OLD_STATUS = {"Binnen": True, "Niet binnen": False}
 STATUS_OPTIONS = [{"name": STATUS_BINNEN, "color": "green"}, {"name": STATUS_NIET_BINNEN, "color": "gray"}]
 
+# Kleuren voor typen, in volgorde van aanmaken (Making Waves-accenten)
+TYPE_COLORS = ["#CF1C7E", "#FD7C2C", "#7B4FF2", "#1BA8B9", "#0DC13C", "#EC2765", "#B8E22C"]
+
 # Kolommen in Notion: sleutel, standaardnaam, andere namen die we herkennen, type, schema.
 COLUMNS = [
     ("naam", "Naam", (), "title", {"title": {}}),
@@ -226,7 +229,12 @@ def types_list():
                 "SELECT type, COUNT(*) AS totaal, SUM(binnen) AS binnen FROM tickets WHERE verwijderd = 0 GROUP BY type"
             )
         }
-    return [{"naam": t, "totaal": counts.get(t, (0, 0))[0], "binnen": counts.get(t, (0, 0))[1] or 0} for t in types]
+    return [{"naam": t, "kleur": TYPE_COLORS[i % len(TYPE_COLORS)], "totaal": counts.get(t, (0, 0))[0],
+             "binnen": counts.get(t, (0, 0))[1] or 0} for i, t in enumerate(types)]
+
+
+def type_color(naam):
+    return next((t["kleur"] for t in types_list() if t["naam"] == naam), None) if naam else None
 
 
 def delete_type(naam):
@@ -268,7 +276,7 @@ def scan(raw_code, door):
         ).fetchone()
         if row is None:
             return {"resultaat": "onbekend", "code": code}
-        base = {"code": code, "naam": row["naam"], "type": row["type"]}
+        base = {"code": code, "naam": row["naam"], "type": row["type"], "kleur": type_color(row["type"])}
         if not row["geldig"]:
             touch(row["id"], pogingen=row["pogingen"] + 1)
             return dict(base, resultaat="ongeldig")
@@ -841,8 +849,9 @@ class Handler(BaseHTTPRequestHandler):
         if not path.startswith(STATIC + os.sep) or not os.path.isfile(path):
             self.send_error(404)
             return
-        ctype = "application/javascript" if path.endswith(".js") else (
-            mimetypes.guess_type(path)[0] or "application/octet-stream")
+        ext = os.path.splitext(path)[1]
+        ctype = {".js": "application/javascript", ".woff2": "font/woff2", ".svg": "image/svg+xml",
+                 ".css": "text/css"}.get(ext) or mimetypes.guess_type(path)[0] or "application/octet-stream"
         with open(path, "rb") as f:
             body = f.read()
         self.send_response(200)

@@ -52,6 +52,42 @@ De kolom Binnen toont ✓ (groen) of ✗ (grijs). Een kolom met de oude waarden 
 
 Je mag kolommen in Notion hernoemen. De server herkent ze aan hun vaste ID en bewaart die in `notion_kolommen.json`. Verwijder je een kolom die de server nodig heeft, dan maakt hij die opnieuw aan.
 
+## Vormgeving
+
+De pagina's volgen de Making Waves-richtlijnen (thisismakingwaves.com/ui-design):
+
+- **Kleur**: ink als ondergrond en cream voor het ticket.
+- **Letters**: Outfit voor titels en getallen, Geist Mono voor labels.
+- **Accenten**: elk type krijgt een eigen accentkleur, in de volgorde magenta, oranje, paars, teal, groen, cerise en lime.
+- **Meldingen**: groen, oranje en magenta, met blinds-stroken.
+
+De lettertypen (OFL) en het MW-teken staan in `static/`. Er is dus geen internet nodig voor de opmaak.
+
+### QR-codes
+
+`static/qrstyle.js` tekent de codes zelf:
+
+- verticale blinds-balkjes in ink, op 78% van de modulebreedte;
+- afgeronde hoekogen in ink;
+- het MW-teken in het midden, in de kleur van het type, op 22% van de breedte;
+- een cream achtergrond;
+- foutcorrectie H.
+
+De grenzen zijn getest met de scanner die de iPhone gebruikt (qr-scanner) en met ZXing. Elke variant ging door 7 omstandigheden, telkens 6 keer: klein, wazig, scheef, gedraaid, schittering, slecht licht en alles samen. Uitkomsten bij de iPhone-scanner:
+
+| Variant | Gelezen |
+|---|---|
+| Klassieke vierkante code | 23 van 42 |
+| Deze stijl | 32 tot 36 van 42 |
+
+Deze stijl scoort hoger door de zwaardere foutcorrectie en het extra uitlijnpatroon. Waar de grens ligt:
+
+- **Logo**: tot ongeveer 26% van de breedte; bij 30% faalt de code.
+- **Balkjes**: dunner dan 78% scant duidelijk slechter.
+- **Hoekogen**: alleen in ink, paars of magenta. Oranje scant slecht en lime faalt.
+- **Kleuren omkeren**: licht op donker leest de iPhone niet.
+- **Logokleur**: maakt voor het scannen niet uit.
+
 ## Starten
 
 ```
