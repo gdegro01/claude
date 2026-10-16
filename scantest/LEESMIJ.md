@@ -7,6 +7,7 @@ QR-tickets tonen op een iPad, scannen met een telefoon, en de status volgen in N
 | Pagina | Apparaat | Toegang |
 |---|---|---|
 | `/admin` | laptop | wachtwoord |
+| `/dashboard` | laptop of groot scherm | wachtwoord |
 | `/show` | iPad | wachtwoord |
 | `/scan` | telefoon | PIN |
 
@@ -21,6 +22,19 @@ QR-tickets tonen op een iPad, scannen met een telefoon, en de status volgen in N
 - Bovenaan zie je welk ticket de iPad op dat moment toont.
 - Weigert Notion een wijziging, dan verschijnt een rode balk met de melding van Notion en de knop **Opnieuw proberen**.
 - **Alles wissen** (onderaan) verwijdert alle tickets, hier en in Notion, na bevestiging met het woord WISSEN. Je kiest of de typen blijven. De kolommen in Notion blijven staan.
+
+### `/dashboard`
+
+Een live overzicht voor tijdens het event, elke seconde bijgewerkt:
+
+- **Binnen**: aantal en percentage van de geldige tickets.
+- **Zojuist binnen**: de naam van de laatst gescande gast, in de kleur van het type.
+- **Per type**: per type hoeveel gasten binnen zijn van het totaal.
+- **No-show**: het deel van de geldige tickets dat nog niet gescand is, met de verdeling binnen, nog niet gescand en ongeldig.
+- **Instroom**: scans per 5 minuten.
+- **Laatste scans** en **Aan de deur**: de recentste scans, het tempo per minuut, dubbele scans en geweigerde pogingen.
+
+Bij elke nieuwe scan lichten de kaarten op in de kleur van het type.
 
 ### `/show`
 
@@ -43,6 +57,7 @@ QR-tickets tonen op een iPad, scannen met een telefoon, en de status volgen in N
 
 - Na de PIN en een naam voor de scanner blijft de camera doorscannen.
 - Bij elke scan krijg je groen, oranje of rood, met geluid en het type van het ticket.
+- Groen staat 0,9 seconde in beeld, oranje en rood 1,8 seconde. Daarna schuift de kleur in stroken omhoog weg. De camera leest dan alweer, dus de volgende gast kan direct. Een tik op het scherm sluit de melding meteen.
 - Met **Typen** voer je een code met de hand in.
 
 ### Notion

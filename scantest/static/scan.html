@@ -39,6 +39,27 @@
   .scan-region-highlight-svg{stroke:#D1FF90!important}
   .code-outline-highlight{stroke:#B8E22C!important}
 
+  /* uitslag: blinds in, even staan, blinds omhoog weg; de camera loopt eronder door */
+  #result{background:none;overflow:hidden}
+  #result.geldig{--fc:var(--green)}
+  #result.al_gescand{--fc:var(--orange)}
+  #result.ongeldig,#result.onbekend{--fc:var(--magenta)}
+  #result.fout{--fc:var(--ink-3)}
+  #result .bl{position:absolute;inset:0;display:flex;z-index:-1}
+  #result .bl i{flex:1;background-color:var(--fc);margin-right:-1px;transform-origin:50% 100%;
+    animation:blIn .2s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--k) * 14ms)}
+  #result .bl i:nth-child(even){background-image:linear-gradient(rgba(255,255,255,.08),rgba(255,255,255,.08))}
+  #result > :not(.bl){animation:fxIn .22s cubic-bezier(.2,.8,.2,1) .05s both}
+  #result .f-timer{position:absolute;left:0;right:0;bottom:0;height:6px;background:currentColor;opacity:.3;transform-origin:0 50%;
+    animation:timer var(--hold,1s) linear both}
+  #result.out .bl i{transform-origin:50% 0;animation:blOut .3s cubic-bezier(.55,0,.75,.35) both;animation-delay:calc(var(--k) * 22ms)}
+  #result.out > :not(.bl){animation:fxOut .16s ease-in both}
+  @keyframes blIn{from{transform:scaleY(0)}}
+  @keyframes blOut{to{transform:scaleY(0)}}
+  @keyframes fxIn{from{opacity:0;transform:translateY(16px)}}
+  @keyframes fxOut{to{opacity:0;transform:translateY(-20px)}}
+  @keyframes timer{to{transform:scaleX(0)}}
+
   /* handmatig */
   #manual{position:fixed;inset:0;background:rgba(12,13,17,.82);backdrop-filter:blur(6px);z-index:20;display:flex;align-items:flex-start;justify-content:center;padding:90px 20px}
   #manual .box{width:100%;max-width:440px;background:var(--ink-2);border-radius:var(--r-panel);padding:22px}
@@ -92,12 +113,14 @@
 </section>
 
 <section id="result" class="flash hidden" role="alert">
+  <div class="bl" id="blinds" aria-hidden="true"></div>
   <div class="f-eyebrow" id="rIcon"></div>
   <div class="f-title" id="rTitle"></div>
   <div class="f-type" id="rType"></div>
   <div class="f-naam" id="rNaam"></div>
   <div class="f-detail" id="rDetail"></div>
   <div class="f-tap">Tik om verder te scannen</div>
+  <div class="f-timer" aria-hidden="true"></div>
 </section>
 
 <script type="module">
@@ -116,10 +139,13 @@ let busy = false;
 let lastCode = "";
 let lastAt = 0;
 let hideTimer = null;
+let exitTimer = null;
 let admitted = 0;
 let audio = null;
 
-const RESULT_MS = 2200;      // zo lang blijft de kleur staan
+// zo lang blijft de kleur staan; daarna leest de camera direct weer
+const HOLD_MS = { geldig: 900, al_gescand: 1800, ongeldig: 1800, onbekend: 1800, fout: 2200 };
+const EXIT_MS = 520;         // duur van het wegschuiven
 const SAME_CODE_MS = 4000;   // dezelfde code binnen deze tijd negeren
 
 function show(id) {
@@ -172,8 +198,15 @@ const SOUNDS = {
 };
 const VIBRATE = { geldig: [80], al_gescand: [80, 60, 80], ongeldig: [400], onbekend: [400], fout: [200] };
 
+$("blinds").innerHTML = Array.from({ length: 10 }, (_, k) => `<i style="--k:${k}"></i>`).join("");
+
 function showResult(kind, data) {
   const r = $("result");
+  clearTimeout(hideTimer);
+  clearTimeout(exitTimer);
+  r.className = "flash hidden";
+  void r.offsetWidth; // animaties opnieuw starten
+  r.style.setProperty("--hold", HOLD_MS[kind] + "ms");
   r.className = "flash " + kind;
   const naam = data.naam || "";
   const texts = {
@@ -188,15 +221,18 @@ function showResult(kind, data) {
   $("rType").textContent = kind === "onbekend" || kind === "fout" ? "" : (data.type || "");
   beep(SOUNDS[kind]);
   try { navigator.vibrate && navigator.vibrate(VIBRATE[kind]); } catch (e) {}
-  clearTimeout(hideTimer);
-  hideTimer = setTimeout(hideResult, kind === "geldig" ? RESULT_MS : RESULT_MS + 1500);
+  hideTimer = setTimeout(hideResult, HOLD_MS[kind]);
 }
 
+// Bij het wegschuiven mag de volgende code al gelezen worden.
 function hideResult() {
   clearTimeout(hideTimer);
-  $("result").className = "flash hidden";
+  const r = $("result");
+  if (r.classList.contains("hidden") || r.classList.contains("out")) return;
   lastAt = Date.now();
   busy = false;
+  r.classList.add("out");
+  exitTimer = setTimeout(() => (r.className = "flash hidden"), EXIT_MS);
 }
 $("result").addEventListener("click", hideResult);
 

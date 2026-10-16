@@ -899,7 +899,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.redirect("/scan")
         if path == "/scan":
             return self.serve_static("scan.html")
-        if path in ("/admin", "/show"):
+        if path in ("/admin", "/show", "/dashboard"):
             if self.admin_ok():
                 self.serve_static(path[1:] + ".html")
             return

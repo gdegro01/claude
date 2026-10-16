@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard · Making Waves</title>
+<link rel="stylesheet" href="/static/mw.css">
+<style>
+  body{min-height:100vh}
+  main{max-width:1440px;margin:0 auto;padding:26px 32px 48px}
+  .top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:30px}
+  .brand{display:flex;align-items:center;gap:14px}
+  .live{display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text)}
+  .live i{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(13,193,60,.6);animation:live 2s infinite}
+  .live.off i{background:var(--ink-4);animation:none}
+  @keyframes live{0%{box-shadow:0 0 0 0 rgba(13,193,60,.55)}70%{box-shadow:0 0 0 10px rgba(13,193,60,0)}100%{box-shadow:0 0 0 0 rgba(13,193,60,0)}}
+  #clock{font-family:var(--display);font-weight:700;font-size:20px;color:#fff;font-variant-numeric:tabular-nums}
+  .spacer{flex:1}
+
+  .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+  .card{--c:var(--teal);position:relative;overflow:hidden;border-radius:var(--r-panel);padding:24px 26px 26px;min-height:150px;
+    background:radial-gradient(420px 240px at 100% 0%,color-mix(in srgb,var(--c) 26%,transparent),transparent 70%),var(--ink-2);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);display:flex;flex-direction:column;transition:box-shadow .6s var(--ease)}
+  .card .l{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--c);display:flex;align-items:center;gap:10px}
+  .card .l span{color:var(--muted)}
+  .span-7{grid-column:span 7}.span-5{grid-column:span 5}.span-4{grid-column:span 4}.span-8{grid-column:span 8}.span-6{grid-column:span 6}
+
+  /* oplichten bij een nieuwe scan */
+  .card.lit{animation:lit 1.6s var(--ease)}
+  @keyframes lit{0%{box-shadow:inset 0 0 0 2px var(--c),0 0 0 0 color-mix(in srgb,var(--c) 70%,transparent)}
+    35%{box-shadow:inset 0 0 0 2px var(--c),0 0 60px 6px color-mix(in srgb,var(--c) 45%,transparent)}
+    100%{box-shadow:inset 0 0 0 1px rgba(255,255,255,.06),0 0 0 0 transparent}}
+  .wash{position:fixed;inset:0;pointer-events:none;z-index:30;opacity:0;
+    background:radial-gradient(1200px 700px at 50% 30%,color-mix(in srgb,var(--c,#0DC13C) 22%,transparent),transparent 70%)}
+  .wash.on{animation:wash 1.4s var(--ease)}
+  @keyframes wash{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+
+  /* binnen */
+  .hero .v{font-family:var(--display);font-weight:800;font-size:150px;line-height:.9;letter-spacing:-.05em;color:#fff;margin-top:auto;padding-top:22px;font-variant-numeric:tabular-nums}
+  .hero .v small{font-size:58px;font-weight:700;color:var(--muted);letter-spacing:-.02em}
+  .hero .row{display:flex;align-items:center;gap:16px;margin-top:18px}
+  .bar{position:relative;flex:1;height:12px;border-radius:999px;background:var(--ink-deep);overflow:hidden}
+  .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:var(--c);transition:width .8s var(--ease)}
+  .pct{font-family:var(--display);font-weight:700;font-size:26px;color:#fff;min-width:80px;text-align:right;font-variant-numeric:tabular-nums}
+
+  /* zojuist binnen */
+  #last .naam{font-family:var(--display);font-weight:800;font-size:64px;line-height:.95;letter-spacing:-.04em;color:#fff;margin-top:auto;padding-top:22px;overflow-wrap:anywhere}
+  #last .meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:16px;font-size:13px;color:var(--muted)}
+  #last .lbl{font-size:13px}
+  #last .empty{margin-top:auto;font-family:var(--display);font-size:26px;color:var(--muted)}
+  .pop{animation:pop .7s var(--ease)}
+  @keyframes pop{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:none}}
+
+  /* per type: balk per type, spoor = totaal, vulling = binnen */
+  .types{display:flex;flex-direction:column;gap:16px;margin-top:22px}
+  .trow{display:grid;grid-template-columns:minmax(90px,150px) minmax(0,1fr) 92px;gap:14px;align-items:center}
+  .trow .n{font-family:var(--display);font-weight:600;font-size:17px;color:#fff;display:flex;align-items:center;gap:10px;min-width:0}
+  .trow .n i{width:10px;height:10px;border-radius:3px;flex:none}
+  .trow .n b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .track{position:relative;height:16px;border-radius:4px;background:var(--ink-deep)}
+  .track i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;transition:width .8s var(--ease);min-width:0}
+  .trow .c{font-family:var(--mono);font-size:13px;color:var(--text);text-align:right;font-variant-numeric:tabular-nums}
+  .trow .c span{color:var(--muted)}
+
+  /* no-show */
+  .ns .v{font-family:var(--display);font-weight:800;font-size:96px;line-height:.9;letter-spacing:-.05em;color:#fff;margin-top:22px;font-variant-numeric:tabular-nums}
+  .ns .v small{font-size:40px;color:var(--muted)}
+  .ns .sub{font-size:12px;color:var(--muted);margin-top:8px}
+  .stack{display:flex;gap:2px;height:16px;margin-top:auto;border-radius:4px;overflow:hidden}
+  .stack i{display:block;height:100%;transition:flex-grow .8s var(--ease)}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--text)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend i{width:10px;height:10px;border-radius:3px;display:block}
+
+  /* instroom */
+  .flow{display:flex;align-items:flex-end;gap:2px;height:150px;margin-top:auto;padding-top:20px}
+  .flow div{flex:1;position:relative;height:100%;display:flex;align-items:flex-end}
+  .flow i{display:block;width:100%;border-radius:4px 4px 0 0;background:var(--green);min-height:0;transition:height .6s var(--ease)}
+  .flow div:hover i{background:var(--lime-lt)}
+  .axis{display:flex;justify-content:space-between;font-size:11px;color:var(--faint);margin-top:8px;border-top:1px solid rgba(255,255,255,.08);padding-top:8px}
+  .flowpeak{font-size:12px;color:var(--muted);margin-top:6px}
+
+  /* feed */
+  .feed{display:flex;flex-direction:column;margin-top:16px}
+  .fi{display:grid;grid-template-columns:62px minmax(0,1fr) auto;gap:14px;align-items:center;padding:12px 0;border-top:1px solid rgba(255,255,255,.06)}
+  .fi:first-child{border-top:0}
+  .fi time{font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .fi b{font-family:var(--display);font-weight:600;font-size:18px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fi .lbl{font-size:10px}
+  .fi.new{animation:pop .7s var(--ease);background:linear-gradient(90deg,color-mix(in srgb,var(--green) 14%,transparent),transparent)}
+
+  .mini{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:20px}
+  .mini div{background:var(--ink-deep);border-radius:var(--r-card);padding:16px 18px}
+  .mini b{display:block;font-family:var(--display);font-weight:800;font-size:40px;letter-spacing:-.03em;color:#fff;font-variant-numeric:tabular-nums}
+  .mini span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+  #tip{position:fixed;z-index:40;pointer-events:none;background:#fff;color:var(--ink);font-size:12px;padding:7px 10px;border-radius:8px;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);white-space:nowrap}
+  #tip b{font-family:var(--display);font-size:14px}
+
+  @media (max-width:1100px){.span-7,.span-5,.span-4,.span-8,.span-6{grid-column:span 12}.hero .v{font-size:110px}}
+  @media (max-width:640px){main{padding:18px 16px 40px}.hero .v{font-size:84px}#last .naam{font-size:44px}.mini{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<div class="wash" id="wash"></div>
+<main>
+  <header class="top">
+    <div class="brand"><span class="mark"></span><span class="eyebrow">Making Waves · Scan Test</span></div>
+    <span class="live" id="live"><i></i>Live</span>
+    <span class="spacer"></span>
+    <span id="clock"></span>
+    <a class="btn" href="/admin">Admin</a>
+  </header>
+
+  <div class="grid">
+    <section class="card hero span-7" id="cBinnen" style="--c:var(--green)">
+      <div class="l">Binnen <span id="binnenSub"></span></div>
+      <div class="v" id="binnenV">0<small> / 0</small></div>
+      <div class="row"><div class="bar"><i id="binnenBar" style="width:0"></i></div><div class="pct" id="binnenPct">0%</div></div>
+    </section>
+
+    <section class="card span-5" id="last" style="--c:var(--magenta)">
+      <div class="l">Zojuist binnen</div>
+      <div id="lastBody"><div class="empty">Nog niemand gescand</div></div>
+    </section>
+
+    <section class="card span-4" id="cTypes" style="--c:var(--purple)">
+      <div class="l">Per type <span>binnen / totaal</span></div>
+      <div class="types" id="types"></div>
+    </section>
+
+    <section class="card ns span-4" id="cNoshow" style="--c:var(--orange)">
+      <div class="l">No-show</div>
+      <div class="v" id="nsV">0<small>%</small></div>
+      <div class="sub" id="nsSub"></div>
+      <div class="stack" id="nsStack"></div>
+      <div class="legend" id="nsLegend"></div>
+    </section>
+
+    <section class="card span-4" id="cFlow" style="--c:var(--teal)">
+      <div class="l">Instroom <span>per 5 minuten</span></div>
+      <div class="flowpeak" id="flowPeak"></div>
+      <div class="flow" id="flow"></div>
+      <div class="axis" id="flowAxis"></div>
+    </section>
+
+    <section class="card span-6" id="cFeed" style="--c:var(--lime)">
+      <div class="l">Laatste scans</div>
+      <div class="feed" id="feed"></div>
+    </section>
+
+    <section class="card span-6" id="cMini" style="--c:var(--cerise)">
+      <div class="l">Aan de deur</div>
+      <div class="mini">
+        <div><b id="mRate">0</b><span>Per minuut, laatste 5 min</span></div>
+        <div><b id="mDouble">0</b><span>Dubbel gescand</span></div>
+        <div><b id="mVoid">0</b><span>Ongeldig geprobeerd</span></div>
+      </div>
+    </section>
+  </div>
+</main>
+<div id="tip" class="hidden"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let tickets = [], types = [];
+let seen = null;            // id -> gescand_op van tickets die binnen zijn
+let feed = [];              // laatste scans, nieuwste eerst
+let lastJson = "";
+
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function hhmm(iso) {
+  const d = new Date(iso);
+  return isNaN(d) ? "" : d.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" });
+}
+function typeColor(name) { const t = types.find((x) => x.naam === name); return t ? t.kleur : "#8B8E9B"; }
+function typeLabel(name) { return name ? `<span class="lbl cat" style="--c:${typeColor(name)}">${esc(name)}</span>` : ""; }
+function pct(a, b) { return b ? Math.round((a / b) * 100) : 0; }
+
+function tick() { $("clock").textContent = new Date().toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit", second: "2-digit" }); }
+setInterval(tick, 1000); tick();
+
+async function load() {
+  try {
+    const res = await fetch("/api/admin/tickets", { cache: "no-store" });
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    $("live").classList.remove("off");
+    const json = JSON.stringify([data.tickets, data.types]);
+    if (json === lastJson) return;
+    lastJson = json;
+    tickets = data.tickets;
+    types = data.types || [];
+    update();
+  } catch (e) {
+    $("live").classList.add("off");
+  }
+}
+
+function update() {
+  const inside = tickets.filter((t) => t.binnen);
+  const fresh = [];
+  if (seen === null) {
+    feed = inside.slice().sort((a, b) => new Date(b.gescand_op) - new Date(a.gescand_op)).slice(0, 8);
+  } else {
+    for (const t of inside) if (!seen.has(t.id)) fresh.push(t);
+    fresh.sort((a, b) => new Date(a.gescand_op) - new Date(b.gescand_op));
+    for (const t of fresh) feed.unshift(t);
+    // teruggezette tickets uit de lijst halen
+    const ids = new Set(inside.map((t) => t.id));
+    feed = feed.filter((t) => ids.has(t.id)).slice(0, 8);
+  }
+  seen = new Set(inside.map((t) => t.id));
+
+  renderBinnen(inside);
+  renderLast(feed[0], fresh.length > 0);
+  renderTypes();
+  renderNoshow(inside);
+  renderFlow(inside);
+  renderFeed(fresh);
+  renderMini(inside);
+  if (fresh.length) celebrate(fresh[fresh.length - 1]);
+}
+
+function renderBinnen(inside) {
+  const geldig = tickets.filter((t) => t.geldig).length;
+  $("binnenV").innerHTML = `${inside.length}<small> / ${geldig}</small>`;
+  $("binnenBar").style.width = pct(inside.length, geldig) + "%";
+  $("binnenPct").textContent = pct(inside.length, geldig) + "%";
+  $("binnenSub").textContent = "van de geldige tickets";
+}
+
+function renderLast(t, isNew) {
+  if (!t) { $("lastBody").innerHTML = `<div class="empty">Nog niemand gescand</div>`; return; }
+  $("last").style.setProperty("--c", t.type ? typeColor(t.type) : "var(--magenta)");
+  $("lastBody").innerHTML = `<div class="naam${isNew ? " pop" : ""}">${esc(t.naam || "Zonder naam")}</div>
+    <div class="meta">${typeLabel(t.type)}<span>${hhmm(t.gescand_op)}${t.gescand_door ? " · " + esc(t.gescand_door) : ""}</span></div>`;
+  $("lastBody").style.display = "flex";
+  $("lastBody").style.flexDirection = "column";
+  $("lastBody").style.flex = "1";
+}
+
+function renderTypes() {
+  const groups = types.map((x) => ({ naam: x.naam, kleur: x.kleur, items: tickets.filter((t) => t.type === x.naam && t.geldig) }));
+  const untyped = tickets.filter((t) => !t.type && t.geldig);
+  if (untyped.length) groups.push({ naam: "Zonder type", kleur: "#8B8E9B", items: untyped });
+  const max = Math.max(1, ...groups.map((g) => g.items.length));
+  $("types").innerHTML = groups.length ? groups.map((g) => {
+    const b = g.items.filter((t) => t.binnen).length, n = g.items.length;
+    return `<div class="trow" data-tip="${esc(g.naam)}|${b} van ${n} binnen (${pct(b, n)}%)">
+      <div class="n"><i style="background:${g.kleur}"></i><b>${esc(g.naam)}</b></div>
+      <div class="track" style="width:${(n / max) * 100}%"><i style="width:${pct(b, n)}%;background:${g.kleur}"></i></div>
+      <div class="c">${b}<span> / ${n}</span></div></div>`;
+  }).join("") : `<div class="flowpeak">Nog geen tickets</div>`;
+}
+
+function renderNoshow(inside) {
+  const geldig = tickets.filter((t) => t.geldig);
+  const verwacht = geldig.length - inside.filter((t) => t.geldig).length;
+  const ongeldig = tickets.length - geldig.length;
+  $("nsV").innerHTML = `${pct(verwacht, geldig.length)}<small>%</small>`;
+  $("nsSub").textContent = `${verwacht} van ${geldig.length} geldige tickets nog niet gescand`;
+  const parts = [
+    { n: inside.length, c: "var(--green)", l: "Binnen" },
+    { n: verwacht, c: "var(--orange)", l: "Nog niet gescand" },
+    { n: ongeldig, c: "var(--ink-4)", l: "Ongeldig" },
+  ].filter((p) => p.n > 0);
+  $("nsStack").innerHTML = parts.map((p) => `<i style="flex-grow:${p.n};background:${p.c}" data-tip="${p.l}|${p.n} tickets"></i>`).join("");
+  $("nsLegend").innerHTML = parts.map((p) => `<span><i style="background:${p.c}"></i>${p.l} ${p.n}</span>`).join("");
+}
+
+function renderFlow(inside) {
+  const BIN = 5 * 60 * 1000, N = 12;
+  const end = Math.ceil(Date.now() / BIN) * BIN;
+  const counts = new Array(N).fill(0);
+  for (const t of inside) {
+    const k = N - 1 - Math.floor((end - 1 - new Date(t.gescand_op).getTime()) / BIN);
+    if (k >= 0 && k < N) counts[k]++;
+  }
+  const max = Math.max(1, ...counts);
+  $("flow").innerHTML = counts.map((c, k) => {
+    const from = new Date(end - (N - k) * BIN), to = new Date(end - (N - k - 1) * BIN);
+    const label = `${hhmm(from)}–${hhmm(to)}`;
+    return `<div data-tip="${label}|${c} binnen"><i style="height:${(c / max) * 100}%"></i></div>`;
+  }).join("");
+  $("flowAxis").innerHTML = `<span>${hhmm(new Date(end - N * BIN))}</span><span>${hhmm(new Date(end - N * BIN / 2))}</span><span>nu</span>`;
+  const top = Math.max(...counts);
+  $("flowPeak").textContent = top ? `Drukste blok: ${top} binnen` : "Nog geen scans in het afgelopen uur";
+}
+
+function renderFeed(fresh) {
+  const freshIds = new Set(fresh.map((t) => t.id));
+  $("feed").innerHTML = feed.length ? feed.map((t) => `<div class="fi${freshIds.has(t.id) ? " new" : ""}">
+      <time>${hhmm(t.gescand_op)}</time><b>${esc(t.naam || "Zonder naam")}</b>${typeLabel(t.type)}</div>`).join("")
+    : `<div class="flowpeak">De eerste scans verschijnen hier.</div>`;
+}
+
+function renderMini(inside) {
+  const since = Date.now() - 5 * 60 * 1000;
+  const recent = inside.filter((t) => new Date(t.gescand_op).getTime() >= since).length;
+  $("mRate").textContent = (recent / 5).toFixed(1).replace(".", ",");
+  $("mDouble").textContent = tickets.filter((t) => t.geldig && t.binnen).reduce((s, t) => s + Math.max(0, t.pogingen - 1), 0);
+  $("mVoid").textContent = tickets.filter((t) => !t.geldig).reduce((s, t) => s + t.pogingen, 0);
+}
+
+function celebrate(t) {
+  const c = t.type ? typeColor(t.type) : "#0DC13C";
+  for (const id of ["cBinnen", "last", "cTypes", "cNoshow", "cFlow", "cFeed"]) {
+    const el = $(id);
+    el.classList.remove("lit"); void el.offsetWidth; el.classList.add("lit");
+  }
+  const w = $("wash");
+  w.style.setProperty("--c", c);
+  w.classList.remove("on"); void w.offsetWidth; w.classList.add("on");
+}
+
+// tooltips
+document.addEventListener("mousemove", (e) => {
+  const el = e.target.closest("[data-tip]");
+  if (!el) return $("tip").classList.add("hidden");
+  const [a, b] = el.dataset.tip.split("|");
+  $("tip").innerHTML = `<b>${esc(a)}</b><br>${esc(b)}`;
+  $("tip").style.left = Math.min(window.innerWidth - 200, e.clientX + 14) + "px";
+  $("tip").style.top = e.clientY + 14 + "px";
+  $("tip").classList.remove("hidden");
+});
+
+load();
+setInterval(() => { if (!document.hidden) load(); }, 1000);
+setInterval(() => { if (tickets.length) { renderFlow(tickets.filter((t) => t.binnen)); renderMini(tickets.filter((t) => t.binnen)); } }, 30000);
+</script>
+</body>
+</html>
