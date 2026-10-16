@@ -28,7 +28,7 @@ QR-tickets tonen op een iPad, scannen met een telefoon, en de status volgen in N
 Een live overzicht voor tijdens het event, elke seconde bijgewerkt:
 
 - **Binnen**: aantal en percentage van de geldige tickets.
-- **Zojuist binnen**: de naam van de laatst gescande gast, in de kleur van het type.
+- **Laatste scan**: de naam van de laatst gescande gast, in de kleur van het type.
 - **Per type**: per type hoeveel gasten binnen zijn van het totaal.
 - **No-show**: het deel van de geldige tickets dat nog niet gescand is, met de verdeling binnen, nog niet gescand en ongeldig.
 - **Instroom**: scans per 5 minuten.
