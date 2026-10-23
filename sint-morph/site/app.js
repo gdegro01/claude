@@ -144,7 +144,8 @@ function claudeHtml(clip) {
     if (me.flags?.length) parts.push(`<span class="flags">${esc(me.flags.join(" · "))}</span>`);
   }
   const verdict = ev ? `<span class="badge v-${esc(ev.verdict)}">Claude: ${esc(ev.verdict)}${ev.best ? " ★" : ""}</span>` : "";
-  const sheet = me?.sheet ? ` <a href="${url(me.sheet)}" target="_blank" rel="noopener">contactblad</a>` : "";
+  const sheet = (me?.sheet ? ` <a href="${url(me.sheet)}" target="_blank" rel="noopener">contactblad</a>` : "") +
+    (me?.detail ? ` <a href="${url(me.detail)}" target="_blank" rel="noopener">detail</a>` : "");
   return `<div class="claude">${verdict}${sheet}${ev?.note ? `<p>${esc(ev.note)}</p>` : ""}
     ${parts.length ? `<div class="metrics">${parts.join("<br>")}</div>` : ""}</div>`;
 }

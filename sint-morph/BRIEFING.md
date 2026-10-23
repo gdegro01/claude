@@ -16,7 +16,9 @@ Eisen aan een goede clip:
 4. **Vloeiend en geloofwaardig**: geen sprongen, geen vervormde handen of smeltende gezichten.
 5. **30 fps** (voor versnellen en vertragen in het spel), lengte rond de 5 seconden.
 
-**Budget: maximaal $16 aan fal.ai** (ongeveer €15). `run_test.py` houdt de uitgaven bij en weigert alles wat erboven komt (`budget_usd` in `config.json`; niet verhogen).
+**Budget: maximaal $22 aan fal.ai** (ongeveer €20). `run_test.py` houdt de uitgaven bij en weigert alles wat erboven komt (`budget_usd` in `config.json`; niet verhogen). Zuinig zijn is geen doel: gebruik het budget om tot goede, foutloze clips te komen, met opnieuw maken waar nodig.
+
+**Begin met één clip.** Gerke wil vóór vertrek zien of het de goede kant op gaat: na het uitlijnen eerst 1 persoon × `kling3-std` × `v1` (`plan --count 1 --models kling3-std --variants v1 --note "snelle eerste test"`), meten, het contactblad zelf bekijken en in maximaal 5 regels melden wat je ziet en wat het kostte. Daarna pas de rest.
 
 ## Paden
 
@@ -113,9 +115,22 @@ Gericht herhalen: `plan --persons a,b --variants v1,v3 --models kling-o3-std,see
 
 Daarbovenop reserveert het script max $0,10 per clip voor FILM-interpolatie naar 30 fps.
 
-## Stap 5: zelf beoordelen
+## Stap 5: zelf controleren en beoordelen (verplicht, elke ronde)
 
-`evaluate.py measure` maakt per clip `runs/<run>/eval/<clip>_sheet.jpg`: 21 frames (elke 0,25 s, 3 s rood omrand) met daaronder een grafiek. Blauw: lijkt op de Sint. Groen: lijkt op de persoon. Bekijk **elk** contactblad zelf. Twijfel je over een moment, haal dan dat frame op volle grootte eruit:
+Wacht niet op Gerke en sla dit nooit over. Na **elke** ronde bekijk je **elke** clip zelf, voordat je de volgende ronde plant. Het doel is dat er in de beste voorbeelden geen enkele glitch of misalignment zit.
+
+`evaluate.py measure` maakt per clip twee beelden. Bekijk ze **allebei**:
+
+- `runs/<run>/eval/<clip>_sheet.jpg`: 21 frames over de hele clip (elke 0,25 s, 3 s rood omrand), met een grafiek. Blauw: lijkt op de Sint. Groen: lijkt op de persoon.
+- `runs/<run>/eval/<clip>_detail.jpg`: 21 frames, elke 0,1 s, rond het onthullingsmoment. Daar zitten de meeste fouten. Een rood omrand frame is een mogelijke glitch.
+
+Waar je actief naar zoekt:
+
+- **Glitches**: een frame dat flitst of anders is dan zijn buren, een vlek, een hand of vinger die even verschijnt of verdwijnt, een gezicht dat één frame vervormt, een mijter of baard die springt.
+- **Misalignment**: het eerste frame is niet precies de Sint (verschoven, ingezoomd, andere uitsnede of kleur), of het laatste frame landt niet precies op het eindframe. Vergelijk zelf het laatste frame met `frames/end/<slug>.png` en het eerste met `frames/start/sint.png`.
+- **Ongeloofwaardige anatomie**: extra vingers, smeltende gezichten, armen die door het lichaam gaan.
+
+Twijfel je over een moment, haal dan dat frame op volle grootte eruit:
 
 ```bash
 ffmpeg -loglevel error -ss 2.8 -i runs/<run>/fps30/<clip>.mp4 -frames:v 1 /tmp/f.png
@@ -130,6 +145,9 @@ Metingen die meehelpen (in `runs/<run>/eval/metrics.json`):
 | `fade_score` (mix van begin en eind) | < 0,6 | ≥ 0,8: fade of dubbelbeeld |
 | `jump_ratio` + `jump_size` | geen vlag | vlag: knip of sprong |
 | `end_sim_last`, aansluiting eind | ≥ 0,8 | eindframe niet gehaald |
+| `glitches_s` (op de originele frames) | leeg | elk tijdstip: bekijken, meestal opnieuw |
+| `begin_/eind_shift_pct`, `_scale` | < 1,5 % en schaal 0,98 tot 1,02 | misalignment: opnieuw |
+| `begin_/eind_color` | < 10 | kleurverschil: zichtbare schok in het spel |
 
 Metingen zijn hulpmiddelen; jouw blik op de frames beslist. Een vervormde hand of een smeltend gezicht zie je alleen door te kijken.
 
@@ -141,7 +159,9 @@ Oordeel per clip, en leg het vast:
 
 - **goed**: alle vijf eisen in orde.
 - **twijfel**: één eis net niet (bijvoorbeeld onthulling op 2,7 s, of een korte vreemde hand).
-- **onvoldoende**: fade of dubbelbeeld, te vroege onthulling, vervormingen, sprong, of eindframe gemist.
+- **onvoldoende**: fade of dubbelbeeld, te vroege onthulling, vervormingen, sprong, glitch, misalignment, of eindframe gemist.
+
+**Opnieuw maken** bij een glitch, misalignment of eenmalige vervorming, zonder te wachten: maak dezelfde persoon, variant en model nog een keer als nieuwe run (`plan --persons <slug> --variants <v> --models <model> --note "opnieuw: glitch bij 3,2 s in <run>/<clip>"`). Komt dezelfde fout terug, verander dan eerst de prompt (nieuwe variant), daarna het model. Een clip met een glitch komt nooit bij de beste voorbeelden.
 - `--best`: de clips die Gerke als eerste moet zien. Dat zijn er uiteindelijk 4 tot 8, van verschillende personen, met het aanbevolen recept voorop.
 
 ## Bijsturen
@@ -161,7 +181,7 @@ Nieuwe of aangepaste prompts zet je als **nieuwe variant** in `prompts/varianten
 
 Stop met genereren zodra een van deze waar is:
 
-- je hebt minstens 6 clips met oordeel `goed`, van minstens 4 personen, en het recept werkte ook op personen die je niet eerder gebruikte;
+- je hebt minstens 6 clips met oordeel `goed` zonder glitch of misalignment, van minstens 4 personen, en het recept werkte ook op personen die je niet eerder gebruikte;
 - er is minder dan $1 budget over;
 - er zijn ruim 3 uur verstreken.
 

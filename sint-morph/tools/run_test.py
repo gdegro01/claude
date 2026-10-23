@@ -163,7 +163,7 @@ def print_plan(plan: dict) -> None:
     n = len(plan["persons"]) * len(plan["models"])
     total += FILM_BUDGET_PER_CLIP * n
     print(f"  FILM-interpolatie        {n} clips  max ${FILM_BUDGET_PER_CLIP * n:.2f} gereserveerd")
-    spent, budget = spent_usd(), float(load_config().get("budget_usd", 16))
+    spent, budget = spent_usd(), float(load_config().get("budget_usd", 22))
     print(f"  Deze run: ${total:.2f}   al uitgegeven: ${spent:.2f}   budget: ${budget:.2f}   "
           f"daarna over: ${budget - spent - total:.2f}")
     print(f"\nVul ontbrekende velden in prompts/personen.json in en start met:\n"
@@ -410,7 +410,7 @@ def spent_usd(per_run: dict | None = None) -> float:
 
 
 def check_budget(new_cost: float, cfg: dict) -> None:
-    budget = float(cfg.get("budget_usd", 16))
+    budget = float(cfg.get("budget_usd", 22))
     spent = spent_usd()
     if spent + new_cost > budget + 1e-9:
         raise SystemExit(
@@ -421,7 +421,7 @@ def check_budget(new_cost: float, cfg: dict) -> None:
 def cmd_budget(args, cfg) -> None:
     per_run = {}
     spent = spent_usd(per_run)
-    budget = float(cfg.get("budget_usd", 16))
+    budget = float(cfg.get("budget_usd", 22))
     for run_id, amount in sorted(per_run.items()):
         print(f"  {run_id:<22} ${amount:.2f}")
     print(f"Uitgegeven (schatting): ${spent:.2f} van ${budget:.2f}; over: ${budget - spent:.2f}")

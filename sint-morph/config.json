@@ -10,6 +10,6 @@
   "duration_s": 5,
   "models": ["kling3-std", "flux3-max"],
   "interpolation": "film",
-  "budget_usd": 16,
+  "budget_usd": 22,
   "server_port": 8765
 }

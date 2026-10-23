@@ -14,6 +14,9 @@ Metrics per clip, all on the region where start and end frame differ (the person
                        high means crossfade / double exposure
   jump_ratio           biggest frame-to-frame change divided by the 90th percentile; together
                        with jump_size (0-255) it flags cuts and sudden pops
+  glitches_s           moments where one frame differs sharply from both neighbours (raw video)
+  begin/eind_shift_pct first/last model frame vs start/end frame: shift in % of the width,
+  begin/eind_scale     zoom factor and mean colour difference (misalignment checks)
 """
 from __future__ import annotations
 
@@ -60,6 +63,77 @@ def read_frames(path: Path, sheet_step: float = 0.25) -> tuple[list[np.ndarray],
     if last is not None:
         keep[i - 1] = last
     return small, keep, fps
+
+
+def _gray(img: np.ndarray) -> np.ndarray:
+    g = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2GRAY).astype(np.float32)
+    return (g - g.mean()) / (g.std() + 1e-6)
+
+
+def alignment_to(frame: np.ndarray, ref: np.ndarray) -> tuple[float | None, float | None]:
+    """Shift (% of width) and scale of `frame` relative to `ref`, via ECC (affine)."""
+    warp = np.eye(2, 3, dtype=np.float32)
+    try:
+        _, warp = cv2.findTransformECC(_gray(ref), _gray(frame), warp, cv2.MOTION_AFFINE,
+                                       (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 200, 1e-6), None, 5)
+    except cv2.error:
+        return None, None
+    scale = float(np.sqrt(abs(np.linalg.det(warp[:, :2]))))
+    shift = float(np.hypot(warp[0, 2], warp[1, 2])) / frame.shape[1] * 100
+    return round(shift, 2), round(scale, 4)
+
+
+def find_glitches(frames: list[np.ndarray], fps: float) -> tuple[list[float], float]:
+    """Frames that differ sharply from both neighbours while the neighbours agree with each
+    other: one-frame flickers, pops and blobs. Checked per tile, so local glitches count."""
+    hits, worst = [], 0.0
+    h, w = frames[0].shape[:2]
+    ys, xs = np.linspace(0, h, 4, dtype=int), np.linspace(0, w, 4, dtype=int)
+    for i in range(1, len(frames) - 1):
+        a, b, c = frames[i] - frames[i - 1], frames[i + 1] - frames[i], frames[i + 1] - frames[i - 1]
+        score = 0.0
+        for y0, y1 in zip(ys[:-1], ys[1:]):
+            for x0, x1 in zip(xs[:-1], xs[1:]):
+                da = float(np.abs(a[y0:y1, x0:x1]).mean())
+                db = float(np.abs(b[y0:y1, x0:x1]).mean())
+                dc = float(np.abs(c[y0:y1, x0:x1]).mean())
+                if min(da, db) > 5:
+                    score = max(score, min(da, db) / max(dc, 0.5))
+        worst = max(worst, score)
+        if score > 3:
+            t = round(i / fps, 2)
+            if not hits or t - hits[-1] > 0.15:
+                hits.append(t)
+    return hits, round(worst, 1)
+
+
+def raw_checks(raw: Path, start_png: Path, end_png: Path) -> dict:
+    """Glitches and misalignment, measured on the model's own frames (before interpolation)."""
+    small, _, fps = read_frames(raw, sheet_step=1e9)
+    h, w = small[0].shape[:2]
+    S = fit(cv2.imread(str(start_png)), w, h).astype(np.float32)
+    E = fit(cv2.imread(str(end_png)), w, h).astype(np.float32)
+    glitches, worst = find_glitches(small, fps)
+    b_shift, b_scale = alignment_to(small[0], S)
+    e_shift, e_scale = alignment_to(small[-1], E)
+    color = lambda a, b: round(float(np.abs(a.mean(axis=(0, 1)) - b.mean(axis=(0, 1))).max()), 1)  # noqa: E731
+    return {"glitches_s": glitches, "glitch_score": worst,
+            "begin_shift_pct": b_shift, "begin_scale": b_scale, "begin_color": color(small[0], S),
+            "eind_shift_pct": e_shift, "eind_scale": e_scale, "eind_color": color(small[-1], E)}
+
+
+def grab(video: Path, indices: set[int]) -> dict:
+    cap = cv2.VideoCapture(str(video))
+    out, i = {}, 0
+    while indices - out.keys():
+        ok, f = cap.read()
+        if not ok:
+            break
+        if i in indices:
+            out[i] = f
+        i += 1
+    cap.release()
+    return out
 
 
 def measure_clip(video: Path, start_png: Path, end_png: Path) -> tuple[dict, dict, dict]:
@@ -181,6 +255,52 @@ def contact_sheet(full: dict, fps: float, curves: dict, metrics: dict,
     cv2.imwrite(str(out), np.vstack([head, grid, chart]), [cv2.IMWRITE_JPEG_QUALITY, 85])
 
 
+def detail_sheet(video: Path, fps: float, n: int, metrics: dict, title: str, out: Path,
+                 step: float = 0.1, cols: int = 7, tile_w: int = 230) -> None:
+    """21 frames, 0.1 s apart, around the reveal; frames near a glitch get a red border."""
+    dur = n / fps
+    center = metrics["reveal_s"] if metrics.get("reveal_s") is not None else 0.6 * dur
+    t0 = min(max(0.0, center - 1.0), max(0.0, dur - 2.0))
+    times = [round(t0 + k * step, 2) for k in range(21)]
+    idx = {ts: min(n - 1, int(round(ts * fps))) for ts in times}
+    frames = grab(video, set(idx.values()))
+    tiles = []
+    for ts in times:
+        f = frames.get(idx[ts])
+        if f is None:
+            continue
+        tile = cv2.resize(f, (tile_w, round(f.shape[0] * tile_w / f.shape[1])), interpolation=cv2.INTER_AREA)
+        cv2.rectangle(tile, (0, 0), (tile_w, 22), (0, 0, 0), -1)
+        cv2.putText(tile, f"{ts:.2f}s", (6, 16), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1, cv2.LINE_AA)
+        if any(abs(ts - g) <= 0.06 for g in metrics.get("glitches_s", [])):
+            cv2.rectangle(tile, (0, 0), (tile_w - 1, tile.shape[0] - 1), (0, 0, 255), 4)
+        tiles.append(tile)
+    if not tiles:
+        return
+    th = tiles[0].shape[0]
+    while len(tiles) % cols:
+        tiles.append(np.zeros((th, tile_w, 3), np.uint8))
+    grid = np.vstack([np.hstack(tiles[r:r + cols]) for r in range(0, len(tiles), cols)])
+    head = np.full((44, grid.shape[1], 3), 255, np.uint8)
+    cv2.putText(head, f"{title}   detail {times[0]:.1f}-{times[-1]:.1f} s (rood = mogelijke glitch)",
+                (10, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (20, 20, 20), 1, cv2.LINE_AA)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(str(out), np.vstack([head, grid]), [cv2.IMWRITE_JPEG_QUALITY, 85])
+
+
+def check_flags(m: dict) -> list[str]:
+    flags = [f"glitch bij {g} s" for g in m.get("glitches_s", [])]
+    for side in ("begin", "eind"):
+        shift, scale = m.get(f"{side}_shift_pct"), m.get(f"{side}_scale")
+        if shift is None:
+            flags.append(f"uitlijning {side} niet meetbaar, bekijk zelf")
+        elif shift > 1.5 or abs(scale - 1) > 0.02:
+            flags.append(f"misalignment {side} ({shift}% verschoven, schaal {scale})")
+        if m.get(f"{side}_color", 0) > 10:
+            flags.append(f"kleurverschil {side} ({m[f'{side}_color']})")
+    return flags
+
+
 def cmd_measure(args) -> None:
     run_dir = RUNS / args.run_id
     man = read_json(run_dir / "manifest.json")
@@ -196,11 +316,17 @@ def cmd_measure(args) -> None:
         video = KIT / c["files"]["fps30"]
         person = persons[c["person"]]
         try:
-            metrics, full, curves = measure_clip(video, KIT / man["start"]["file"], KIT / person["end_file"])
-            sheet = run_dir / "eval" / f"{c['id']}_sheet.jpg"
+            start_png, end_png = KIT / man["start"]["file"], KIT / person["end_file"]
+            metrics, full, curves = measure_clip(video, start_png, end_png)
+            if c["files"].get("raw"):
+                metrics.update(raw_checks(KIT / c["files"]["raw"], start_png, end_png))
+                metrics["flags"] += check_flags(metrics)
             title = f"{person['name']} | {c['model_label']} | {person['variant']}"
+            sheet = run_dir / "eval" / f"{c['id']}_sheet.jpg"
             contact_sheet(full, curves["fps"], curves, metrics, title, sheet)
-            metrics["sheet"] = rel(sheet)
+            detail = run_dir / "eval" / f"{c['id']}_detail.jpg"
+            detail_sheet(video, curves["fps"], len(curves["t"]), metrics, title, detail)
+            metrics.update(sheet=rel(sheet), detail=rel(detail))
             results[c["id"]] = metrics
             print(f"  {c['id']:<30} onthulling {str(metrics['reveal_s']):>5} s  verborgen {metrics['hidden_s']:>4} s  "
                   f"fade {metrics['fade_score']:<4}  sprong x{metrics['jump_ratio']:<5} {'; '.join(metrics['flags'])}")
