@@ -17,6 +17,7 @@ import http.server
 import json
 import posixpath
 import re
+import socket
 import sys
 import threading
 import urllib.parse
@@ -265,6 +266,20 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         super().end_headers()
 
 
+def port_taken(port: int) -> bool:
+    """True if anything answers on this port via IPv4 or IPv6. A browser may resolve
+    'localhost' to ::1, so a server there would hide ours behind the same address."""
+    for family, host in ((socket.AF_INET, "127.0.0.1"), (socket.AF_INET6, "::1")):
+        try:
+            with socket.socket(family, socket.SOCK_STREAM) as s:
+                s.settimeout(0.3)
+                if s.connect_ex((host, port)) == 0:
+                    return True
+        except OSError:
+            continue
+    return False
+
+
 def main() -> None:
     global DATA
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -276,7 +291,10 @@ def main() -> None:
     DATA = Path(args.kit).expanduser().resolve() if args.kit else KIT
     port = args.port or int(read_json(DATA / "config.json", {}).get("server_port", 8765))
     server = None
-    for p in range(port, port + 10):
+    for p in range(port, port + 20):
+        if port_taken(p):
+            print(f"Poort {p} is al in gebruik door een ander programma, ik neem een andere.", flush=True)
+            continue
         try:
             server = http.server.ThreadingHTTPServer((args.host, p), Handler)
             port = p
@@ -285,8 +303,8 @@ def main() -> None:
             continue
     if server is None:
         raise SystemExit(f"Geen vrije poort gevonden vanaf {port}")
-    url = f"http://localhost:{port}"
-    print(f"Sint-morph: {url}  (data uit {DATA}; stoppen met Ctrl+C)", flush=True)
+    url = f"http://127.0.0.1:{port}"
+    print(f"Sint-morph: open {url}  (data uit {DATA}; stoppen met Ctrl+C)", flush=True)
     if args.open:
         threading.Timer(0.6, lambda: webbrowser.open(url)).start()
     try:
