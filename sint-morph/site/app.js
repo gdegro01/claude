@@ -63,7 +63,7 @@ async function loadRun(runId, keepPlayback = false) {
   state.metrics = data.metrics || {};
   if (!keepPlayback || changed) renderVideos();
   renderSummary();
-  history.replaceState(null, "", `?run=${encodeURIComponent(runId)}`);
+  if (!$("#videos").hidden) history.replaceState(null, "", `?tab=videos&run=${encodeURIComponent(runId)}`);
 }
 
 setInterval(() => {
@@ -328,6 +328,7 @@ function setActive(player) {
 
 document.addEventListener("keydown", (e) => {
   if (e.target.closest("textarea, input, select")) return;
+  if (!$("#modal").hidden || $("#videos").hidden) return;
   const pl = state.active || state.players[0];
   if (!pl) return;
   if (e.code === "Space") { e.preventDefault(); setActive(pl); pl.toggle(); }
@@ -354,12 +355,17 @@ $("#speed").addEventListener("click", (e) => {
 $("#loop").addEventListener("change", (e) => { state.loop = e.target.checked; });
 $("#run").addEventListener("change", (e) => loadRun(e.target.value));
 
-document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => {
-  document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t === tab));
-  document.querySelectorAll(".view").forEach((v) => { v.hidden = v.id !== tab.dataset.tab; });
-  if (tab.dataset.tab === "align") renderAlign();
-  else state.players.forEach((p) => p.pause());
-}));
+function showTab(name) {
+  if (!["overview", "videos", "align"].includes(name)) name = "overview";
+  if (name !== "videos") history.replaceState(null, "", name === "overview" ? location.pathname : `?tab=${name}`);
+  document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === name));
+  document.querySelectorAll(".view").forEach((v) => { v.hidden = v.id !== name; });
+  $(".run-select").hidden = name !== "videos";
+  if (name !== "videos") state.players.forEach((p) => p.pause());
+  if (name === "align") renderAlign();
+  if (name === "overview") loadOverview();
+}
+document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => showTab(tab.dataset.tab)));
 
 /* ---------- alignment view ---------- */
 
@@ -404,4 +410,233 @@ async function renderAlign() {
 }
 $("#only-issues").addEventListener("change", renderAlign);
 
+/* ---------- overview: sessions, gallery, player ---------- */
+
+const ov = { data: null, filter: "all", model: "", run: "", list: [], index: -1, speed: 1 };
+const VERDICT_LABEL = { goed: "Goed", twijfel: "Twijfel", onvoldoende: "Onvoldoende" };
+
+function fmtTime(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return d.toLocaleString("nl-NL", { weekday: "short", hour: "2-digit", minute: "2-digit" });
+}
+
+async function loadOverview() {
+  try {
+    ov.data = await api("/api/overview");
+  } catch (e) {
+    $("#ov-runs").innerHTML = `<p class="empty">Kan overzicht niet laden: ${esc(e.message)}</p>`;
+    return;
+  }
+  renderStats();
+  renderRunCards();
+  renderFilters();
+  renderGallery();
+}
+
+function renderStats() {
+  const d = ov.data;
+  const n = (f) => d.clips.filter(f).length;
+  const done = n((c) => c.status === "klaar");
+  const busy = n((c) => ["gepland", "ingediend", "nabewerken"].includes(c.status));
+  const fail = n((c) => c.status === "fout");
+  const v = (k) => n((c) => c.eval?.verdict === k);
+  const best = n((c) => c.eval?.best);
+  const pct = d.budget ? Math.min(100, (d.spent / d.budget) * 100) : 0;
+  $("#ov-stats").innerHTML = `
+    <div class="stat"><b>${d.runs.length}</b><span>sessies</span></div>
+    <div class="stat"><b>${done}</b><span>filmpjes klaar${busy ? ` · ${busy} bezig` : ""}${fail ? ` · ${fail} fout` : ""}</span></div>
+    <div class="stat"><b class="c-good">${v("goed")}</b><span>goed volgens Claude · <span class="c-doubt">${v("twijfel")} twijfel</span> · <span class="c-bad">${v("onvoldoende")} onvoldoende</span></span></div>
+    <div class="stat"><b>★ ${best}</b><span>beste voorbeelden</span></div>
+    <div class="stat wide"><b>$${nl(d.spent)}</b><span>van $${nl(d.budget)} uitgegeven</span>
+      <div class="bar"><i style="width:${pct}%"></i></div></div>
+    <div class="stat muted"><span>bijgewerkt ${esc(fmtTime(d.now))} · ververst elke 15 s</span></div>`;
+}
+
+function renderRunCards() {
+  const d = ov.data;
+  if (!d.runs.length) {
+    $("#ov-runs").innerHTML = `<p class="empty">Nog geen sessies. Zodra de sessie op je Mac de eerste run start, verschijnt die hier.</p>`;
+    return;
+  }
+  $("#ov-runs").innerHTML = d.runs.map((r) => {
+    const st = Object.entries(r.states).map(([k, v]) => `<span class="pill s-${esc(k)}">${v} ${esc(k)}</span>`).join("");
+    const vd = ["goed", "twijfel", "onvoldoende"].filter((k) => r.verdicts[k])
+      .map((k) => `<span class="pill v-${k}">${r.verdicts[k]} ${k}</span>`).join("");
+    return `<article class="run-card" data-run="${esc(r.run_id)}">
+      <div class="run-top"><h3>${esc(r.run_id)}</h3><span class="muted">${esc(fmtTime(r.created))}</span></div>
+      ${r.note ? `<p class="note">${esc(r.note)}</p>` : ""}
+      <p class="muted small">${esc(r.persons.join(", "))}</p>
+      <p class="muted small">${esc(r.models.join(" · "))}</p>
+      <div class="pills">${st || `<span class="pill">alleen plan</span>`}${vd}</div>
+      <div class="run-foot"><span>$${nl(r.spent)}</span>
+        <span class="links"><button class="link" data-act="gallery">filmpjes</button>
+        <button class="link" data-act="compare">vergelijken ›</button></span></div>
+    </article>`;
+  }).join("");
+  $("#ov-runs").querySelectorAll(".run-card").forEach((card) => {
+    card.querySelector('[data-act="compare"]').addEventListener("click", async () => {
+      $("#run").value = card.dataset.run;
+      showTab("videos");
+      await loadRun(card.dataset.run);
+    });
+    card.querySelector('[data-act="gallery"]').addEventListener("click", () => {
+      ov.run = card.dataset.run;
+      $("#f-run").value = ov.run;
+      renderGallery();
+      $("#ov-gallery").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+}
+
+function renderFilters() {
+  const d = ov.data;
+  const models = [...new Map(d.clips.map((c) => [c.model, c.model_label])).entries()];
+  $("#f-model").innerHTML = `<option value="">Alle modellen</option>` +
+    models.map(([k, l]) => `<option value="${esc(k)}">${esc(l)}</option>`).join("");
+  $("#f-model").value = ov.model;
+  $("#f-run").innerHTML = `<option value="">Alle sessies</option>` +
+    d.runs.map((r) => `<option value="${esc(r.run_id)}">${esc(r.run_id)}</option>`).join("");
+  $("#f-run").value = ov.run;
+}
+
+function filtered() {
+  const f = ov.filter;
+  return ov.data.clips.filter((c) => {
+    if (ov.model && c.model !== ov.model) return false;
+    if (ov.run && c.run_id !== ov.run) return false;
+    if (f === "all") return true;
+    if (f === "best") return c.eval?.best;
+    if (f === "open") return c.status === "klaar" && !c.eval?.verdict;
+    if (f === "busy") return c.status !== "klaar";
+    return c.eval?.verdict === f;
+  });
+}
+
+function badges(c) {
+  const out = [];
+  if (c.eval?.verdict) out.push(`<span class="badge v-${esc(c.eval.verdict)}">Claude: ${esc(c.eval.verdict)}${c.eval.best ? " ★" : ""}</span>`);
+  if (c.rating?.rating) out.push(`<span class="badge g-${esc(c.rating.rating)}">jij: ${esc(c.rating.rating)}</span>`);
+  if (c.metrics?.flags?.length) out.push(`<span class="badge flag" title="${esc(c.metrics.flags.join(" · "))}">${c.metrics.flags.length} signaal${c.metrics.flags.length > 1 ? "en" : ""}</span>`);
+  return out.join("");
+}
+
+function renderGallery() {
+  ov.list = filtered();
+  const box = $("#ov-gallery");
+  if (!ov.list.length) {
+    box.innerHTML = `<p class="empty">Geen filmpjes bij dit filter.</p>`;
+    return;
+  }
+  box.innerHTML = ov.list.map((c, i) => {
+    const poster = c.files?.poster_first ? url(c.files.poster_first) : "";
+    const media = c.status === "klaar" && c.files?.fps30
+      ? `<video muted loop playsinline preload="none" ${poster ? `poster="${poster}"` : ""} data-src="${url(c.files.fps30)}"></video>`
+      : `<div class="tile-ph ${c.status === "fout" ? "err" : ""}">${esc(c.status === "fout" ? "mislukt" : c.status)}</div>`;
+    return `<figure class="tile" data-i="${i}">${media}
+      <figcaption><b>${esc(c.person)}</b><span>${esc(c.model_label)}</span>
+        <span class="muted small">${esc(c.variant)} ${esc(c.variant_naam)} · ${esc(c.run_id)}</span>
+        <span class="tile-badges">${badges(c)}</span></figcaption></figure>`;
+  }).join("");
+  box.querySelectorAll(".tile").forEach((tile) => {
+    const v = tile.querySelector("video");
+    if (v) {
+      tile.addEventListener("mouseenter", () => { if (!v.src) v.src = v.dataset.src; v.play().catch(() => {}); });
+      tile.addEventListener("mouseleave", () => { v.pause(); });
+    }
+    tile.addEventListener("click", () => openModal(Number(tile.dataset.i)));
+  });
+}
+
+$("#f-verdict").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  ov.filter = b.dataset.f;
+  $("#f-verdict").querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
+  renderGallery();
+});
+$("#f-model").addEventListener("change", (e) => { ov.model = e.target.value; renderGallery(); });
+$("#f-run").addEventListener("change", (e) => { ov.run = e.target.value; renderGallery(); });
+
+function openModal(i) {
+  if (i < 0 || i >= ov.list.length) return;
+  ov.index = i;
+  const c = ov.list[i];
+  const v = $("#m-video");
+  if (c.status === "klaar" && c.files?.fps30) {
+    v.hidden = false;
+    v.src = url(c.files.fps30);
+    if (c.files.poster_first) v.poster = url(c.files.poster_first);
+    v.playbackRate = ov.speed;
+    v.play().catch(() => {});
+  } else {
+    v.pause();
+    v.removeAttribute("src");
+    v.hidden = true;
+  }
+  const me = c.metrics || {};
+  const r = c.rating || {};
+  const btn = (k) => `<button data-r="${k}" class="${r.rating === k ? "on" : ""}">${VERDICT_LABEL[k]}</button>`;
+  const links = [me.sheet ? `<a href="${url(me.sheet)}" target="_blank" rel="noopener">contactblad</a>` : "",
+    me.detail ? `<a href="${url(me.detail)}" target="_blank" rel="noopener">detail rond onthulling</a>` : ""].filter(Boolean).join(" · ");
+  $("#m-info").innerHTML = `
+    <h2>${esc(c.person)}</h2>
+    <p class="muted">${esc(c.model_label)} · ${esc(c.variant)} ${esc(c.variant_naam)}<br>sessie ${esc(c.run_id)} · ≈ $${nl(c.cost || 0)} · ${i + 1} van ${ov.list.length}</p>
+    <div class="tile-badges">${badges(c)}</div>
+    ${c.eval?.note ? `<p class="claude-note">${esc(c.eval.note)}</p>` : ""}
+    ${me.reveal_s !== undefined ? `<p class="muted small">onthulling ${me.reveal_s == null ? "–" : nl(me.reveal_s, 1) + " s"} · verborgen ${nl(me.hidden_s || 0, 1)} s · fade ${nl(me.fade_score || 0, 2)} · sprong ×${nl(me.jump_ratio || 0, 1)}</p>` : ""}
+    ${me.flags?.length ? `<p class="flags small">${esc(me.flags.join(" · "))}</p>` : ""}
+    ${c.error ? `<p class="flags small">${esc(c.error)}</p>` : ""}
+    ${links ? `<p class="small">${links}</p>` : ""}
+    <div class="m-frames">
+      ${c.start_file ? `<figure><img src="${url(c.start_file)}" alt=""><figcaption>start</figcaption></figure>` : ""}
+      ${c.end_file ? `<figure><img src="${url(c.end_file)}" alt=""><figcaption>eind</figcaption></figure>` : ""}
+    </div>
+    <div class="rate">${btn("goed")}${btn("twijfel")}${btn("onvoldoende")}</div>
+    <textarea id="m-note" placeholder="Jouw notitie">${esc(r.note || "")}</textarea>
+    <details><summary>Prompt</summary><p class="small">${esc(c.prompt)}</p></details>`;
+  const save = async (rating) => {
+    const res = await api("/api/rating", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ run_id: c.run_id, clip_id: c.clip_id, rating, note: $("#m-note").value }),
+    });
+    c.rating = res.ratings[c.clip_id] || {};
+    $("#m-info").querySelectorAll(".rate button").forEach((b) => b.classList.toggle("on", b.dataset.r === c.rating.rating));
+    $("#m-info .tile-badges").innerHTML = badges(c);
+  };
+  $("#m-info").querySelectorAll(".rate button").forEach((b) => b.addEventListener("click", () =>
+    save((c.rating?.rating || "") === b.dataset.r ? "" : b.dataset.r).catch((e) => alert("Opslaan mislukt: " + e.message))));
+  $("#m-note").addEventListener("change", () => save(c.rating?.rating || "").catch(() => {}));
+  $("#modal").hidden = false;
+}
+
+function closeModal() {
+  $("#m-video").pause();
+  $("#modal").hidden = true;
+  renderGallery();
+}
+
+$("#modal").addEventListener("click", (e) => { if (e.target.id === "modal") closeModal(); });
+$(".modal-close").addEventListener("click", closeModal);
+document.querySelectorAll(".modal-ctl .nav").forEach((b) => b.addEventListener("click", () => openModal(ov.index + Number(b.dataset.d))));
+$("#m-speed").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  ov.speed = Number(b.dataset.s);
+  $("#m-video").playbackRate = ov.speed;
+  $("#m-speed").querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
+});
+document.addEventListener("keydown", (e) => {
+  if ($("#modal").hidden || e.target.closest("textarea, input, select")) return;
+  if (e.key === "Escape") closeModal();
+  if (e.key === "ArrowLeft") openModal(ov.index - 1);
+  if (e.key === "ArrowRight") openModal(ov.index + 1);
+  if (e.code === "Space") { e.preventDefault(); const v = $("#m-video"); v.paused ? v.play() : v.pause(); }
+});
+
+setInterval(() => {
+  if (!$("#overview").hidden && $("#modal").hidden && document.visibilityState === "visible") loadOverview();
+}, 15000);
+
 loadRuns().catch((e) => { $("#cards").innerHTML = `<p class="empty">Kan runs niet laden: ${esc(e.message)}</p>`; });
+showTab(new URLSearchParams(location.search).get("tab") || "overview");

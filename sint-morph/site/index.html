@@ -13,16 +13,40 @@
       <h1>Sint-morph arena</h1>
     </div>
     <nav class="tabs" role="tablist">
-      <button class="tab active" data-tab="videos" role="tab">Video's</button>
+      <button class="tab active" data-tab="overview" role="tab">Overzicht</button>
+      <button class="tab" data-tab="videos" role="tab">Vergelijken</button>
       <button class="tab" data-tab="align" role="tab">Uitlijning</button>
     </nav>
-    <label class="run-select">Run
+    <label class="run-select" hidden>Run
       <select id="run"></select>
     </label>
   </header>
 
   <main>
-    <section id="videos" class="view">
+    <section id="overview" class="view">
+      <div id="ov-stats" class="stats"></div>
+      <h2 class="section-title">Sessies</h2>
+      <div id="ov-runs" class="run-grid"></div>
+      <div class="gallery-head">
+        <h2 class="section-title">Alle filmpjes</h2>
+        <div class="filters">
+          <div class="group" id="f-verdict">
+            <button data-f="all" class="on">Alle</button>
+            <button data-f="best">★ Beste</button>
+            <button data-f="goed">Goed</button>
+            <button data-f="twijfel">Twijfel</button>
+            <button data-f="onvoldoende">Onvoldoende</button>
+            <button data-f="open">Nog niet beoordeeld</button>
+            <button data-f="busy">Bezig of fout</button>
+          </div>
+          <select id="f-model"><option value="">Alle modellen</option></select>
+          <select id="f-run"><option value="">Alle sessies</option></select>
+        </div>
+      </div>
+      <div id="ov-gallery" class="gallery"></div>
+    </section>
+
+    <section id="videos" class="view" hidden>
       <div class="toolbar">
         <div class="group" id="version" aria-label="Versie">
           <span class="label">Versie</span>
@@ -52,6 +76,26 @@
       <div id="align-cards" class="align-grid"></div>
     </section>
   </main>
+
+  <div id="modal" class="modal" hidden>
+    <div class="modal-box" role="dialog" aria-modal="true">
+      <button class="modal-close" title="Sluiten (Esc)">×</button>
+      <div class="modal-media">
+        <video id="m-video" controls loop playsinline></video>
+        <div class="modal-ctl">
+          <button class="nav" data-d="-1" title="Vorige (←)">‹ vorige</button>
+          <div class="group" id="m-speed">
+            <button data-s="0.25">0,25×</button>
+            <button data-s="0.5">0,5×</button>
+            <button data-s="1" class="on">1×</button>
+            <button data-s="2">2×</button>
+          </div>
+          <button class="nav" data-d="1" title="Volgende (→)">volgende ›</button>
+        </div>
+      </div>
+      <aside id="m-info" class="modal-info"></aside>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>

@@ -195,7 +195,7 @@ Lever dan op:
    - wat werkte en wat niet, per variant;
    - uitgaven (`run_test.py budget`) en wat je zonder Gerke besloot;
    - aanbeveling voor de echte productie (model, prompt, duur, route naar 30 fps).
-3. De site laten draaien, zodat Gerke hem direct kan openen: `nohup .venv/bin/python tools/serve.py > serve.log 2>&1 &`. Die opent op `http://localhost:8765` met **★ Beste voorbeelden** bovenaan.
+3. De site laten draaien, zodat Gerke hem direct kan openen: `nohup .venv/bin/python tools/serve.py > serve.log 2>&1 &`. Die opent op `http://localhost:8765` met het Overzicht: alle sessies, alle filmpjes met filters (★ Beste, Goed, per model) en een groot afspeelvenster.
 4. VOORTGANG.md afsluiten met "klaar" en de tijd.
 
 ## Framerate: hoe 30 fps ontstaat
