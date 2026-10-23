@@ -1,0 +1,4 @@
+{
+  "_uitleg": "Per persoon: 'beschrijving' = korte Engelse omschrijving van wat zichtbaar is in het eindframe (haar, bril, kleding), zonder naam. 'kostuum' = 'uit' als de persoon in het eindframe gewone kleren draagt, 'aan' als de Sint-mantel er nog op zit, of een eigen Engelse zin. 'extra' = optionele Engelse zin die voor de vaste slotzinnen in de prompt komt. Leeg laten mag; dan gebruikt het script 'the person from the final frame'. De variant kies je per run met plan --variants.",
+  "personen": {}
+}

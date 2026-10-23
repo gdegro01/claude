@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sint-morph arena</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="dot"></span>
+      <h1>Sint-morph arena</h1>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="videos" role="tab">Video's</button>
+      <button class="tab" data-tab="align" role="tab">Uitlijning</button>
+    </nav>
+    <label class="run-select">Run
+      <select id="run"></select>
+    </label>
+  </header>
+
+  <main>
+    <section id="videos" class="view">
+      <div class="toolbar">
+        <div class="group" id="version" aria-label="Versie">
+          <span class="label">Versie</span>
+          <button data-v="fps30" class="on">30 fps</button>
+          <button data-v="master">120 fps master</button>
+          <button data-v="raw">Origineel</button>
+        </div>
+        <div class="group" id="speed" aria-label="Snelheid">
+          <span class="label">Snelheid</span>
+          <button data-s="0.25">0,25×</button>
+          <button data-s="0.5">0,5×</button>
+          <button data-s="1" class="on">1×</button>
+          <button data-s="2">2×</button>
+        </div>
+        <label class="toggle"><input type="checkbox" id="loop" checked> Herhalen</label>
+        <span class="hint">Spatie: afspelen · ← →: frame terug/vooruit</span>
+      </div>
+      <div id="summary" class="summary"></div>
+      <div id="cards"></div>
+    </section>
+
+    <section id="align" class="view" hidden>
+      <div class="toolbar">
+        <label class="toggle"><input type="checkbox" id="only-issues"> Alleen wat aandacht nodig heeft</label>
+        <span class="hint" id="align-info"></span>
+      </div>
+      <div id="align-cards" class="align-grid"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

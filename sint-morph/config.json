@@ -1,0 +1,15 @@
+{
+  "start_frame": "/Users/gerkedegroot/Developer/projects/sint/bron/sint.jpg",
+  "start_frame_alt": "/Users/gerkedegroot/Developer/projects/sint/personen/sint.jpg",
+  "personen_dir": "/Users/gerkedegroot/Developer/projects/sint/personen",
+  "eindframe_subdir": "eindframes",
+  "aspect": "auto",
+  "anchor_x": 0.5,
+  "anchor_y": 0.5,
+  "upload_max_side": 2048,
+  "duration_s": 5,
+  "models": ["kling3-std", "flux3-max"],
+  "interpolation": "film",
+  "budget_usd": 16,
+  "server_port": 8765
+}

@@ -1,0 +1,49 @@
+{
+  "prefix": "One continuous shot from a locked-off camera; the room, the light and the framing stay exactly the same from the first to the last frame.",
+  "suffix": "The change happens only through real physical actions of the body, the hands, the mitre, the beard and the cape. No crossfade, no dissolve, no fade, no double exposure, no morphing or melting face, no cut, nothing slides or pops into view. For the first {t1} seconds nobody can tell who is underneath: the face either stays Sinterklaas or stays hidden. The reveal happens fast in the last {t2} seconds and the clip lands exactly on the final frame, holding that pose for the last moment.",
+  "negative_prompt": "crossfade, dissolve, fade, fade to black, fade to white, double exposure, ghosting, transparency, morphing face, melting face, face warping, cut, jump cut, scene change, slide in, wipe, sudden appearance, teleport, flicker, camera movement, zoom, blur, extra fingers, deformed hands, text, subtitles, watermark",
+  "person_default": "the person from the final frame",
+  "kostuum": {
+    "uit": "In the same moment the red cape and robe are pulled off and thrown out of frame, revealing the clothes underneath.",
+    "aan": ""
+  },
+  "hide_seconds": 3,
+  "varianten": [
+    {
+      "id": "v1",
+      "naam": "Mijter voor het gezicht",
+      "uitleg": "Rustig. De Sint zet de mijter af en houdt hem voor zijn gezicht; daarachter gebeurt de wissel. Dan snel mijter weg en baard eraf.",
+      "prompt": "For the first {t1} seconds Sinterklaas slowly lifts his tall red mitre off his head with both hands and lowers it in front of his face, so his whole face disappears behind it; he holds it there for a moment, teasing. In the last {t2} seconds he quickly drops the mitre out of frame and in the same motion pulls the white beard down and away. {costume} Now we see {person}, who settles into the exact pose of the final frame."
+    },
+    {
+      "id": "v2",
+      "naam": "Baard eraf, lomp en snel",
+      "uitleg": "De Sint plukt plagerig aan zijn baard en rukt hem dan in een keer omhoog over zijn gezicht eraf; de mijter valt door de schok.",
+      "prompt": "For the first {t1} seconds Sinterklaas leans towards the camera with a mischievous look, strokes his long white beard and tugs at it a few times, as if testing whether it is real. In the last {t2} seconds he rips the beard off in one rough, fast yank, sweeping it up across his face, and the mitre tumbles off his head from the jolt. {costume} Now we see {person}, laughing, landing in the exact pose of the final frame."
+    },
+    {
+      "id": "v3",
+      "naam": "Omdraaien",
+      "uitleg": "Andere positie. De Sint draait zijn rug naar de camera, doet met de rug naar ons mijter en baard af, en draait snel terug als de persoon.",
+      "prompt": "For the first {t1} seconds Sinterklaas slowly turns his back to the camera, the red cape swinging around him; with his back towards us he lifts the mitre off and his hands work at his chin, as if taking off the beard, while his face stays out of sight. In the last {t2} seconds the figure spins back around quickly, without mitre and beard. {costume} It is {person}, stepping straight into the exact pose and position of the final frame."
+    },
+    {
+      "id": "v4",
+      "naam": "Diepe buiging",
+      "uitleg": "De Sint maakt een plechtige buiging zodat de mijter zijn gezicht afdekt, en komt met een ruk overeind; mijter glijdt eraf, baard zit in zijn handen.",
+      "prompt": "For the first {t1} seconds Sinterklaas makes a slow, deep, ceremonial bow towards the camera, so the top of his mitre points at the lens and hides his face completely, while his gloved hands go to his chin. In the last {t2} seconds the figure straightens up in one quick movement: the mitre slides off backwards and the beard comes away in the hands. {costume} Standing there is {person}, in the exact pose of the final frame."
+    },
+    {
+      "id": "v5",
+      "naam": "Voorzichtig losmaken",
+      "uitleg": "Rustig en precies. Mijter voorzichtig weggezet, baard behoedzaam losgehaakt achter een hand; dan hand weg en hoofd snel omhoog.",
+      "prompt": "For the first {t1} seconds Sinterklaas carefully lifts off his mitre and sets it down out of frame, then lowers his head and cautiously unhooks the white beard from one ear, one gloved hand covering most of his face. In the last {t2} seconds the beard comes free, the hand drops away and the head comes up quickly. {costume} It is {person}, ending in the exact pose of the final frame."
+    },
+    {
+      "id": "v6",
+      "naam": "Schudden",
+      "uitleg": "Past bij het dobbelen: de Sint schudt alsof hij zelf de beker is; bij het stoppen vliegen mijter en baard eraf.",
+      "prompt": "For the first {t1} seconds Sinterklaas shakes his head and shoulders wildly, as if he himself were being shaken like dice in a cup; the mitre wobbles and the long beard whips back and forth across his face. In the last {t2} seconds he stops abruptly and the momentum flings the mitre and the beard off, out of frame. {costume} Left standing is {person}, in the exact pose of the final frame."
+    }
+  ]
+}
