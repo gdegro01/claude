@@ -1,0 +1,1420 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fotokeuze</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: een macOS 26 venster op een bureaublad. Zwevende glazen zijbalk links, werkbalk met glazen
+   groepen, een raster van getinte glazen kaarten met fotostapels, een zwevende glazen keuzebalk onderaan
+   en Quick Look als laag boven de inhoud. Elke kleur is een token; donker en licht volgen het systeem. */
+:root {
+  --wall-a: #a9c4ff;
+  --wall-b: #c9b6ff;
+  --wall-c: #f6c4e3;
+  --wall-d: #4a74f4;
+  --wall-e: #9161ef;
+  --menubar-ink: rgba(18, 20, 38, .88);
+
+  --window: #e1e4ea;
+  --window-edge: rgba(0, 0, 0, .12);
+  --ink: #1d1d1f;
+  --ink-2: rgba(29, 29, 31, .64);
+  --ink-3: rgba(29, 29, 31, .42);
+  --hairline: rgba(0, 0, 0, .09);
+  --hover: rgba(0, 0, 0, .055);
+
+  --glass: rgba(255, 255, 255, .60);
+  --glass-strong: rgba(252, 252, 254, .80);
+  --glass-panel: rgba(244, 245, 249, .80);
+  --glass-menu: rgba(246, 246, 249, .86);
+  --glass-rim: rgba(255, 255, 255, .85);
+  --glass-shine: rgba(255, 255, 255, .95);
+  --glass-shadow: rgba(18, 22, 44, .16);
+  --seg-thumb: #ffffff;
+
+  --card-base: rgba(255, 255, 255, .52);
+  --card-sheen: rgba(255, 255, 255, .55);
+  --badge: rgba(255, 255, 255, .84);
+  --print: #ffffff;
+  --check-bg: rgba(255, 255, 255, .72);
+  --scrim: rgba(16, 18, 30, .30);
+
+  --accent: #0a7cff;
+  --accent-ink: #ffffff;
+  --apply: #0f9e8b;
+  --danger: #e5443b;
+  --ok: #1d9a54;
+
+  --tint-teal: #24b19d;
+  --tint-blue: #5580f2;
+  --tint-coral: #f2765b;
+  --tint-violet: #9b77ef;
+  --tint-amber: #eda638;
+  --tint-rose: #ea6a93;
+  --tint-cyan: #2bb1d6;
+  --tint-green: #69ab53;
+
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Segoe UI", Roboto, system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", "Segoe UI", Roboto, system-ui, sans-serif;
+  --font-round: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+
+  --spring: cubic-bezier(.3, 1.35, .45, 1);
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --wall-a: #1b2a5e; --wall-b: #302262; --wall-c: #5b2552; --wall-d: #1e3fae; --wall-e: #4a2aa3;
+    --menubar-ink: rgba(255, 255, 255, .9);
+    --window: #15161a; --window-edge: rgba(255, 255, 255, .12);
+    --ink: #f3f3f5; --ink-2: rgba(243, 243, 245, .64); --ink-3: rgba(243, 243, 245, .40);
+    --hairline: rgba(255, 255, 255, .10); --hover: rgba(255, 255, 255, .07);
+    --glass: rgba(48, 50, 58, .58); --glass-strong: rgba(56, 58, 66, .78); --glass-panel: rgba(30, 31, 36, .80);
+    --glass-menu: rgba(44, 45, 52, .90); --glass-rim: rgba(255, 255, 255, .14); --glass-shine: rgba(255, 255, 255, .22);
+    --glass-shadow: rgba(0, 0, 0, .5); --seg-thumb: rgba(255, 255, 255, .18);
+    --card-base: rgba(34, 36, 42, .66); --card-sheen: rgba(255, 255, 255, .14); --badge: rgba(72, 74, 82, .9);
+    --print: #f2f1ee; --check-bg: rgba(255, 255, 255, .06); --scrim: rgba(0, 0, 0, .52);
+    --accent: #3a98ff; --apply: #16b39c; --danger: #ff6259; --ok: #3ccf7a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --wall-a: #1b2a5e; --wall-b: #302262; --wall-c: #5b2552; --wall-d: #1e3fae; --wall-e: #4a2aa3;
+  --menubar-ink: rgba(255, 255, 255, .9);
+  --window: #15161a; --window-edge: rgba(255, 255, 255, .12);
+  --ink: #f3f3f5; --ink-2: rgba(243, 243, 245, .64); --ink-3: rgba(243, 243, 245, .40);
+  --hairline: rgba(255, 255, 255, .10); --hover: rgba(255, 255, 255, .07);
+  --glass: rgba(48, 50, 58, .58); --glass-strong: rgba(56, 58, 66, .78); --glass-panel: rgba(30, 31, 36, .80);
+  --glass-menu: rgba(44, 45, 52, .90); --glass-rim: rgba(255, 255, 255, .14); --glass-shine: rgba(255, 255, 255, .22);
+  --glass-shadow: rgba(0, 0, 0, .5); --seg-thumb: rgba(255, 255, 255, .18);
+  --card-base: rgba(34, 36, 42, .66); --card-sheen: rgba(255, 255, 255, .14); --badge: rgba(72, 74, 82, .9);
+  --print: #f2f1ee; --check-bg: rgba(255, 255, 255, .06); --scrim: rgba(0, 0, 0, .52);
+  --accent: #3a98ff; --apply: #16b39c; --danger: #ff6259; --ok: #3ccf7a;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { height: 100%; box-sizing: border-box; }
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  font: 13px/1.35 var(--font);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  background:
+    radial-gradient(55% 75% at 8% 100%, var(--wall-d) 0%, transparent 62%),
+    radial-gradient(50% 60% at 96% 12%, var(--wall-c) 0%, transparent 62%),
+    radial-gradient(65% 85% at 72% 104%, var(--wall-e) 0%, transparent 64%),
+    linear-gradient(158deg, var(--wall-a) 0%, var(--wall-b) 48%, var(--wall-c) 100%);
+  background-color: var(--wall-b);
+}
+button { font: inherit; color: inherit; }
+button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid color-mix(in oklab, var(--accent) 65%, transparent);
+  outline-offset: 2px;
+}
+.ic { width: 17px; height: 17px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Bureaublad */
+.desktop { height: 100%; display: flex; flex-direction: column; }
+.menubar {
+  flex: none; height: 30px; display: flex; align-items: center; gap: 4px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  color: var(--menubar-ink); font-size: 13px; user-select: none;
+}
+.menubar .mb-item { border: 0; background: none; height: 22px; padding: 0 9px; border-radius: 6px; cursor: default; }
+.menubar .mb-item:hover, .menubar .mb-item[aria-expanded="true"] { background: color-mix(in oklab, var(--menubar-ink) 14%, transparent); }
+.menubar .mb-app { font-weight: 700; }
+.menubar .mb-status { margin-left: auto; display: flex; align-items: center; gap: 14px; padding-right: 4px; font-variant-numeric: tabular-nums; }
+.menubar .mb-status .ic { width: 18px; height: 18px; }
+.stage {
+  flex: 1; min-height: 0; display: grid; place-items: center;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 8px 22px;
+}
+
+/* Venster */
+.window {
+  --sb-w: 244px;
+  position: relative; width: min(1380px, 100%); height: min(900px, 100%);
+  display: grid; grid-template-columns: var(--sb-w) minmax(0, 1fr);
+  border-radius: 26px; background: var(--window); overflow: hidden; isolation: isolate;
+  box-shadow: 0 0 0 .5px var(--window-edge), 0 34px 90px -24px rgba(12, 16, 44, .5), 0 12px 30px -14px rgba(12, 16, 44, .35);
+  transition: grid-template-columns .5s var(--ease-out);
+}
+.window::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(38% 46% at 22% 8%, color-mix(in oklab, var(--tint-teal) 13%, transparent), transparent 72%),
+    radial-gradient(42% 50% at 92% 88%, color-mix(in oklab, var(--tint-rose) 12%, transparent), transparent 72%),
+    radial-gradient(34% 42% at 62% 40%, color-mix(in oklab, var(--tint-blue) 9%, transparent), transparent 72%);
+}
+.window.sidebar-hidden { --sb-w: 0px; }
+
+/* Zijbalk */
+.sidebar-col { position: relative; min-width: 0; padding: 8px 0 8px 8px; z-index: 7; }
+.sidebar {
+  width: 236px; height: 100%; display: flex; flex-direction: column; padding: 12px 10px;
+  border-radius: 20px; background: var(--glass);
+  -webkit-backdrop-filter: blur(28px) saturate(1.8); backdrop-filter: blur(28px) saturate(1.8);
+  box-shadow: inset 0 1px 0 var(--glass-shine), inset 0 0 0 .5px var(--glass-rim), 0 1px 2px rgba(0, 0, 0, .05), 0 10px 28px -12px var(--glass-shadow);
+  transition: transform .5s var(--ease-out), opacity .3s ease;
+}
+.window.sidebar-hidden .sidebar { transform: translateX(-112%); opacity: 0; }
+.sb-head { display: flex; align-items: center; justify-content: space-between; padding: 2px 2px 10px 8px; }
+.traffic { display: flex; gap: 8px; }
+.traffic span { width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .2); }
+.traffic span:nth-child(1) { background: #ff5f57; }
+.traffic span:nth-child(2) { background: #febc2e; }
+.traffic span:nth-child(3) { background: #28c840; }
+.icon-btn {
+  width: 32px; height: 30px; display: inline-grid; place-items: center; border: 0; border-radius: 999px;
+  background: transparent; color: var(--ink); cursor: default; transition: background .15s;
+}
+.icon-btn:hover { background: var(--hover); }
+.icon-btn:active { background: color-mix(in oklab, var(--ink) 12%, transparent); }
+.sb-section { margin-top: 8px; }
+.sb-section h4 { margin: 10px 10px 3px; font-size: 11px; font-weight: 600; color: var(--ink-3); letter-spacing: .01em; }
+.sb-row {
+  width: 100%; height: 30px; display: flex; align-items: center; gap: 9px; padding: 0 10px;
+  border: 0; border-radius: 9px; background: transparent; font-size: 13px; text-align: left; cursor: default;
+}
+.sb-row:hover { background: var(--hover); }
+.sb-row[aria-current="true"] { background: color-mix(in oklab, var(--accent) 17%, transparent); }
+.sb-row .ic { color: var(--accent); width: 18px; height: 18px; }
+.sb-row .sb-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-row .sb-count { color: var(--ink-3); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+/* Hoofdgebied */
+.main { position: relative; min-width: 0; min-height: 0; display: flex; flex-direction: column; container-type: inline-size; }
+.toolbar {
+  flex: none; position: relative; z-index: 6; min-height: 58px;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px;
+  padding: 10px 14px 6px 16px;
+  transition: opacity .25s;
+}
+.tb-lead, .tb-trail { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.tb-trail { justify-content: flex-end; }
+.tb-lead .traffic, .tb-lead .tb-sidebar { display: none; }
+.window.sidebar-hidden .tb-lead .traffic, .window.sidebar-hidden .tb-lead .tb-sidebar { display: flex; }
+.window.sidebar-hidden .tb-lead .traffic { margin: 0 6px 0 4px; }
+.win-title { margin: 0 0 0 6px; font: 600 15px/1 var(--font-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.glass {
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: blur(18px) saturate(1.8); backdrop-filter: blur(18px) saturate(1.8);
+  box-shadow: inset 0 1px 0 var(--glass-shine), inset 0 0 0 .5px var(--glass-rim), 0 1px 2px rgba(0, 0, 0, .07), 0 5px 14px -7px var(--glass-shadow);
+}
+.tb-group { display: flex; align-items: center; padding: 2px; border-radius: 999px; }
+.tb-group .icon-btn { width: 36px; height: 32px; }
+.segmented { position: relative; display: flex; padding: 3px; border-radius: 999px; }
+.segmented button {
+  position: relative; z-index: 1; height: 28px; padding: 0 16px; border: 0; border-radius: 999px;
+  background: transparent; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: default;
+}
+.segmented button[aria-pressed="true"] { font-weight: 600; }
+.segmented .seg-thumb {
+  position: absolute; top: 3px; bottom: 3px; left: 0; width: 0; border-radius: 999px; background: var(--seg-thumb);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .14), 0 0 0 .5px rgba(0, 0, 0, .05);
+  transition: transform .42s var(--spring), width .42s var(--spring);
+}
+.search {
+  display: flex; align-items: center; gap: 7px; height: 36px; width: clamp(150px, 20cqi, 240px);
+  padding: 0 12px; border-radius: 999px; color: var(--ink-2);
+}
+.search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 13px; color: var(--ink); }
+.search input::placeholder { color: var(--ink-3); }
+.search:focus-within { box-shadow: inset 0 1px 0 var(--glass-shine), 0 0 0 3px color-mix(in oklab, var(--accent) 45%, transparent); }
+.main.is-peeking .toolbar { opacity: .45; }
+
+.scroll {
+  flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
+  padding: 6px 34px calc(var(--sum-h, 120px) + 44px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 16px); mask-image: linear-gradient(to bottom, transparent 0, #000 16px);
+  scrollbar-width: thin;
+}
+.page-head { margin: 4px 2px 24px; }
+.page-head h2 { margin: 0; font: 700 28px/1.15 var(--font-display); letter-spacing: -.012em; text-wrap: balance; }
+.page-head p { margin: 5px 0 0; font-size: 15px; color: var(--ink-2); }
+
+/* Kaarten */
+.grid { --card-min: 226px; display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--card-min), 1fr)); gap: 28px; }
+.window.size-large .grid { --card-min: 304px; }
+.card {
+  --tint: var(--tint-teal);
+  position: relative; isolation: isolate; padding: 14px 14px 16px; border-radius: 24px;
+  background: linear-gradient(165deg,
+    color-mix(in oklab, var(--tint) 36%, var(--card-base)) 0%,
+    color-mix(in oklab, var(--tint) 21%, var(--card-base)) 100%);
+  -webkit-backdrop-filter: blur(18px) saturate(1.7); backdrop-filter: blur(18px) saturate(1.7);
+  box-shadow:
+    inset 0 1px 0 var(--glass-shine),
+    inset 0 0 0 .5px var(--glass-rim),
+    inset 0 -16px 28px -22px color-mix(in oklab, var(--tint) 75%, transparent),
+    0 1px 2px rgba(0, 0, 0, .06),
+    0 16px 34px -20px color-mix(in oklab, var(--tint) 80%, transparent);
+  transition: transform .4s var(--spring), box-shadow .3s ease;
+}
+.card::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1;
+  background:
+    linear-gradient(135deg, var(--card-sheen) 0%, transparent 34%),
+    radial-gradient(90% 55% at 100% 100%, color-mix(in oklab, var(--card-sheen) 45%, transparent), transparent 70%);
+}
+.card::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--tint) 88%, var(--ink) 12%);
+  opacity: 0; transition: opacity .2s ease;
+}
+.card.is-reviewed::after { opacity: 1; }
+.card:hover { transform: translateY(-3px); }
+.card[hidden] { display: none; }
+.card-hit { position: absolute; inset: 0; z-index: 1; border: 0; border-radius: inherit; background: transparent; cursor: default; }
+.card-hit:focus-visible { outline-offset: 4px; }
+.card-top, .card-foot { position: relative; z-index: 2; pointer-events: none; }
+.card-top { display: flex; align-items: center; justify-content: space-between; }
+.card-top > button { pointer-events: auto; }
+.check {
+  width: 26px; height: 26px; padding: 0; border: 0; border-radius: 50%; display: grid; place-items: center; cursor: default;
+  background: var(--check-bg); color: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--ink-3);
+  transition: background .2s ease, box-shadow .2s ease, transform .3s var(--spring);
+}
+.check svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 18; stroke-dashoffset: 18; transition: stroke-dashoffset .28s ease-out .04s; }
+.check[aria-pressed="true"] { background: color-mix(in oklab, var(--tint) 86%, #000 14%); color: #fff; box-shadow: 0 2px 6px -2px color-mix(in oklab, var(--tint) 80%, transparent); }
+.check[aria-pressed="true"] svg { stroke-dashoffset: 0; }
+.check:active { transform: scale(.86); }
+.gbtn {
+  display: inline-grid; place-items: center; border: 0; cursor: default; color: var(--ink);
+  background: var(--glass-strong);
+  -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8);
+  box-shadow: inset 0 1px 0 var(--glass-shine), inset 0 0 0 .5px var(--glass-rim), 0 1px 2px rgba(0, 0, 0, .08), 0 4px 12px -6px var(--glass-shadow);
+  transition: transform .25s var(--spring), background .15s ease, opacity .2s;
+}
+.gbtn:hover { background: color-mix(in oklab, var(--glass-strong) 70%, var(--glass-shine)); }
+.gbtn:active { transform: scale(.93); }
+.gbtn:disabled { opacity: .4; }
+.gbtn.round { width: 32px; height: 32px; border-radius: 50%; }
+.gbtn.pill { height: 34px; padding: 0 16px; border-radius: 999px; font-size: 13.5px; font-weight: 500; white-space: nowrap; }
+.peek .ic { width: 16px; height: 16px; stroke-width: 1.9; }
+
+.stack { position: relative; aspect-ratio: 1.5; margin: 4px 2px 12px; }
+.print {
+  position: absolute; left: 11%; top: 10%; width: 70%; aspect-ratio: 1.39; padding: 4px;
+  background: var(--print); border-radius: 5px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .14), 0 12px 22px -12px rgba(0, 0, 0, .5);
+  transition: transform .5s var(--spring);
+}
+.print img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 2px; background: color-mix(in oklab, var(--tint) 30%, var(--window)); }
+.print[data-depth="1"] { transform: translate(9px, -5px) rotate(3.5deg); }
+.print[data-depth="2"] { transform: translate(18px, -10px) rotate(7deg); }
+.card:hover .print[data-depth="0"] { transform: translate(-6px, 2px) rotate(-2.5deg); }
+.card:hover .print[data-depth="1"] { transform: translate(21px, -7px) rotate(6.5deg); }
+.card:hover .print[data-depth="2"] { transform: translate(40px, -12px) rotate(12deg); }
+.card.is-lifted .print { visibility: hidden; }
+
+.card-foot { display: flex; align-items: center; gap: 10px; }
+.count {
+  flex: none; min-width: 30px; height: 30px; padding: 0 7px; border-radius: 999px; display: grid; place-items: center;
+  background: var(--badge); box-shadow: inset 0 0 0 .5px var(--hairline), 0 1px 2px rgba(0, 0, 0, .06);
+  font: 600 13px/1 var(--font-round); font-variant-numeric: tabular-nums;
+}
+.card-text { min-width: 0; }
+.card-text h3 { margin: 0; font: 600 15px/1.2 var(--font-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-text p { margin: 2px 0 0; font-size: 12.5px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.empty { display: grid; justify-items: center; gap: 6px; padding: 70px 20px; text-align: center; color: var(--ink-2); }
+.empty .ic { width: 40px; height: 40px; stroke-width: 1.3; color: var(--ink-3); }
+.empty h3 { margin: 6px 0 0; font: 600 17px var(--font-display); color: var(--ink); }
+.empty p { margin: 0; max-width: 36ch; }
+
+/* Keuzebalk */
+.summary {
+  position: absolute; left: 24px; right: 24px; bottom: 18px; z-index: 4;
+  display: flex; align-items: center; gap: 20px; padding: 14px 14px 14px 22px; border-radius: 24px;
+  -webkit-backdrop-filter: blur(30px) saturate(1.8); backdrop-filter: blur(30px) saturate(1.8);
+}
+.sum-body { flex: 1; min-width: 0; }
+.sum-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 24px; font: 600 15px/1.3 var(--font-display); }
+.sum-line > span { display: inline-flex; align-items: center; gap: 8px; }
+.sum-line .ic { width: 20px; height: 20px; stroke-width: 1.8; }
+.sum-line .ic-trash { color: var(--danger); }
+.sum-line .ic-ok { color: var(--ok); }
+.sum-line .sum-muted { font-weight: 500; color: var(--ink-2); }
+.sum-note { margin: 4px 0 0; font-size: 13px; color: var(--ink-2); }
+.num { display: inline-block; font-variant-numeric: tabular-nums; }
+.num.bump { animation: bump .45s var(--spring); }
+@keyframes bump { 0% { transform: translateY(4px); opacity: .3; } 100% { transform: none; opacity: 1; } }
+.btn-prominent {
+  flex: none; height: 42px; padding: 0 22px; border: 0; border-radius: 999px; cursor: default;
+  background: linear-gradient(180deg, color-mix(in oklab, var(--btn, var(--apply)) 82%, #fff 18%), var(--btn, var(--apply)));
+  color: #fff; font: 600 15px/1 var(--font-display); white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .38), inset 0 0 0 .5px rgba(0, 0, 0, .08), 0 8px 18px -8px color-mix(in oklab, var(--btn, var(--apply)) 85%, transparent);
+  transition: transform .25s var(--spring), opacity .2s, filter .15s;
+}
+.btn-prominent:hover { filter: brightness(1.05); }
+.btn-prominent:active { transform: scale(.96); }
+.btn-prominent:disabled { opacity: .42; filter: saturate(.6); }
+.btn-prominent.small { height: 34px; padding: 0 18px; font-size: 13.5px; font-weight: 600; }
+
+.toast {
+  position: absolute; left: 50%; bottom: calc(var(--sum-h, 120px) + 30px); z-index: 4;
+  display: flex; align-items: center; gap: 12px; padding: 6px 6px 6px 16px; border-radius: 999px;
+  transform: translateX(-50%); white-space: nowrap; font-weight: 500;
+  -webkit-backdrop-filter: blur(24px) saturate(1.8); backdrop-filter: blur(24px) saturate(1.8);
+  animation: toast-in .45s var(--spring);
+}
+.toast .ic { color: var(--danger); }
+.toast .gbtn { height: 30px; padding: 0 12px; gap: 6px; display: inline-flex; }
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, 14px); } }
+
+/* Quick Look */
+.ql { position: absolute; inset: 0; z-index: 5; }
+.ql-scrim {
+  position: absolute; inset: 0; background: var(--scrim); opacity: 0;
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); transition: opacity .32s ease;
+}
+.ql.is-open .ql-scrim { opacity: 1; }
+.ql-panel {
+  --qtint: var(--tint-teal);
+  position: absolute; top: calc(var(--tb-h, 58px) + 4px); left: 28px; right: 28px; bottom: 20px;
+  display: flex; flex-direction: column; border-radius: 30px; background: var(--glass-panel);
+  -webkit-backdrop-filter: blur(40px) saturate(1.7); backdrop-filter: blur(40px) saturate(1.7);
+  box-shadow: inset 0 1px 0 var(--glass-shine), inset 0 0 0 .5px var(--glass-rim), 0 40px 90px -30px rgba(0, 0, 0, .55);
+  opacity: 0; transform: scale(.975);
+  transition: opacity .24s ease-out, transform .5s var(--spring);
+}
+.ql.is-open .ql-panel { opacity: 1; transform: none; }
+.ql-panel:focus { outline: none; }
+.ql-panel.is-measure { transform: none !important; transition: none !important; }
+.ql-head { flex: none; display: flex; align-items: center; gap: 12px; padding: 16px 18px 8px; }
+.ql-titles { flex: 1; min-width: 0; }
+.ql-titles h2 { margin: 0; font: 600 18px/1.2 var(--font-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ql-titles p { margin: 2px 0 0; font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.ql-head .btn-prominent { --btn: color-mix(in oklab, var(--qtint) 86%, #000 14%); }
+.ql-stage { flex: 1; min-height: 0; display: flex; align-items: center; gap: 12px; padding: 6px 16px; }
+.ql-view { position: relative; flex: 1; min-width: 0; height: 100%; }
+.ql-figure {
+  position: absolute; margin: 0; border-radius: 16px; overflow: hidden; background: color-mix(in oklab, var(--qtint) 20%, var(--window));
+  box-shadow: 0 22px 44px -22px rgba(0, 0, 0, .6);
+  transition: left .34s var(--ease-out), top .34s var(--ease-out), width .34s var(--ease-out), height .34s var(--ease-out);
+}
+.ql-figure.no-anim { transition: none; }
+.ql-figure img { display: block; width: 100%; height: 100%; object-fit: cover; transition: filter .25s ease, opacity .25s ease; }
+.ql-figure.is-out img { filter: grayscale(.8) brightness(.9); opacity: .72; }
+.ql-out-badge, .ql-pos, .ql-keep { position: absolute; display: inline-flex; align-items: center; gap: 7px; }
+.ql-out-badge { top: 12px; left: 12px; height: 30px; padding: 0 12px 0 10px; border-radius: 999px; font-size: 12.5px; font-weight: 600; opacity: 0; transform: translateY(-4px); transition: opacity .2s, transform .3s var(--spring); pointer-events: none; }
+.ql-out-badge .ic { width: 15px; height: 15px; color: var(--danger); }
+.ql-figure.is-out .ql-out-badge { opacity: 1; transform: none; }
+.ql-pos { left: 12px; bottom: 12px; height: 28px; padding: 0 11px; border-radius: 999px; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.ql-keep { right: 12px; bottom: 12px; height: 36px; padding: 0 16px 0 12px; border-radius: 999px; font-size: 14px; font-weight: 600; }
+.ql-keep .mark { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.6px var(--ink-3); }
+.ql-keep .mark svg { width: 12px; height: 12px; fill: none; stroke: #fff; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.ql-keep[aria-pressed="true"] { background: color-mix(in oklab, var(--qtint) 86%, #000 14%); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 8px 18px -8px color-mix(in oklab, var(--qtint) 85%, transparent); }
+.ql-keep[aria-pressed="true"] .mark { background: rgba(255, 255, 255, .25); box-shadow: none; }
+.ql-keep[aria-pressed="true"] .mark svg { opacity: 1; }
+.ql-nav .ic { width: 18px; height: 18px; stroke-width: 2; }
+.ql-nav.gbtn.round { width: 38px; height: 38px; }
+.ql-strip {
+  flex: none; display: flex; gap: 10px; overflow-x: auto; padding: 14px 20px 18px;
+  scrollbar-width: none; scroll-padding-inline: 40px;
+}
+.ql-strip::-webkit-scrollbar { display: none; }
+.ql-strip > :first-child { margin-left: auto; }
+.ql-strip > :last-child { margin-right: auto; }
+.thumb { position: relative; flex: none; width: 104px; height: 70px; border-radius: 11px; transition: transform .3s var(--spring); }
+.thumb-hit { display: block; width: 100%; height: 100%; padding: 0; border: 0; border-radius: inherit; background: none; cursor: default; }
+.thumb-hit img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; transition: filter .2s ease, opacity .2s ease; }
+.thumb.is-out .thumb-hit img { filter: grayscale(.85); opacity: .5; }
+.thumb.is-focus { transform: translateY(-3px); }
+.thumb.is-focus::after { content: ""; position: absolute; inset: -4px; border-radius: 14px; pointer-events: none; box-shadow: 0 0 0 3px color-mix(in oklab, var(--qtint) 86%, #000 14%); }
+.thumb .check { position: absolute; top: 5px; left: 5px; width: 21px; height: 21px; --tint: var(--qtint); }
+.thumb .check svg { width: 11px; height: 11px; }
+.thumb .out { position: absolute; right: 5px; bottom: 5px; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: var(--danger); color: #fff; opacity: 0; transform: scale(.6); transition: opacity .2s, transform .3s var(--spring); pointer-events: none; }
+.thumb .out .ic { width: 12px; height: 12px; stroke-width: 2; }
+.thumb.is-out .out { opacity: 1; transform: none; }
+
+.flyer { position: fixed; z-index: 60; pointer-events: none; background: var(--print); overflow: hidden; will-change: left, top, width, height, transform; }
+.flyer img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.flyer .flyer-inner { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 2px; }
+
+/* Menu's, melding en instellingen */
+.menu {
+  position: fixed; z-index: 70; min-width: 210px; padding: 5px; border-radius: 13px; background: var(--glass-menu);
+  -webkit-backdrop-filter: blur(30px) saturate(1.8); backdrop-filter: blur(30px) saturate(1.8);
+  box-shadow: inset 0 0 0 .5px var(--glass-rim), 0 0 0 .5px rgba(0, 0, 0, .1), 0 14px 34px -10px rgba(0, 0, 0, .38);
+  font-size: 13px; animation: menu-in .16s ease-out; transform-origin: top left;
+}
+@keyframes menu-in { from { opacity: 0; transform: scale(.97); } }
+.menu .mi {
+  width: 100%; height: 24px; display: flex; align-items: center; gap: 6px; padding: 0 12px 0 6px;
+  border: 0; border-radius: 6px; background: none; text-align: left; cursor: default; white-space: nowrap;
+}
+.menu .mi:disabled { color: var(--ink-3); }
+.menu .mi:not(:disabled):hover, .menu .mi:not(:disabled):focus-visible { background: var(--accent); color: var(--accent-ink); outline: none; }
+.menu .mi .mcheck { width: 14px; height: 14px; stroke-width: 2.2; visibility: hidden; }
+.menu .mi[aria-checked="true"] .mcheck { visibility: visible; }
+.menu .mi .kbd { margin-left: auto; padding-left: 24px; color: var(--ink-3); font-size: 12.5px; letter-spacing: .04em; }
+.menu .mi:not(:disabled):hover .kbd { color: color-mix(in oklab, var(--accent-ink) 80%, transparent); }
+.menu .msep { height: 1px; margin: 5px 10px; background: var(--hairline); }
+.menu .mlabel { padding: 4px 12px 2px 26px; font-size: 11px; font-weight: 600; color: var(--ink-3); }
+
+.layer { position: absolute; inset: 0; z-index: 8; display: grid; place-items: center; padding: 16px; background: color-mix(in oklab, var(--scrim) 55%, transparent); animation: fade-in .2s ease-out; }
+@keyframes fade-in { from { opacity: 0; } }
+.alert {
+  width: min(300px, 100%); padding: 22px 18px 16px; border-radius: 26px; text-align: center; background: var(--glass-panel);
+  -webkit-backdrop-filter: blur(40px) saturate(1.8); backdrop-filter: blur(40px) saturate(1.8);
+  box-shadow: inset 0 1px 0 var(--glass-shine), inset 0 0 0 .5px var(--glass-rim), 0 30px 70px -24px rgba(0, 0, 0, .55);
+  animation: pop-in .4s var(--spring);
+}
+@keyframes pop-in { from { opacity: 0; transform: scale(.92); } }
+.app-icon { position: relative; width: 58px; height: 58px; margin: 0 auto 12px; }
+.app-icon i { position: absolute; inset: 9px 7px; border-radius: 10px; border: 3px solid var(--print); box-shadow: 0 4px 10px -4px rgba(0, 0, 0, .4); }
+.app-icon i:nth-child(1) { background: var(--tint-violet); transform: rotate(-12deg) translate(-4px, 2px); }
+.app-icon i:nth-child(2) { background: var(--tint-coral); transform: rotate(8deg) translate(4px, -1px); }
+.app-icon i:nth-child(3) { background: linear-gradient(160deg, var(--tint-amber), var(--tint-teal)); }
+.alert h3 { margin: 0; font: 700 14px/1.3 var(--font-display); text-wrap: balance; }
+.alert p { margin: 6px 0 0; font-size: 12.5px; color: var(--ink-2); text-wrap: pretty; }
+.alert-actions { display: flex; gap: 8px; margin-top: 18px; }
+.alert-actions > * { flex: 1; height: 30px; padding: 0 10px; font-size: 13px; }
+.alert-actions .btn-prominent { --btn: var(--accent); font: 600 13px/1 var(--font); height: 30px; }
+
+.settings {
+  width: min(460px, 100%); border-radius: 22px; overflow: hidden; background: var(--glass-panel);
+  -webkit-backdrop-filter: blur(40px) saturate(1.8); backdrop-filter: blur(40px) saturate(1.8);
+  box-shadow: inset 0 1px 0 var(--glass-shine), inset 0 0 0 .5px var(--glass-rim), 0 30px 70px -24px rgba(0, 0, 0, .55);
+  animation: pop-in .4s var(--spring);
+}
+.settings-bar { position: relative; display: flex; align-items: center; justify-content: center; height: 46px; font-weight: 600; }
+.settings-bar .traffic { position: absolute; left: 16px; }
+.settings-bar .traffic span:first-child { cursor: default; }
+.settings-body { display: grid; gap: 14px; padding: 4px 18px 20px; }
+.group { border-radius: 14px; background: color-mix(in oklab, var(--ink) 5%, transparent); box-shadow: inset 0 0 0 .5px var(--hairline); }
+.row { display: flex; align-items: center; gap: 14px; min-height: 44px; padding: 8px 14px; }
+.row + .row { border-top: .5px solid var(--hairline); }
+.row label, .row .row-label { flex: 1; }
+.row small { display: block; color: var(--ink-2); font-size: 12px; margin-top: 2px; }
+.switch { position: relative; width: 38px; height: 22px; flex: none; border: 0; border-radius: 999px; padding: 0; background: color-mix(in oklab, var(--ink) 18%, transparent); cursor: default; transition: background .2s; }
+.switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); transition: transform .3s var(--spring); }
+.switch[aria-checked="true"] { background: var(--ok); }
+.switch[aria-checked="true"]::after { transform: translateX(16px); }
+.mini-seg { position: relative; display: flex; padding: 2px; border-radius: 999px; background: color-mix(in oklab, var(--ink) 8%, transparent); }
+.mini-seg button { height: 24px; padding: 0 12px; border: 0; border-radius: 999px; background: none; font-size: 12.5px; cursor: default; }
+.mini-seg button[aria-pressed="true"] { background: var(--seg-thumb); font-weight: 600; box-shadow: 0 1px 2px rgba(0, 0, 0, .14); }
+
+/* Smalle vensters */
+@container (max-width: 820px) {
+  .toolbar { display: flex; flex-wrap: wrap; row-gap: 10px; padding-left: 14px; }
+  .tb-trail { display: contents; }
+  .tb-lead { flex: 1 1 auto; }
+  .segmented { order: 3; flex: 1 1 280px; }
+  .segmented button { flex: 1; padding: 0 8px; }
+  .search { order: 4; width: auto; flex: 1 1 200px; }
+  .scroll { padding-inline: 20px; }
+}
+@container (max-width: 720px) {
+  .summary { flex-direction: column; align-items: stretch; gap: 12px; left: 12px; right: 12px; bottom: 12px; padding: 14px 16px; }
+  .summary .btn-prominent { width: 100%; }
+  .ql-panel { left: 10px; right: 10px; bottom: 10px; border-radius: 24px; }
+  .ql-nav { display: none; }
+  .ql-stage { padding: 4px 12px; }
+  .ql-head { flex-wrap: wrap; }
+  .thumb { width: 86px; height: 58px; }
+  .toast { white-space: normal; width: max-content; max-width: calc(100% - 32px); }
+}
+@container (max-width: 560px) {
+  .grid { --card-min: 148px; gap: 16px; }
+  .window.size-large .grid { --card-min: 100%; }
+  .card { padding: 11px 11px 13px; border-radius: 20px; }
+  .card-text h3 { font-size: 14px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; text-wrap: balance; -webkit-hyphens: auto; hyphens: auto; }
+  .card-foot { align-items: flex-start; }
+  .page-head h2 { font-size: 24px; }
+  .scroll { padding-inline: 16px; }
+  .ql-head .gbtn.pill { display: none; }
+}
+@media (max-width: 760px) {
+  .menubar { display: none; }
+  .stage { padding-block: 8px; }
+  .window { border-radius: 22px; }
+}
+@media (max-width: 960px) {
+  .window:not(.sidebar-hidden) .sidebar-col { position: absolute; inset: 0 auto 0 0; width: 252px; }
+  .window:not(.sidebar-hidden) { --sb-w: 0px; }
+  .window:not(.sidebar-hidden) .tb-lead .traffic, .window:not(.sidebar-hidden) .tb-lead .tb-sidebar { display: flex; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-sidebar" viewBox="0 0 20 20"><rect x="2.5" y="4" width="15" height="12" rx="2.6"/><path d="M8 4v12M4.6 7h1.4M4.6 9.4h1.4"/></symbol>
+  <symbol id="i-photos" viewBox="0 0 20 20"><rect x="5.5" y="3.5" width="11.5" height="9.5" rx="2"/><path d="M3.3 6.6v7.6a2.2 2.2 0 0 0 2.2 2.2h8.8"/><path d="M7.4 11.4l2.4-2.6 1.8 1.8 1.3-1.3 2 2.1"/><circle cx="9.1" cy="6.6" r=".9"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 20 20"><path d="M2.8 6.1c0-.9.8-1.7 1.7-1.7h3.1l1.7 1.7h6.2c.9 0 1.7.8 1.7 1.7v6.8c0 .9-.8 1.7-1.7 1.7H4.5c-.9 0-1.7-.8-1.7-1.7z"/><path d="M2.8 8.3h14.4"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 20 20"><rect x="3" y="4.2" width="14" height="12.6" rx="2.4"/><path d="M3 8h14M6.6 2.8v2.6M13.4 2.8v2.6"/><path d="M6.6 11h.01M10 11h.01M13.4 11h.01M6.6 13.8h.01M10 13.8h.01" stroke-width="2"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 20 20"><rect x="3.5" y="3.5" width="5.4" height="5.4" rx="1.4"/><rect x="11.1" y="3.5" width="5.4" height="5.4" rx="1.4"/><rect x="3.5" y="11.1" width="5.4" height="5.4" rx="1.4"/><rect x="11.1" y="11.1" width="5.4" height="5.4" rx="1.4"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 20 20"><path d="M3.5 6h13M6 10h8M8.5 14h3"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 20 20"><path id="gear-path" d=""/><circle cx="10" cy="10" r="2.5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.6" cy="8.6" r="5.1"/><path d="M12.4 12.4l4.1 4.1"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 20 20"><path d="M3.8 5.8h12.4M8 5.8V4.5c0-.6.4-1 1-1h2c.6 0 1 .4 1 1v1.3M5.4 5.8l.7 9.6c.1.9.8 1.6 1.7 1.6h4.4c.9 0 1.6-.7 1.7-1.6l.7-9.6M8.5 9v5M11.5 9v5"/></symbol>
+  <symbol id="i-check-circle" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.2"/><path d="M6.8 10.2l2.2 2.2 4.3-4.7"/></symbol>
+  <symbol id="i-check" viewBox="0 0 20 20"><path d="M4.5 10.5l3.6 3.6 7.4-8.2"/></symbol>
+  <symbol id="i-x" viewBox="0 0 20 20"><path d="M5.5 5.5l9 9M14.5 5.5l-9 9"/></symbol>
+  <symbol id="i-left" viewBox="0 0 20 20"><path d="M12.5 4.5L7 10l5.5 5.5"/></symbol>
+  <symbol id="i-right" viewBox="0 0 20 20"><path d="M7.5 4.5L13 10l-5.5 5.5"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 20 20"><path d="M7.5 5L4 8.5 7.5 12"/><path d="M4 8.5h7.5a4.25 4.25 0 0 1 0 8.5H9"/></symbol>
+  <symbol id="i-stack" viewBox="0 0 20 20"><rect x="3.5" y="7" width="13" height="9.5" rx="2"/><path d="M5.5 4.6h9M7.5 2.4h5"/></symbol>
+  <symbol id="i-wifi" viewBox="0 0 20 20"><path d="M2.5 7.6a10.6 10.6 0 0 1 15 0M5.1 10.3a6.9 6.9 0 0 1 9.8 0M7.7 13a3.2 3.2 0 0 1 4.6 0"/><circle cx="10" cy="15.6" r=".6" fill="currentColor"/></symbol>
+  <symbol id="i-battery" viewBox="0 0 24 20"><rect x="1.5" y="5.5" width="18" height="9" rx="2.6"/><rect x="3.4" y="7.4" width="12.6" height="5.2" rx="1.2" fill="currentColor" stroke="none"/><path d="M21.6 8.4v3.2"/></symbol>
+</svg>
+
+<div class="desktop" lang="nl">
+  <nav class="menubar" aria-label="Menubalk">
+    <button class="mb-item mb-app" type="button" data-menu="app" aria-haspopup="menu" aria-expanded="false">Fotokeuze</button>
+    <button class="mb-item" type="button" data-menu="file" aria-haspopup="menu" aria-expanded="false">Archief</button>
+    <button class="mb-item" type="button" data-menu="edit" aria-haspopup="menu" aria-expanded="false">Wijzig</button>
+    <button class="mb-item" type="button" data-menu="view" aria-haspopup="menu" aria-expanded="false">Weergave</button>
+    <button class="mb-item" type="button" data-menu="window" aria-haspopup="menu" aria-expanded="false">Venster</button>
+    <div class="mb-status" aria-hidden="true">
+      <svg class="ic"><use href="#i-wifi"/></svg>
+      <svg class="ic" viewBox="0 0 24 20" style="width:24px"><use href="#i-battery"/></svg>
+      <span id="clock"></span>
+    </div>
+  </nav>
+
+  <div class="stage">
+    <div class="window" id="window">
+      <div class="sidebar-col" id="sidebar-col">
+        <aside class="sidebar" aria-label="Bibliotheek">
+          <div class="sb-head">
+            <div class="traffic" aria-hidden="true"><span></span><span></span><span></span></div>
+            <button class="icon-btn" type="button" data-action="toggle-sidebar" title="Verberg zijbalk" aria-label="Verberg zijbalk"><svg class="ic"><use href="#i-sidebar"/></svg></button>
+          </div>
+          <div id="sidebar-list"></div>
+        </aside>
+      </div>
+
+      <section class="main" id="main">
+        <header class="toolbar" id="toolbar">
+          <div class="tb-lead">
+            <div class="traffic" aria-hidden="true"><span></span><span></span><span></span></div>
+            <button class="icon-btn tb-sidebar" type="button" data-action="toggle-sidebar" title="Toon zijbalk" aria-label="Toon zijbalk"><svg class="ic"><use href="#i-sidebar"/></svg></button>
+            <h1 class="win-title">Fotokeuze</h1>
+          </div>
+          <div class="segmented glass" role="group" aria-label="Toon" id="segmented">
+            <span class="seg-thumb" aria-hidden="true"></span>
+            <button type="button" data-filter="all" aria-pressed="true">Alle sets</button>
+            <button type="button" data-filter="open" aria-pressed="false">Nog te kiezen</button>
+            <button type="button" data-filter="done" aria-pressed="false">Bewaard</button>
+          </div>
+          <div class="tb-trail">
+            <div class="tb-group glass">
+              <button class="icon-btn" type="button" id="btn-size" title="Stapelgrootte" aria-label="Stapelgrootte" aria-haspopup="menu" aria-expanded="false"><svg class="ic"><use href="#i-grid"/></svg></button>
+              <button class="icon-btn" type="button" id="btn-sort" title="Sorteer" aria-label="Sorteer" aria-haspopup="menu" aria-expanded="false"><svg class="ic"><use href="#i-filter"/></svg></button>
+            </div>
+            <div class="tb-group glass">
+              <button class="icon-btn" type="button" data-action="settings" title="Instellingen" aria-label="Instellingen"><svg class="ic"><use href="#i-gear"/></svg></button>
+            </div>
+            <label class="search glass" for="search-input">
+              <svg class="ic"><use href="#i-search"/></svg>
+              <input id="search-input" type="search" placeholder="Zoek fotosets" autocomplete="off" spellcheck="false">
+            </label>
+          </div>
+        </header>
+
+        <div class="scroll" id="scroll">
+          <div class="page-head">
+            <h2>Kies wat je bewaart</h2>
+            <p>Open een stapel om foto’s te vergelijken.</p>
+          </div>
+          <div class="grid" id="grid"></div>
+          <div class="empty" id="empty" hidden>
+            <svg class="ic"><use href="#i-stack"/></svg>
+            <h3 id="empty-title"></h3>
+            <p id="empty-text"></p>
+          </div>
+        </div>
+
+        <footer class="summary glass" id="summary">
+          <div class="sum-body" id="sum-body"></div>
+          <button class="btn-prominent" type="button" id="btn-apply">Bevestigen en toepassen</button>
+        </footer>
+
+        <div class="toast glass" id="toast" role="status" aria-live="polite" hidden>
+          <svg class="ic"><use href="#i-trash"/></svg>
+          <span id="toast-text"></span>
+          <button class="gbtn" type="button" id="toast-undo"><svg class="ic" style="width:15px;height:15px"><use href="#i-undo"/></svg>Herstel</button>
+        </div>
+
+        <div class="ql" id="ql" hidden>
+          <div class="ql-scrim" id="ql-scrim"></div>
+          <div class="ql-panel" id="ql-panel" role="dialog" aria-modal="true" aria-labelledby="ql-title" tabindex="-1">
+            <div class="ql-head">
+              <button class="gbtn round" type="button" id="ql-close" title="Sluit (Esc)" aria-label="Sluit"><svg class="ic" style="stroke-width:2"><use href="#i-x"/></svg></button>
+              <div class="ql-titles"><h2 id="ql-title"></h2><p id="ql-sub"></p></div>
+              <button class="gbtn pill" type="button" id="ql-all">Alles bewaren</button>
+              <button class="btn-prominent small" type="button" id="ql-done">Gereed</button>
+            </div>
+            <div class="ql-stage">
+              <button class="gbtn round ql-nav" type="button" id="ql-prev" title="Vorige foto (←)" aria-label="Vorige foto"><svg class="ic"><use href="#i-left"/></svg></button>
+              <div class="ql-view" id="ql-view">
+                <figure class="ql-figure" id="ql-figure">
+                  <img id="ql-img" alt="">
+                  <span class="ql-out-badge glass"><svg class="ic"><use href="#i-trash"/></svg>Gaat naar de prullenmand</span>
+                  <span class="ql-pos glass" id="ql-pos"></span>
+                  <button class="ql-keep glass" type="button" id="ql-keep" aria-pressed="true" title="Bewaren (spatiebalk)"><span class="mark"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span>Bewaren</button>
+                </figure>
+              </div>
+              <button class="gbtn round ql-nav" type="button" id="ql-next" title="Volgende foto (→)" aria-label="Volgende foto"><svg class="ic"><use href="#i-right"/></svg></button>
+            </div>
+            <div class="ql-strip" id="ql-strip" role="list" aria-label="Foto’s in deze stapel"></div>
+          </div>
+        </div>
+
+        <div class="layer" id="alert-layer" hidden>
+          <div class="alert" role="alertdialog" aria-modal="true" aria-labelledby="alert-title" aria-describedby="alert-text">
+            <div class="app-icon" aria-hidden="true"><i></i><i></i><i></i></div>
+            <h3 id="alert-title"></h3>
+            <p id="alert-text"></p>
+            <div class="alert-actions">
+              <button class="gbtn pill" type="button" id="alert-cancel">Annuleer</button>
+              <button class="btn-prominent" type="button" id="alert-confirm">Verplaats</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="layer" id="settings-layer" hidden>
+          <div class="settings" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+            <div class="settings-bar">
+              <div class="traffic"><span role="button" tabindex="0" aria-label="Sluit instellingen" id="settings-close"></span><span></span><span></span></div>
+              <span id="settings-title">Instellingen</span>
+            </div>
+            <div class="settings-body">
+              <div class="group">
+                <div class="row">
+                  <span class="row-label">Stapelgrootte<small>Grote stapels tonen minder kaarten per rij.</small></span>
+                  <div class="mini-seg" role="group" aria-label="Stapelgrootte" id="set-size">
+                    <button type="button" data-size="small">Klein</button>
+                    <button type="button" data-size="large">Groot</button>
+                  </div>
+                </div>
+              </div>
+              <div class="group">
+                <div class="row">
+                  <span class="row-label" id="confirm-label">Vraag om bevestiging voor het toepassen<small>Foto’s gaan altijd naar de prullenmand en zijn terug te halen.</small></span>
+                  <button class="switch" type="button" role="switch" aria-labelledby="confirm-label" id="set-confirm"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const PHOTO_DIR = 'photos/';
+  const ASPECT = {"bos-01":1.5,"bos-02":1.4992,"bos-03":1.5,"bos-04":1.493,"bos-05":1.4942,"concert-01":1.6,"concert-02":1.603,"concert-03":1.6024,"concert-04":1.5094,"concert-05":1.5089,"concert-06":1.5105,"concert-07":1.5,"concert-08":1.5009,"concert-09":1.4991,"concert-10":1.5,"concert-11":1.5009,"concert-12":1.4991,"concert-13":1.5,"concert-14":1.5009,"concert-15":1.4991,"concert-16":1.5,"concert-17":1.5009,"concert-18":1.4991,"concert-19":1.5,"concert-20":1.5009,"concert-21":1.4991,"concert-22":1.493,"concert-23":1.4956,"concert-24":1.4934,"concert-25":1.5047,"concert-26":1.5062,"concert-27":1.5048,"concert-28":1.5,"concert-29":1.5009,"concert-30":1.4991,"concert-31":1.5,"concert-32":1.5009,"concert-33":1.5,"concert-34":1.5009,"concert-35":1.3333,"concert-36":1.5047,"concert-37":1.5047,"duin-01":1.5,"duin-02":1.4992,"duin-03":1.5,"duin-04":1.4992,"lachen-01":1.5,"lachen-02":1.5,"picknick-01":1.5,"picknick-02":1.5,"picknick-03":1.5,"strand-01":1.5047,"strand-02":1.5042,"water-01":1.4977,"water-02":1.5009,"water-03":1.4962,"water-04":1.5,"water-05":1.5009,"water-06":1.3333,"zonsondergang-01":1.7778,"zonsondergang-02":1.7815,"zonsondergang-03":1.7793,"zonsondergang-04":1.7944,"zonsondergang-05":1.7966,"zonsondergang-06":1.5,"zonsondergang-07":1.5009,"zonsondergang-08":1.5};
+
+  const ALBUMS = [
+    { id: 'familieweekend', name: 'Familieweekend' },
+    { id: 'concert', name: 'Concert' },
+    { id: 'zee', name: 'Weekend aan zee' },
+  ];
+
+  // Voorbeelddata, gelijk aan SampleData.swift. "keep" is de voorgestelde keuze: de beste foto per reeks.
+  const SEED = [
+    { id: 'strand', title: 'Aan het strand', subtitle: 'Zon, zee en strand', tint: 'teal', album: 'zee', day: '2026-10-11', count: 2, keep: [0], reviewed: true },
+    { id: 'bos', title: 'Samen in het bos', subtitle: 'Wandeling in het bos', tint: 'blue', album: 'familieweekend', day: '2026-10-04', count: 5, keep: [0, 3] },
+    { id: 'concert', title: 'Concertavond', subtitle: 'Live muziek en sfeer', tint: 'coral', album: 'concert', day: '2026-10-12', count: 37, keep: [0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 32, 34, 35, 36] },
+    { id: 'picknick', title: 'Familiepicknick', subtitle: 'Samen in het park', tint: 'violet', album: 'familieweekend', day: '2026-10-04', count: 3, keep: [0, 2] },
+    { id: 'duin', title: 'Duinwandeling', subtitle: 'Duinen, wind en uitzicht', tint: 'amber', album: 'zee', day: '2026-10-11', count: 4, keep: [0, 2] },
+    { id: 'zonsondergang', title: 'Zonsondergang', subtitle: 'Mooie luchten', tint: 'rose', album: 'zee', day: '2026-10-11', count: 8, keep: [0, 3, 5, 7] },
+    { id: 'lachen', title: 'Samen lachen', subtitle: 'Spontane momenten', tint: 'cyan', album: 'familieweekend', day: '2026-10-04', count: 2, keep: [0], reviewed: true },
+    { id: 'water', title: 'Aan het water', subtitle: 'Rust aan de rivier', tint: 'green', album: 'familieweekend', day: '2026-10-04', count: 6, keep: [0, 3, 5] },
+  ];
+
+  let sets = SEED.map(s => ({
+    id: s.id, title: s.title, subtitle: s.subtitle, tint: s.tint, album: s.album, day: s.day,
+    reviewed: !!s.reviewed,
+    photos: Array.from({ length: s.count }, (_, i) => ({ id: `${s.id}-${String(i + 1).padStart(2, '0')}`, keep: s.keep.includes(i) })),
+  }));
+
+  const store = {
+    get(key, fallback) { try { const v = localStorage.getItem('fotokeuze.' + key); return v === null ? fallback : JSON.parse(v); } catch { return fallback; } },
+    set(key, value) { try { localStorage.setItem('fotokeuze.' + key, JSON.stringify(value)); } catch { /* opslag niet beschikbaar */ } },
+  };
+
+  const state = {
+    scope: { kind: 'all' },
+    filter: 'all',
+    sort: 'library',
+    query: '',
+    size: store.get('size', 'small'),
+    confirm: store.get('confirm', true),
+  };
+  const undoStack = [];
+  let ql = { open: false, busy: false, setId: null, index: 0, returnFocus: null };
+
+  /* Hulpjes */
+  const $ = id => document.getElementById(id);
+  const icon = (name, cls = 'ic') => `<svg class="${cls}"><use href="#i-${name}"/></svg>`;
+  const src = id => PHOTO_DIR + id + '.jpg';
+  const fotos = n => n === 1 ? '1 foto' : `${n} foto’s`;
+  const getSet = id => sets.find(s => s.id === id);
+  const cover = set => set.photos.find(p => p.keep) || set.photos[0];
+  const keepCount = set => set.photos.filter(p => p.keep).length;
+  const stackPhotos = set => { const c = cover(set); return c ? [c, ...set.photos.filter(p => p.id !== c.id).slice(0, 2)] : []; };
+  const albumName = id => (ALBUMS.find(a => a.id === id) || {}).name || '';
+  const dayLabel = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+  const days = () => [...new Set(sets.map(s => s.day))].sort().reverse();
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const narrow = window.matchMedia('(max-width: 960px)');
+
+  const win = $('window'), main = $('main'), grid = $('grid'), scroll = $('scroll');
+
+  /* Veerbeweging als CSS linear() curve, met dezelfde demping als .spring(duration: 0.5, bounce: 0.15) */
+  const spring = (() => {
+    const stiffness = 190, damping = 23;
+    const w0 = Math.sqrt(stiffness), zeta = damping / (2 * Math.sqrt(stiffness)), wd = w0 * Math.sqrt(1 - zeta * zeta);
+    const x = t => 1 - Math.exp(-zeta * w0 * t) * (Math.cos(wd * t) + (zeta * w0 / wd) * Math.sin(wd * t));
+    let end = 0;
+    for (let t = 0; t < 3; t += 1 / 240) if (Math.abs(1 - x(t)) > 0.0025) end = t;
+    end += 1 / 60;
+    const pts = [];
+    for (let i = 0; i <= 64; i++) pts.push(+x((i / 64) * end).toFixed(4));
+    pts[pts.length - 1] = 1;
+    const ok = window.CSS && CSS.supports && CSS.supports('animation-timing-function', 'linear(0, 1)');
+    return ok ? { easing: `linear(${pts.join(', ')})`, duration: Math.round(end * 1000) } : { easing: 'cubic-bezier(.25, 1.1, .4, 1)', duration: 520 };
+  })();
+
+  /* Tandwiel voor het instellingen-icoon */
+  (() => {
+    const teeth = 8, ro = 7.7, ri = 5.9, d = [];
+    for (let i = 0; i < teeth; i++) {
+      const a = (i / teeth) * Math.PI * 2, s = Math.PI / teeth;
+      const pt = (r, ang) => `${(10 + r * Math.cos(ang)).toFixed(2)} ${(10 + r * Math.sin(ang)).toFixed(2)}`;
+      d.push(`${i ? 'L' : 'M'}${pt(ri, a - s * 0.95)}`, `L${pt(ro, a - s * 0.42)}`, `L${pt(ro, a + s * 0.42)}`, `L${pt(ri, a + s * 0.95)}`);
+    }
+    $('gear-path').setAttribute('d', d.join(' ') + 'Z');
+  })();
+
+  /* Klok in de menubalk */
+  const clockFmt = new Intl.DateTimeFormat('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' });
+  const timeFmt = new Intl.DateTimeFormat('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  const tick = () => { const now = new Date(); $('clock').textContent = `${clockFmt.format(now)} ${timeFmt.format(now)}`; };
+  tick(); setInterval(tick, 20000);
+
+  /* Zijbalk */
+  function scopeEquals(a, b) { return a.kind === b.kind && a.id === b.id && a.day === b.day; }
+  function inScope(set, scope) {
+    if (scope.kind === 'album') return set.album === scope.id;
+    if (scope.kind === 'day') return set.day === scope.day;
+    return true;
+  }
+  function renderSidebar() {
+    const live = sets.filter(s => s.photos.length);
+    const row = (label, ic, scope) => {
+      const n = live.filter(s => inScope(s, scope)).length;
+      const current = scopeEquals(scope, state.scope);
+      return `<button class="sb-row" type="button" data-scope='${JSON.stringify(scope)}' aria-current="${current}">
+        ${icon(ic)}<span class="sb-label">${label}</span><span class="sb-count">${n || ''}</span></button>`;
+    };
+    $('sidebar-list').innerHTML = `
+      <div class="sb-section"><h4>Bibliotheek</h4>${row('Alle sets', 'photos', { kind: 'all' })}</div>
+      <div class="sb-section"><h4>Albums</h4>${ALBUMS.map(a => row(a.name, 'folder', { kind: 'album', id: a.id })).join('')}</div>
+      <div class="sb-section"><h4>Datums</h4>${days().map(d => row(dayLabel.format(new Date(d + 'T12:00:00')), 'calendar', { kind: 'day', day: d })).join('')}</div>`;
+  }
+  $('sidebar-list').addEventListener('click', e => {
+    const btn = e.target.closest('.sb-row');
+    if (!btn) return;
+    state.scope = JSON.parse(btn.dataset.scope);
+    renderSidebar();
+    applyView();
+    scroll.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+    if (narrow.matches) setSidebar(false);
+  });
+
+  function setSidebar(show) {
+    win.classList.toggle('sidebar-hidden', !show);
+    document.querySelectorAll('[data-action="toggle-sidebar"]').forEach(b => {
+      const label = show ? 'Verberg zijbalk' : 'Toon zijbalk';
+      b.title = label; b.setAttribute('aria-label', label);
+    });
+    setTimeout(placeSegThumb, 520);
+  }
+  const sidebarShown = () => !win.classList.contains('sidebar-hidden');
+
+  /* Kaarten */
+  const cards = new Map();
+  function buildCard(set) {
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.dataset.id = set.id;
+    card.style.setProperty('--tint', `var(--tint-${set.tint})`);
+    card.innerHTML = `
+      <button class="card-hit" type="button"></button>
+      <div class="card-top">
+        <button class="check" type="button" aria-pressed="false"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></button>
+        <button class="gbtn round peek" type="button" title="Snel bekijken" aria-label="Snel bekijken">${icon('search')}</button>
+      </div>
+      <div class="stack" aria-hidden="true"></div>
+      <div class="card-foot"><span class="count"></span><div class="card-text"><h3></h3><p></p></div></div>`;
+    card.querySelector('.card-hit').addEventListener('click', () => openQL(set.id));
+    card.querySelector('.peek').addEventListener('click', () => openQL(set.id));
+    card.querySelector('.check').addEventListener('click', () => toggleReviewed(set.id));
+    cards.set(set.id, card);
+    return card;
+  }
+  function updateCard(set) {
+    const card = cards.get(set.id);
+    const check = card.querySelector('.check');
+    check.setAttribute('aria-pressed', String(set.reviewed));
+    const checkLabel = set.reviewed ? 'Gekozen. Klik om terug te zetten naar nog te kiezen.' : 'Neem de voorgestelde keuze over';
+    check.setAttribute('aria-label', checkLabel); check.title = set.reviewed ? 'Markeer als nog te kiezen' : 'Neem de voorgestelde keuze over';
+    card.classList.toggle('is-reviewed', set.reviewed);
+    card.querySelector('.count').textContent = set.photos.length;
+    card.querySelector('h3').textContent = set.title;
+    card.querySelector('p').textContent = set.subtitle;
+    card.querySelector('.card-hit').setAttribute('aria-label', `${set.title}, ${fotos(set.photos.length)}, ${keepCount(set)} bewaard. Open om te kiezen.`);
+    const stack = card.querySelector('.stack');
+    const photos = stackPhotos(set);
+    while (stack.children.length < photos.length) {
+      const pr = document.createElement('div');
+      pr.className = 'print';
+      const im = document.createElement('img');
+      im.alt = ''; im.decoding = 'async'; im.draggable = false;
+      pr.append(im);
+      stack.prepend(pr);
+    }
+    while (stack.children.length > photos.length) stack.firstElementChild.remove();
+    [...stack.children].forEach((pr, i) => {
+      const depth = photos.length - 1 - i, photo = photos[depth];
+      pr.dataset.depth = depth; pr.dataset.photo = photo.id;
+      const im = pr.firstElementChild, s = src(photo.id);
+      if (im.getAttribute('src') !== s) im.src = s;
+    });
+  }
+
+  function visibleSets() {
+    let list = sets.filter(s => s.photos.length && inScope(s, state.scope));
+    if (state.filter === 'open') list = list.filter(s => !s.reviewed);
+    if (state.filter === 'done') list = list.filter(s => s.reviewed);
+    const q = state.query.trim().toLocaleLowerCase('nl');
+    if (q) list = list.filter(s => [s.title, s.subtitle, albumName(s.album)].some(t => t.toLocaleLowerCase('nl').includes(q)));
+    if (state.sort === 'newest') list = [...list].sort((a, b) => b.day.localeCompare(a.day));
+    if (state.sort === 'size') list = [...list].sort((a, b) => b.photos.length - a.photos.length);
+    if (state.sort === 'name') list = [...list].sort((a, b) => a.title.localeCompare(b.title, 'nl'));
+    return list;
+  }
+
+  function applyView() {
+    const list = visibleSets();
+    const ids = new Set(list.map(s => s.id));
+    list.forEach(s => grid.appendChild(cards.get(s.id)));
+    cards.forEach((card, id) => { card.hidden = !ids.has(id); });
+    const empty = $('empty');
+    empty.hidden = list.length > 0;
+    if (!list.length) {
+      const q = state.query.trim();
+      const [title, text] = q ? [`Geen sets voor ‘${q}’`, 'Controleer de spelling of probeer een andere zoekterm.']
+        : state.filter === 'open' ? ['Alles is gekozen', 'Elke stapel in deze weergave heeft een keuze. Bevestig onderaan om op te ruimen.']
+        : state.filter === 'done' ? ['Nog niets bewaard', 'Vink een stapel aan of open er een om foto’s te kiezen.']
+        : ['Geen sets', 'Hier verschijnen stapels met vergelijkbare foto’s.'];
+      $('empty-title').textContent = title;
+      $('empty-text').textContent = text;
+    }
+    win.classList.toggle('size-large', state.size === 'large');
+  }
+
+  function refreshAll() {
+    sets.forEach(s => updateCard(s));
+    renderSidebar();
+    applyView();
+    renderSummary();
+  }
+
+  /* Werkbalk */
+  const seg = $('segmented');
+  function placeSegThumb() {
+    const active = seg.querySelector('[aria-pressed="true"]');
+    const thumb = seg.querySelector('.seg-thumb');
+    if (!active) return;
+    thumb.style.width = active.offsetWidth + 'px';
+    thumb.style.transform = `translateX(${active.offsetLeft}px)`;
+  }
+  function setFilter(filter) {
+    state.filter = filter;
+    seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.filter === filter)));
+    placeSegThumb();
+    applyView();
+  }
+  seg.addEventListener('click', e => { const b = e.target.closest('button[data-filter]'); if (b) setFilter(b.dataset.filter); });
+  new ResizeObserver(placeSegThumb).observe(seg);
+
+  $('search-input').addEventListener('input', e => { state.query = e.target.value; applyView(); });
+
+  function setSize(size) {
+    state.size = size; store.set('size', size);
+    applyView(); renderSettings();
+  }
+  function setSort(sort) { state.sort = sort; applyView(); }
+
+  /* Menu's */
+  let openMenuEl = null, openMenuAnchor = null;
+  function closeMenu() {
+    if (!openMenuEl) return;
+    openMenuEl.remove(); openMenuEl = null;
+    if (openMenuAnchor) { openMenuAnchor.setAttribute('aria-expanded', 'false'); openMenuAnchor = null; }
+  }
+  function showMenu(anchor, items, align = 'left') {
+    if (openMenuAnchor === anchor) { closeMenu(); return; }
+    closeMenu();
+    const m = document.createElement('div');
+    m.className = 'menu'; m.setAttribute('role', 'menu');
+    items.forEach(it => {
+      if (it === '-') { m.insertAdjacentHTML('beforeend', '<div class="msep" role="separator"></div>'); return; }
+      if (it.label) { m.insertAdjacentHTML('beforeend', `<div class="mlabel">${it.label}</div>`); return; }
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'mi';
+      b.setAttribute('role', it.checked === undefined ? 'menuitem' : 'menuitemradio');
+      if (it.checked !== undefined) b.setAttribute('aria-checked', String(it.checked));
+      b.disabled = !!it.disabled;
+      b.innerHTML = `${icon('check', 'ic mcheck')}<span>${it.text}</span>${it.kbd ? `<span class="kbd">${it.kbd}</span>` : ''}`;
+      b.addEventListener('click', () => { closeMenu(); it.run && it.run(); });
+      m.append(b);
+    });
+    document.body.append(m);
+    const r = anchor.getBoundingClientRect();
+    const mw = m.offsetWidth;
+    let left = align === 'right' ? r.right - mw : r.left;
+    left = Math.max(8, Math.min(left, window.innerWidth - mw - 8));
+    m.style.left = left + 'px';
+    m.style.top = (r.bottom + 6) + 'px';
+    if (align === 'right') m.style.transformOrigin = 'top right';
+    anchor.setAttribute('aria-expanded', 'true');
+    openMenuEl = m; openMenuAnchor = anchor;
+    const first = m.querySelector('.mi:not(:disabled)');
+    if (first && anchor.matches(':focus-visible')) first.focus();
+  }
+  document.addEventListener('pointerdown', e => {
+    if (openMenuEl && !openMenuEl.contains(e.target) && !(openMenuAnchor && openMenuAnchor.contains(e.target))) closeMenu();
+  });
+  window.addEventListener('resize', closeMenu);
+
+  $('btn-size').addEventListener('click', e => showMenu(e.currentTarget, [
+    { text: 'Kleine stapels', checked: state.size === 'small', run: () => setSize('small') },
+    { text: 'Grote stapels', checked: state.size === 'large', run: () => setSize('large') },
+  ], 'right'));
+  $('btn-sort').addEventListener('click', e => showMenu(e.currentTarget, [
+    { label: 'Sorteer op' },
+    { text: 'Standaard', checked: state.sort === 'library', run: () => setSort('library') },
+    { text: 'Nieuwste eerst', checked: state.sort === 'newest', run: () => setSort('newest') },
+    { text: 'Meeste foto’s', checked: state.sort === 'size', run: () => setSort('size') },
+    { text: 'Naam', checked: state.sort === 'name', run: () => setSort('name') },
+  ], 'right'));
+
+  const MENUBAR = {
+    app: () => [
+      { text: 'Over Fotokeuze', disabled: true },
+      '-',
+      { text: 'Instellingen…', kbd: '⌘,', run: openSettings },
+      '-',
+      { text: 'Stop Fotokeuze', kbd: '⌘Q', disabled: true },
+    ],
+    file: () => [
+      { text: 'Bevestigen en toepassen…', kbd: '⌘↩', disabled: pendingRemove() === 0, run: requestApply },
+      '-',
+      { text: 'Sluit venster', kbd: '⌘W', disabled: true },
+    ],
+    edit: () => [
+      { text: undoStack.length ? 'Herstel naar prullenmand verplaatsen' : 'Herstel', kbd: '⌘Z', disabled: !undoStack.length, run: undo },
+      '-',
+      { text: 'Zoek', kbd: '⌘F', run: () => $('search-input').focus() },
+    ],
+    view: () => [
+      { text: 'Alle sets', kbd: '⌘1', checked: state.filter === 'all', run: () => setFilter('all') },
+      { text: 'Nog te kiezen', kbd: '⌘2', checked: state.filter === 'open', run: () => setFilter('open') },
+      { text: 'Bewaard', kbd: '⌘3', checked: state.filter === 'done', run: () => setFilter('done') },
+      '-',
+      { text: 'Kleine stapels', checked: state.size === 'small', run: () => setSize('small') },
+      { text: 'Grote stapels', checked: state.size === 'large', run: () => setSize('large') },
+      '-',
+      { text: sidebarShown() ? 'Verberg zijbalk' : 'Toon zijbalk', kbd: '⌃⌘S', run: () => setSidebar(!sidebarShown()) },
+    ],
+    window: () => [
+      { text: 'Minimaliseer', kbd: '⌘M', disabled: true },
+      { text: 'Zoom', disabled: true },
+      '-',
+      { text: 'Fotokeuze', checked: true },
+    ],
+  };
+  document.querySelectorAll('.mb-item').forEach(b => b.addEventListener('click', () => showMenu(b, MENUBAR[b.dataset.menu]())));
+  document.querySelectorAll('.mb-item').forEach(b => b.addEventListener('pointerenter', () => {
+    if (openMenuAnchor && openMenuAnchor.classList.contains('mb-item') && openMenuAnchor !== b) showMenu(b, MENUBAR[b.dataset.menu]());
+  }));
+
+  document.querySelectorAll('[data-action="toggle-sidebar"]').forEach(b => b.addEventListener('click', () => setSidebar(!sidebarShown())));
+  document.querySelector('[data-action="settings"]').addEventListener('click', openSettings);
+
+  /* Keuzes */
+  const reviewedSets = () => sets.filter(s => s.reviewed && s.photos.length);
+  const pendingRemove = () => reviewedSets().reduce((n, s) => n + s.photos.length - keepCount(s), 0);
+  const pendingKeep = () => reviewedSets().reduce((n, s) => n + keepCount(s), 0);
+
+  function toggleReviewed(id) {
+    const set = getSet(id);
+    set.reviewed = !set.reviewed;
+    updateCard(set);
+    renderSummary();
+    if (state.filter !== 'all') setTimeout(applyView, 380);
+  }
+
+  let lastCounts = null;
+  function renderSummary() {
+    const reviewed = reviewedSets();
+    const body = $('sum-body');
+    const remove = pendingRemove(), keep = pendingKeep();
+    if (!reviewed.length) {
+      body.innerHTML = `<div class="sum-line"><span>${icon('check-circle', 'ic')}Nog niets gekozen</span></div>
+        <p class="sum-note">Vink een stapel aan om de voorgestelde keuze over te nemen, of open hem om zelf te kiezen.</p>`;
+      lastCounts = null;
+    } else {
+      const bumpR = lastCounts && lastCounts.remove !== remove ? ' bump' : '';
+      const bumpK = lastCounts && lastCounts.keep !== keep ? ' bump' : '';
+      body.innerHTML = `<div class="sum-line">
+          <span>${icon('trash', 'ic ic-trash')}<span><span class="num${bumpR}">${remove}</span> ${remove === 1 ? 'foto' : 'foto’s'} verwijderen</span></span>
+          <span>${icon('check-circle', 'ic ic-ok')}<span><span class="num${bumpK}">${keep}</span> blijven bewaard <span class="sum-muted">· uit ${reviewed.length} ${reviewed.length === 1 ? 'set' : 'sets'}</span></span></span>
+        </div>
+        <p class="sum-note">Foto’s gaan naar de prullenmand. Je kunt ze terughalen; niets wordt definitief verwijderd.</p>`;
+      lastCounts = { remove, keep };
+    }
+    $('btn-apply').disabled = remove === 0;
+  }
+  $('btn-apply').addEventListener('click', requestApply);
+
+  function requestApply() {
+    if (pendingRemove() === 0) return;
+    if (state.confirm) openAlert(); else applyChoices();
+  }
+  function applyChoices() {
+    const moved = pendingRemove();
+    undoStack.push(JSON.parse(JSON.stringify(sets)));
+    sets.forEach(s => { if (s.reviewed) s.photos = s.photos.filter(p => p.keep); });
+    refreshAll();
+    showToast(`${fotos(moved)} naar de prullenmand verplaatst`);
+  }
+  function undo() {
+    const snap = undoStack.pop();
+    if (!snap) return;
+    sets = snap;
+    refreshAll();
+    hideToast();
+  }
+
+  let toastTimer = 0;
+  function showToast(text) {
+    const t = $('toast');
+    $('toast-text').textContent = text;
+    t.hidden = false;
+    t.style.animation = 'none'; void t.offsetWidth; t.style.animation = '';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 7000);
+  }
+  function hideToast() { $('toast').hidden = true; clearTimeout(toastTimer); }
+  $('toast-undo').addEventListener('click', undo);
+
+  /* Bevestiging */
+  function openAlert() {
+    const remove = pendingRemove(), keep = pendingKeep();
+    $('alert-title').textContent = `${fotos(remove)} naar de prullenmand verplaatsen?`;
+    $('alert-text').textContent = `${fotos(keep)} ${keep === 1 ? 'blijft' : 'blijven'} bewaard. Je kunt verplaatste foto’s terughalen uit de prullenmand.`;
+    $('alert-confirm').textContent = 'Verplaats';
+    $('alert-layer').hidden = false;
+    $('alert-confirm').focus();
+  }
+  function closeAlert() { $('alert-layer').hidden = true; $('btn-apply').focus(); }
+  $('alert-cancel').addEventListener('click', closeAlert);
+  $('alert-confirm').addEventListener('click', () => { closeAlert(); applyChoices(); });
+
+  /* Instellingen */
+  function renderSettings() {
+    $('set-size').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.size === state.size)));
+    $('set-confirm').setAttribute('aria-checked', String(state.confirm));
+  }
+  function openSettings() { renderSettings(); $('settings-layer').hidden = false; $('set-confirm').focus(); }
+  function closeSettings() { $('settings-layer').hidden = true; }
+  $('set-size').addEventListener('click', e => { const b = e.target.closest('button[data-size]'); if (b) setSize(b.dataset.size); });
+  $('set-confirm').addEventListener('click', () => { state.confirm = !state.confirm; store.set('confirm', state.confirm); renderSettings(); });
+  $('settings-close').addEventListener('click', closeSettings);
+  $('settings-close').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); closeSettings(); } });
+  $('settings-layer').addEventListener('pointerdown', e => { if (e.target === e.currentTarget) closeSettings(); });
+
+  /* Quick Look */
+  const qlRoot = $('ql'), panel = $('ql-panel'), view = $('ql-view'), figure = $('ql-figure'), figImg = $('ql-img'), strip = $('ql-strip');
+  const curSet = () => getSet(ql.setId);
+  const curPhoto = () => curSet().photos[ql.index];
+  const aspectOf = id => ASPECT[id] || 1.5;
+
+  function layoutFigure() {
+    if (!ql.setId) return;
+    const w0 = view.clientWidth, h0 = view.clientHeight, ar = aspectOf(curPhoto().id);
+    let w = w0, h = w0 / ar;
+    if (h > h0) { h = h0; w = h * ar; }
+    Object.assign(figure.style, { width: w + 'px', height: h + 'px', left: (w0 - w) / 2 + 'px', top: (h0 - h) / 2 + 'px' });
+  }
+  new ResizeObserver(() => { if (ql.open) { figure.classList.add('no-anim'); layoutFigure(); requestAnimationFrame(() => figure.classList.remove('no-anim')); } }).observe(view);
+
+  function renderQLHead() {
+    const set = curSet(), k = keepCount(set), n = set.photos.length;
+    $('ql-title').textContent = set.title;
+    $('ql-sub').textContent = `${k} van ${n} bewaard`;
+    $('ql-all').disabled = k === n;
+    $('ql-prev').disabled = ql.index === 0;
+    $('ql-next').disabled = ql.index === n - 1;
+  }
+  function renderFigure() {
+    const p = curPhoto(), n = curSet().photos.length;
+    const s = src(p.id);
+    if (figImg.getAttribute('src') !== s) figImg.src = s;
+    figure.classList.toggle('is-out', !p.keep);
+    $('ql-pos').textContent = `${ql.index + 1} van ${n}`;
+    const keep = $('ql-keep');
+    keep.setAttribute('aria-pressed', String(p.keep));
+    keep.setAttribute('aria-label', p.keep ? 'Bewaren, aan' : 'Bewaren, uit');
+  }
+  function buildStrip() {
+    const set = curSet();
+    strip.innerHTML = '';
+    set.photos.forEach((p, i) => {
+      const t = document.createElement('div');
+      t.className = 'thumb'; t.dataset.photo = p.id; t.setAttribute('role', 'listitem');
+      t.innerHTML = `<button class="thumb-hit" type="button" aria-label="Foto ${i + 1}"><img alt="" decoding="async" src="${src(p.id)}"></button>
+        <button class="check" type="button" aria-pressed="${p.keep}" aria-label="Bewaar foto ${i + 1}"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></button>
+        <span class="out" aria-hidden="true">${icon('trash')}</span>`;
+      t.querySelector('.thumb-hit').addEventListener('click', () => focusPhoto(i));
+      t.querySelector('.check').addEventListener('click', () => toggleKeep(p.id));
+      strip.append(t);
+    });
+    renderStrip();
+  }
+  function renderStrip() {
+    const set = curSet();
+    [...strip.children].forEach((t, i) => {
+      const p = set.photos[i];
+      t.classList.toggle('is-focus', i === ql.index);
+      t.classList.toggle('is-out', !p.keep);
+      t.querySelector('.check').setAttribute('aria-pressed', String(p.keep));
+      t.querySelector('.thumb-hit').setAttribute('aria-current', String(i === ql.index));
+    });
+  }
+  function revealThumb(smooth = true) {
+    const t = strip.children[ql.index];
+    if (!t) return;
+    const left = t.offsetLeft - (strip.clientWidth - t.offsetWidth) / 2;
+    strip.scrollTo({ left, behavior: smooth && !reduceMotion.matches ? 'smooth' : 'auto' });
+  }
+  function focusPhoto(i) {
+    const set = curSet();
+    if (i < 0 || i >= set.photos.length || i === ql.index) return;
+    const dir = i > ql.index ? 1 : -1;
+    ql.index = i;
+    renderFigure(); layoutFigure(); renderQLHead(); renderStrip(); revealThumb();
+    if (!reduceMotion.matches) figImg.animate([{ opacity: .35, transform: `translateX(${dir * 18}px) scale(1.01)` }, { opacity: 1, transform: 'none' }], { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)' });
+  }
+  function toggleKeep(photoId) {
+    const set = curSet();
+    const p = set.photos.find(x => x.id === photoId);
+    p.keep = !p.keep;
+    set.reviewed = true;
+    updateCard(set); renderSummary(); renderQLHead(); renderFigure(); renderStrip();
+  }
+
+  function printGeometry(el) {
+    const r = el.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight;
+    const t = getComputedStyle(el).transform;
+    let angle = 0;
+    if (t && t !== 'none') { const m = new DOMMatrixReadOnly(t); angle = Math.atan2(m.b, m.a) * 180 / Math.PI; }
+    return { left: r.left + r.width / 2 - w / 2, top: r.top + r.height / 2 - h / 2, width: w, height: h, angle };
+  }
+  const rectOf = el => { const r = el.getBoundingClientRect(); return { left: r.left, top: r.top, width: r.width, height: r.height, angle: 0 }; };
+  function stripVisible(el) {
+    const a = el.getBoundingClientRect(), b = strip.getBoundingClientRect();
+    return a.right > b.left + 4 && a.left < b.right - 4;
+  }
+
+  // Eén vliegende kopie: van printje naar Quick Look of terug. "under" is een tweede foto die eronder
+  // ligt en zichtbaar wordt, voor als de omslag van de stapel een andere foto is dan de bekeken foto.
+  function fly(from, to, photoId, o) {
+    const f = document.createElement('div');
+    f.className = 'flyer';
+    const inner = document.createElement('div');
+    inner.className = 'flyer-inner';
+    if (o.under && o.under !== photoId) { const u = new Image(); u.src = src(o.under); u.alt = ''; inner.append(u); }
+    const img = new Image(); img.src = src(photoId); img.alt = ''; inner.append(img);
+    f.append(inner);
+    document.body.append(f);
+    const frame = (r, pad, radius) => ({
+      left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px',
+      padding: pad + 'px', borderRadius: radius + 'px', transform: `rotate(${r.angle || 0}deg)`,
+    });
+    const anim = f.animate([frame(from, o.fromPad, o.fromRadius), frame(to, o.toPad, o.toRadius)], { duration: spring.duration, easing: spring.easing, fill: 'forwards' });
+    if (o.under && o.under !== photoId) img.animate([{ opacity: 1 }, { opacity: 1, offset: .35 }, { opacity: 0 }], { duration: spring.duration * .8, fill: 'forwards' });
+    return { el: f, done: anim.finished };
+  }
+
+  function trapFocus(e) {
+    if (e.key !== 'Tab') return;
+    const f = [...panel.querySelectorAll('button:not(:disabled)')].filter(b => b.offsetParent !== null);
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && (document.activeElement === first || document.activeElement === panel)) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+  panel.addEventListener('keydown', trapFocus);
+
+  const background = () => [$('sidebar-col'), $('toolbar'), scroll, $('summary'), $('toast')];
+
+  function openQL(setId) {
+    if (ql.open || ql.busy) return;
+    const set = getSet(setId);
+    if (!set || !set.photos.length) return;
+    closeMenu();
+    const card = cards.get(setId);
+    const c = cover(set);
+    ql = { open: true, busy: true, setId, index: Math.max(0, set.photos.indexOf(c)), returnFocus: document.activeElement };
+    panel.style.setProperty('--qtint', `var(--tint-${set.tint})`);
+    main.style.setProperty('--tb-h', $('toolbar').offsetHeight + 'px');
+    qlRoot.hidden = false;
+    renderQLHead(); renderFigure(); buildStrip();
+    figure.classList.add('no-anim');
+
+    panel.classList.add('is-measure');
+    layoutFigure(); revealThumb(false);
+    const prints = [...card.querySelectorAll('.print')].sort((a, b) => a.dataset.depth - b.dataset.depth);
+    const flights = [];
+    if (!reduceMotion.matches) {
+      prints.forEach(pr => {
+        const depth = +pr.dataset.depth, id = pr.dataset.photo;
+        const from = printGeometry(pr);
+        if (depth === 0) {
+          flights.push({ from, to: rectOf(figure), id, target: figure, o: { fromPad: 4, toPad: 0, fromRadius: 5, toRadius: 16 } });
+        } else {
+          const thumb = strip.querySelector(`.thumb[data-photo="${id}"]`);
+          if (thumb && stripVisible(thumb)) flights.push({ from, to: rectOf(thumb), id, target: thumb, o: { fromPad: 4, toPad: 0, fromRadius: 5, toRadius: 11 } });
+        }
+      });
+    }
+    panel.classList.remove('is-measure');
+    void panel.offsetWidth;
+
+    background().forEach(el => { el.inert = true; });
+    main.classList.add('is-peeking');
+    card.classList.add('is-lifted');
+    const running = flights.map(f => { f.target.style.opacity = '0'; return { ...f, ...fly(f.from, f.to, f.id, f.o) }; });
+    requestAnimationFrame(() => { qlRoot.classList.add('is-open'); figure.classList.remove('no-anim'); });
+    panel.focus({ preventScroll: true });
+    Promise.all(running.map(r => r.done)).then(() => {
+      running.forEach(r => { r.target.style.opacity = ''; r.el.remove(); });
+      ql.busy = false;
+    });
+  }
+
+  function closeQL({ done = false } = {}) {
+    if (!ql.open || ql.busy) return;
+    ql.busy = true;
+    const set = curSet(), card = cards.get(set.id);
+    if (done) set.reviewed = true;
+    updateCard(set); renderSummary();
+    const flights = [];
+    if (!reduceMotion.matches && !card.hidden) {
+      const prints = [...card.querySelectorAll('.print')];
+      const focused = curPhoto();
+      prints.forEach(pr => {
+        const depth = +pr.dataset.depth, id = pr.dataset.photo, to = printGeometry(pr);
+        if (depth === 0) {
+          flights.push({ from: rectOf(figure), to, id: focused.id, source: figure, o: { fromPad: 0, toPad: 4, fromRadius: 16, toRadius: 5, under: id } });
+        } else {
+          const thumb = strip.querySelector(`.thumb[data-photo="${id}"]`);
+          if (thumb && stripVisible(thumb)) flights.push({ from: rectOf(thumb), to, id, source: thumb, o: { fromPad: 0, toPad: 4, fromRadius: 11, toRadius: 5 } });
+        }
+      });
+    }
+    const running = flights.map(f => { f.source.style.opacity = '0'; return { ...f, ...fly(f.from, f.to, f.id, f.o) }; });
+    qlRoot.classList.remove('is-open');
+    const finish = () => {
+      running.forEach(r => { r.source.style.opacity = ''; r.el.remove(); });
+      card.classList.remove('is-lifted');
+      qlRoot.hidden = true;
+      main.classList.remove('is-peeking');
+      background().forEach(el => { el.inert = false; });
+      const back = ql.returnFocus;
+      ql = { open: false, busy: false, setId: null, index: 0, returnFocus: null };
+      if (back && document.contains(back)) back.focus({ preventScroll: true });
+      if (state.filter !== 'all') setTimeout(applyView, 120);
+    };
+    const wait = running.length ? Promise.all(running.map(r => r.done)) : new Promise(r => setTimeout(r, 300));
+    wait.then(finish);
+  }
+
+  $('ql-close').addEventListener('click', () => closeQL());
+  $('ql-scrim').addEventListener('click', () => closeQL());
+  $('ql-done').addEventListener('click', () => closeQL({ done: true }));
+  $('ql-prev').addEventListener('click', () => focusPhoto(ql.index - 1));
+  $('ql-next').addEventListener('click', () => focusPhoto(ql.index + 1));
+  $('ql-keep').addEventListener('click', () => toggleKeep(curPhoto().id));
+  $('ql-all').addEventListener('click', () => {
+    const set = curSet();
+    set.photos.forEach(p => { p.keep = true; });
+    set.reviewed = true;
+    updateCard(set); renderSummary(); renderQLHead(); renderFigure(); renderStrip();
+  });
+
+  /* Toetsenbord */
+  document.addEventListener('keydown', e => {
+    const mod = e.metaKey || e.ctrlKey;
+    const inField = e.target.matches && e.target.matches('input, textarea');
+    if (e.key === 'Escape' && openMenuEl) { closeMenu(); return; }
+    if (!$('alert-layer').hidden) { if (e.key === 'Escape') { e.preventDefault(); closeAlert(); } return; }
+    if (!$('settings-layer').hidden) { if (e.key === 'Escape') { e.preventDefault(); closeSettings(); } return; }
+    if (ql.open) {
+      const onButton = e.target.closest && e.target.closest('button');
+      if (e.key === 'ArrowLeft') { e.preventDefault(); focusPhoto(ql.index - 1); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); focusPhoto(ql.index + 1); }
+      else if (e.key === 'Escape') { e.preventDefault(); closeQL(); }
+      else if (e.key === ' ' && !onButton) { e.preventDefault(); toggleKeep(curPhoto().id); }
+      else if (e.key === 'Enter' && !onButton) { e.preventDefault(); closeQL({ done: true }); }
+      return;
+    }
+    if (mod && e.key === 'Enter') { e.preventDefault(); requestApply(); }
+    else if (mod && !e.shiftKey && e.key.toLowerCase() === 'z' && !inField) { e.preventDefault(); undo(); }
+    else if (mod && e.key.toLowerCase() === 'f') { e.preventDefault(); $('search-input').focus(); }
+    else if (mod && e.key === ',') { e.preventDefault(); openSettings(); }
+    else if (e.metaKey && e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); setSidebar(!sidebarShown()); }
+  });
+
+  /* Maten bijhouden voor de zwevende balk */
+  new ResizeObserver(() => { main.style.setProperty('--sum-h', $('summary').offsetHeight + 'px'); }).observe($('summary'));
+
+  /* Start */
+  sets.forEach(s => grid.append(buildCard(s)));
+  if (narrow.matches) win.classList.add('sidebar-hidden');
+  narrow.addEventListener('change', e => setSidebar(!e.matches));
+  setSidebar(sidebarShown());
+  refreshAll();
+  renderSettings();
+  placeSegThumb();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeSegThumb);
+})();
+</script>
+</body>
+</html>
