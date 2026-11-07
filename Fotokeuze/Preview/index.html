@@ -347,6 +347,14 @@ button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
 .sum-line .sum-muted { font-weight: 500; color: var(--ink-2); }
 .sum-note { margin: 4px 0 0; font-size: 13px; color: var(--ink-2); }
 .num { display: inline-block; font-variant-numeric: tabular-nums; }
+.sum-compact { display: none; align-items: center; gap: 14px; min-width: 0; font: 600 15px/1 var(--font-display); white-space: nowrap; }
+.sc-trash { display: inline-flex; align-items: center; gap: 6px; }
+.sc-trash .ic { width: 19px; height: 19px; color: var(--danger); stroke-width: 1.8; }
+.sc-size { display: inline-flex; align-items: center; gap: 5px; min-width: 0; color: var(--ink-2); font-weight: 500; font-variant-numeric: tabular-nums; }
+.sc-size b { color: var(--ink); font-weight: 600; }
+.sc-size .ic { width: 13px; height: 13px; stroke-width: 2.2; color: var(--ink-3); }
+.sc-empty { color: var(--ink-2); font-weight: 500; }
+.lbl-short { display: none; }
 .num.bump { animation: bump .45s var(--spring); }
 @keyframes bump { 0% { transform: translateY(4px); opacity: .3; } 100% { transform: none; opacity: 1; } }
 .btn-prominent {
@@ -517,8 +525,12 @@ button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
   .scroll { padding-inline: 20px; }
 }
 @container (max-width: 720px) {
-  .summary { flex-direction: column; align-items: stretch; gap: 12px; left: 12px; right: 12px; bottom: 12px; padding: 14px 16px; }
-  .summary .btn-prominent { width: 100%; }
+  .summary { gap: 12px; left: 12px; right: 12px; bottom: 12px; padding: 7px 7px 7px 16px; border-radius: 999px; }
+  .sum-full { display: none; }
+  .sum-compact { display: flex; }
+  .summary .btn-prominent { height: 34px; padding: 0 16px; font-size: 14px; }
+  .lbl-full { display: none; }
+  .lbl-short { display: inline; }
   .ql-panel { left: 10px; right: 10px; bottom: 10px; border-radius: 24px; }
   .ql-nav { display: none; }
   .ql-stage { padding: 4px 12px; }
@@ -567,6 +579,7 @@ button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
   <symbol id="i-x" viewBox="0 0 20 20"><path d="M5.5 5.5l9 9M14.5 5.5l-9 9"/></symbol>
   <symbol id="i-left" viewBox="0 0 20 20"><path d="M12.5 4.5L7 10l5.5 5.5"/></symbol>
   <symbol id="i-right" viewBox="0 0 20 20"><path d="M7.5 4.5L13 10l-5.5 5.5"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 20 20"><path d="M4 10h11.5M11 5.5l4.5 4.5-4.5 4.5"/></symbol>
   <symbol id="i-undo" viewBox="0 0 20 20"><path d="M7.5 5L4 8.5 7.5 12"/><path d="M4 8.5h7.5a4.25 4.25 0 0 1 0 8.5H9"/></symbol>
   <symbol id="i-stack" viewBox="0 0 20 20"><rect x="3.5" y="7" width="13" height="9.5" rx="2"/><path d="M5.5 4.6h9M7.5 2.4h5"/></symbol>
   <symbol id="i-wifi" viewBox="0 0 20 20"><path d="M2.5 7.6a10.6 10.6 0 0 1 15 0M5.1 10.3a6.9 6.9 0 0 1 9.8 0M7.7 13a3.2 3.2 0 0 1 4.6 0"/><circle cx="10" cy="15.6" r=".6" fill="currentColor"/></symbol>
@@ -642,7 +655,7 @@ button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
 
         <footer class="summary glass" id="summary">
           <div class="sum-body" id="sum-body"></div>
-          <button class="btn-prominent" type="button" id="btn-apply">Bevestigen en toepassen</button>
+          <button class="btn-prominent" type="button" id="btn-apply"><span class="lbl-full">Bevestigen en toepassen</span><span class="lbl-short">Toepassen</span></button>
         </footer>
 
         <div class="toast glass" id="toast" role="status" aria-live="polite" hidden>
@@ -764,6 +777,21 @@ button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
   };
   const undoStack = [];
   let ql = { open: false, busy: false, setId: null, index: 0, returnFocus: null };
+
+  /* Voorbeeldgroottes per foto, vast per bestandsnaam. In de app komen ze uit PhotoKit. */
+  const photoBytes = id => {
+    let h = 2166136261;
+    for (const c of id) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); }
+    const t = (h >>> 0) / 4294967295;
+    return Math.round(((id.startsWith('concert') ? 3.6 : 2.6) + t * 2.4) * 1e6);
+  };
+  const nf1 = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 1 });
+  const nf0 = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 0 });
+  const sizeParts = (before, after) => {
+    const [unit, div] = before >= 1e9 ? ['GB', 1e9] : ['MB', 1e6];
+    const f = v => (v >= 100 ? nf0 : nf1).format(v);
+    return { before: f(before / div), after: f(after / div), unit };
+  };
 
   /* Hulpjes */
   const $ = id => document.getElementById(id);
@@ -1085,17 +1113,25 @@ button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
     const body = $('sum-body');
     const remove = pendingRemove(), keep = pendingKeep();
     if (!reviewed.length) {
-      body.innerHTML = `<div class="sum-line"><span>${icon('check-circle', 'ic')}Nog niets gekozen</span></div>
-        <p class="sum-note">Vink een stapel aan om de voorgestelde keuze over te nemen, of open hem om zelf te kiezen.</p>`;
+      body.innerHTML = `<div class="sum-full"><div class="sum-line"><span>${icon('check-circle', 'ic')}Nog niets gekozen</span></div>
+        <p class="sum-note">Vink een stapel aan om de voorgestelde keuze over te nemen, of open hem om zelf te kiezen.</p></div>
+        <div class="sum-compact"><span class="sc-empty">Nog niets gekozen</span></div>`;
       lastCounts = null;
     } else {
+      const before = reviewed.reduce((n, s) => n + s.photos.reduce((m, p) => m + photoBytes(p.id), 0), 0);
+      const after = reviewed.reduce((n, s) => n + s.photos.filter(p => p.keep).reduce((m, p) => m + photoBytes(p.id), 0), 0);
+      const size = sizeParts(before, after);
       const bumpR = lastCounts && lastCounts.remove !== remove ? ' bump' : '';
       const bumpK = lastCounts && lastCounts.keep !== keep ? ' bump' : '';
-      body.innerHTML = `<div class="sum-line">
+      body.innerHTML = `<div class="sum-full"><div class="sum-line">
           <span>${icon('trash', 'ic ic-trash')}<span><span class="num${bumpR}">${remove}</span> ${remove === 1 ? 'foto' : 'foto’s'} verwijderen</span></span>
           <span>${icon('check-circle', 'ic ic-ok')}<span><span class="num${bumpK}">${keep}</span> blijven bewaard <span class="sum-muted">· uit ${reviewed.length} ${reviewed.length === 1 ? 'set' : 'sets'}</span></span></span>
         </div>
-        <p class="sum-note">Foto’s gaan naar de prullenmand. Je kunt ze terughalen; niets wordt definitief verwijderd.</p>`;
+        <p class="sum-note">Foto’s gaan naar de prullenmand. Je kunt ze terughalen; niets wordt definitief verwijderd.</p></div>
+        <div class="sum-compact">
+          <span class="sc-trash" title="${fotos(remove)} naar de prullenmand">${icon('trash')}<span class="num${bumpR}">${remove}</span></span>
+          <span class="sc-size" title="Gekozen stapels: ${size.before} ${size.unit} nu, ${size.after} ${size.unit} na opruimen" aria-label="Gekozen stapels van ${size.before} naar ${size.after} ${size.unit}">${size.before}${icon('arrow')}<b class="num${bumpR}">${size.after}</b> ${size.unit}</span>
+        </div>`;
       lastCounts = { remove, keep };
     }
     $('btn-apply').disabled = remove === 0;
